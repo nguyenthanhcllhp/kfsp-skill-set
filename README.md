@@ -371,19 +371,19 @@ kfsp-skill-set/
 
 ---
 
+## Disclaimer
+
+**This skill set is NOT created by a domain expert.** It is distilled from personal thinking, experience, and intuition of a non-tech Product Manager building a real product with AI. The ideas, checklists, and frameworks here are generalized from a Vietnamese stock analysis app — if something feels unfamiliar, try asking AI to translate/adapt it to your context rather than forcing interpretation.
+
+**You are fully responsible for your own actions.** Whether you use these skills, modify them, or ignore them — every decision and its consequences belong to the person who acts. This includes me, the creator, who has been and will always be accountable for my own actions regardless of what tools, skills, or references I consulted beforehand.
+
+**This is a snapshot of work-in-progress.** This version was published while the project is still mid-development — packaged to preserve a "trail of thoughts" that were getting messy and needed structure. Skills will be updated as the product evolves. If updates seem slow, I'm probably working on another domain (check my other repos). If my GitHub goes quiet entirely — well, I've chosen peace and happiness, and that's fine too. 🙏
+
+---
+
 ## About the Creator
 
-Hi, I'm **Thanh** — a non-tech product person who built this skill set with AI.
-
-I studied **Business Administration**, not Computer Science. From 2019 to early 2025, my world was **content marketing**, Excel/Google Sheets automation, and building data pipelines from raw orders to dashboards — all self-taught. In late 2024, I discovered **n8n** and started automating workflows properly. Then AI changed everything.
-
-I went from asking the most naive questions to Claude, to building a complete mobile app ([KungFu Stocks Pro](https://kungfustockspro.com)) with AI as my co-developer. Along the way, I realized: **the harder part isn't building — it's making sure what you build actually works, stays consistent, and doesn't break silently.**
-
-This skill set was born from that realization. I'm not a developer, tester, or QA engineer. I'm a **Product Manager** (still working on my Google PM Certificate when I created this). But that's exactly why these skills exist — they're the "insurance policy" that lets me focus on what I do best: **business, marketing, and customer care** — while being confident that the product side is covered.
-
-Every skill here is something I needed, couldn't find anywhere else, and built by articulating my thinking to AI until it became a reusable tool. If you find them useful, that means something to me. I'm someone who values connection and meaning — poetry, music, human stories. Knowing that my work helps someone else makes this journey worth more.
-
-**I will keep developing new skills** — for myself first, and for anyone who finds them valuable.
+**[Thanh Nguyen](https://github.com/nguyenthanhcllhp)** — [read my story here](https://github.com/nguyenthanhcllhp).
 
 ---
 
@@ -395,9 +395,9 @@ MIT — Use freely, adapt for your projects.
 
 ## Credits
 
-Created by **[Thanh Nguyen](https://github.com/nguyenthanhcllhp)** — Product Manager, non-tech builder, AI-first practitioner.
+Created by **[Thanh Nguyen](https://github.com/nguyenthanhcllhp)** with [Claude AI](https://claude.ai) as co-developer.
 
-Built for [KungFu Stocks Pro](https://kungfustockspro.com) with [Claude AI](https://claude.ai) as co-developer.
+Born from building [KungFu Stocks Pro](https://kungfustockspro.com).
 
 Inspired by:
 - [GSD (Get Shit Done)](https://github.com/get-shit-done/gsd) — planning & execution framework
