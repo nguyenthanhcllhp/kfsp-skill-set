@@ -397,7 +397,7 @@ MIT — Use freely, adapt for your projects.
 
 Created by **[Thanh Nguyen](https://github.com/nguyenthanhcllhp)** with [Claude AI](https://claude.ai) as co-developer.
 
-Born from building [KungFu Stocks Pro](https://kfsp.vn/home/#trang-chu).
+Born from building [KFSP](https://kfsp.vn/home/#trang-chu).
 
 Inspired by:
 - [GSD (Get Shit Done)](https://github.com/get-shit-done/gsd) — planning & execution framework
