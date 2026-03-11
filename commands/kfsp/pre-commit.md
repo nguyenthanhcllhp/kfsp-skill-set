@@ -1,0 +1,155 @@
+---
+name: kfsp:pre-commit
+description: Pre-commit validation checklist — blast radius check, no hardcoded values, file size limits, import validation before committing changes
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - TodoWrite
+---
+<objective>
+KFSP Pre-Commit Check — Validation gate trước khi commit code.
+
+Chạy trước mỗi commit để đảm bảo:
+1. Không có hardcoded colors/spacing/fonts leak vào code
+2. Imports hợp lệ, không circular dependency
+3. File size hợp lý (không commit file quá lớn)
+4. Không commit secrets/credentials
+5. Code conventions tuân thủ project patterns
+
+**Gate:** PASS/FAIL. Nếu FAIL → liệt kê violations cần fix trước khi commit.
+</objective>
+
+<instructions>
+## Determine Source Path
+
+Check which source exists:
+1. `/tmp/kfsp_flutter/` (working copy — preferred)
+2. `Product/kfsp_flutter_migration/source/` (package copy)
+
+Use whichever exists. If neither → error.
+
+## Check 1: 🚫 Hardcoded Values
+
+```bash
+# Colors — ONLY allowed in kfsp_colors.dart
+grep -rn "Color(0x" lib/ --include="*.dart" | grep -v "kfsp_colors.dart" | grep -v "_test.dart"
+grep -rn "Colors\." lib/ --include="*.dart" | grep -v "kfsp_colors.dart" | grep -v "_test.dart" | grep -v "Colors.transparent"
+
+# Spacing — ONLY allowed in kfsp_spacing.dart
+grep -rn "EdgeInsets\.all([0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
+grep -rn "SizedBox(height: [0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
+grep -rn "SizedBox(width: [0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
+
+# Font sizes — ONLY allowed in kfsp_text_styles.dart
+grep -rn "fontSize:" lib/ --include="*.dart" | grep -v "kfsp_text_styles.dart" | grep -v "_test.dart"
+
+# Font families
+grep -rn "fontFamily:" lib/ --include="*.dart" | grep -v "kfsp_text_styles.dart"
+```
+
+**Exceptions:** Test files, generated files, third-party code.
+**Severity:** Each violation = ⚠️ Warning (not blocking, but flagged).
+
+## Check 2: 🔒 Secrets & Credentials
+
+```bash
+# API keys, tokens, passwords
+grep -rni "api_key\|apikey\|api-key\|secret\|password\|token\|bearer" lib/ --include="*.dart" | grep -v "// " | grep -v "kDebugMode"
+grep -rn "\.env" lib/ --include="*.dart"
+
+# Hardcoded URLs that might be staging/dev
+grep -rn "localhost\|127\.0\.0\.1\|192\.168\." lib/ --include="*.dart" | grep -v "env_config.dart"
+```
+
+**Severity:** 🔴 CRITICAL — block commit.
+
+## Check 3: 📏 File Size Check
+
+```bash
+# Dart files > 500 lines (might need splitting)
+find lib/ -name "*.dart" -exec wc -l {} + | sort -rn | head -20
+
+# Any single file > 1000 lines
+find lib/ -name "*.dart" -exec sh -c 'lines=$(wc -l < "$1"); [ "$lines" -gt 1000 ] && echo "⚠️ $1: $lines lines"' _ {} \;
+
+# Large assets check
+find assets/ -size +5M -exec ls -lh {} \; 2>/dev/null
+```
+
+**Severity:** > 500 lines = ℹ️ Info. > 1000 lines = ⚠️ Warning.
+
+## Check 4: 📦 Import Validation
+
+```bash
+# Broken imports — import files that don't exist
+grep -rn "^import.*package:kfsp" lib/ --include="*.dart" | while read line; do
+  file=$(echo "$line" | sed "s/.*package:kfsp_flutter\//lib\//;s/'.*//" | sed "s/\";.*//")
+  [ ! -f "$file" ] && echo "❌ Broken import: $line → $file not found"
+done
+
+# Relative imports (should use package: imports)
+grep -rn "^import '\.\." lib/ --include="*.dart"
+```
+
+## Check 5: 🏗️ Convention Check
+
+```bash
+# Widget files should have Widget/Screen/Page suffix
+find lib/features/ -name "*.dart" | grep -v "test" | while read f; do
+  basename=$(basename "$f" .dart)
+  # Skip non-UI files
+  grep -q "extends.*Widget\|extends.*Screen\|extends.*Page" "$f" 2>/dev/null && \
+  ! echo "$basename" | grep -qE "(widget|screen|page|view|card|tile|badge|button|dialog|sheet|bar|header|section|indicator|picker)" && \
+  echo "ℹ️ $f — contains Widget but filename doesn't reflect it"
+done
+
+# Riverpod: providers should be in providers/ or controllers/
+grep -rln "Provider\|Notifier" lib/features/ --include="*.dart" | grep -v "providers\|controllers\|_test"
+```
+
+## Check 6: 🧹 Dead Code Detection
+
+```bash
+# Unused imports (basic check)
+for f in $(find lib/ -name "*.dart" ! -name "*_test.dart"); do
+  grep "^import " "$f" | while read imp; do
+    # Extract imported name
+    name=$(echo "$imp" | grep "show " | sed 's/.*show //;s/;//;s/,.*//')
+    if [ -n "$name" ]; then
+      count=$(grep -c "$name" "$f")
+      [ "$count" -le 1 ] && echo "ℹ️ $f: possibly unused import: $name"
+    fi
+  done
+done 2>/dev/null | head -20
+```
+
+## Output Format
+
+```markdown
+# ✅/❌ KFSP Pre-Commit Check
+**Date:** [timestamp]
+**Source:** [path]
+
+## Result: PASS ✅ / FAIL ❌
+
+## Findings
+| # | Check | Status | Violations |
+|---|-------|--------|------------|
+| 1 | Hardcoded Values | ✅/⚠️ | N violations |
+| 2 | Secrets | ✅/🔴 | N violations |
+| 3 | File Size | ✅/⚠️ | N warnings |
+| 4 | Imports | ✅/❌ | N broken |
+| 5 | Conventions | ✅/ℹ️ | N suggestions |
+| 6 | Dead Code | ✅/ℹ️ | N candidates |
+
+## Violations Detail
+[grouped by severity: 🔴 Critical → ⚠️ Warning → ℹ️ Info]
+
+## Verdict
+- 🔴 Critical found → **FAIL — fix before commit**
+- ⚠️ Warnings only → **PASS with warnings — commit OK, fix soon**
+- ℹ️ Info only → **PASS — clean commit**
+```
+</instructions>
