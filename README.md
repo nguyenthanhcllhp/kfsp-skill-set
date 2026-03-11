@@ -1,6 +1,6 @@
 # 🥋 KFSP Skill Set
 
-**13 production-grade skills for agent-driven product development.**
+**15 production-grade skills for agent-driven product development.**
 
 Build apps from zero to store with confidence — for both human teams and AI agent swarms.
 
@@ -82,8 +82,10 @@ cp -r kfsp-skill-set/commands/kfsp/ \
 
 | Skill | What it does | When to use |
 |-------|-------------|-------------|
+| `/kfsp:product-health` | **NEW** PM's comprehensive dashboard: 8 dimensions (UX, Tech, Docs, Business, Legal, Ops, Data, Growth). Score /80 with gap analysis. | Monthly or before major launch |
 | `/kfsp:doc-pilot` | Tracks which docs need updating. Knows what info goes into which file. Ensures user guide is ready before store submission. | After every feature change |
 | `/kfsp:pre-mortem` | Before building anything, imagines it already failed. Identifies risks across all 4 interaction surfaces. Produces Go/No-Go decision. | Before starting new feature |
+| `/kfsp:ux-audit` | **NEW** UX evaluation using Nielsen 10 heuristics + accessibility + user flow analysis. Designed for PMs with no UX background. Templates included. | After building screens, before release |
 | `/kfsp:ux-parity` | Compares actual UI against design specs. Finds hardcoded colors, wrong spacing, typography drift. | After building screens |
 
 ### T3 🧪 Quality Assurance
@@ -345,10 +347,12 @@ KFSP Skill Set is specifically designed for AI agent safety:
 kfsp-skill-set/
 ├── README.md                          ← You are here
 ├── INSTALL.md                         ← Detailed install guide
-├── commands/kfsp/                     ← 14 skill files (90KB total)
+├── commands/kfsp/                     ← 16 skill files
 │   ├── help.md                        ← /kfsp:help (start here)
+│   ├── product-health.md              ← T5: PM's 8-dimension health dashboard
 │   ├── doc-pilot.md                   ← T5: Documentation autopilot
 │   ├── pre-mortem.md                  ← T5: Risk forecast
+│   ├── ux-audit.md                    ← T4: UX heuristic evaluation (for non-UX PMs)
 │   ├── ux-parity.md                   ← T4: Design-code parity
 │   ├── surface-test.md                ← T3: 4-surface contract testing
 │   ├── sentinel.md                    ← T3: Regression detection
