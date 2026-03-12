@@ -1,149 +1,182 @@
-# KFSP Skill Set — Installation Guide
+# KFSP Skill Set v2.0 — Installation Guide
 
 ## Prerequisites
 
 - [Claude Code](https://claude.com/claude-code) installed and running
 - A project open in Claude Code
 
-## Installation Methods
+## What Gets Installed
 
-### Method 1: Project-Level (Recommended)
+| Component | Location | Count | Purpose |
+|-----------|----------|-------|---------|
+| Slash Commands | `~/.claude/commands/kfsp/` | 16 files | Quick manual checks (`/kfsp:sweep myfile.dart`) |
+| Agents | `~/.claude/agents/` | 15 files | Autonomous subprocess agents (`kfsp-guard`, `kfsp-sweep`...) |
 
-Skills only available in one specific project:
+**Why both?** Commands run inline in your conversation (quick checks). Agents spawn as subprocesses with their own context window (deep scans, parallel execution, orchestrator-triggered).
+
+---
+
+## Installation
+
+### One-Line Install (Recommended)
 
 ```bash
-# Find your project hash
-ls ~/.claude/projects/
-# Look for the folder matching your project path
-
-# Copy skills
-cp -r commands/kfsp/ ~/.claude/projects/<your-project-hash>/commands/kfsp/
-
-# Verify
-ls ~/.claude/projects/<your-project-hash>/commands/kfsp/
-# Should show 14 .md files
+git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git /tmp/kfsp-skill-set \
+  && mkdir -p ~/.claude/commands/kfsp/ ~/.claude/agents/ \
+  && cp -r /tmp/kfsp-skill-set/commands/kfsp/ ~/.claude/commands/kfsp/ \
+  && cp /tmp/kfsp-skill-set/agents/kfsp/*.md ~/.claude/agents/ \
+  && rm -rf /tmp/kfsp-skill-set \
+  && echo "✅ KFSP Skill Set v2.0 installed (commands + agents)."
 ```
 
-### Method 2: Global Install
-
-Skills available in ALL Claude Code projects:
+### Manual Install (from cloned repo)
 
 ```bash
-# Copy to global commands
+# 1. Clone
+git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git
+cd kfsp-skill-set
+
+# 2. Install slash commands (16 files)
+mkdir -p ~/.claude/commands/kfsp/
 cp -r commands/kfsp/ ~/.claude/commands/kfsp/
 
-# Verify
-ls ~/.claude/commands/kfsp/
+# 3. Install agents (15 files)
+mkdir -p ~/.claude/agents/
+cp agents/kfsp/*.md ~/.claude/agents/
+
+# 4. (Optional) Copy reference docs
+cp references/INTERACTION_SURFACE_MAP.md your-project/docs/
 ```
 
-### Method 3: One-Line Install (from GitHub)
+---
+
+## Verification
+
+### Step 1: Check file counts
 
 ```bash
-# Clone and install globally
-git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git /tmp/kfsp-skill-set \
-  && cp -r /tmp/kfsp-skill-set/commands/kfsp/ ~/.claude/commands/kfsp/ \
-  && rm -rf /tmp/kfsp-skill-set \
-  && echo "✅ KFSP Skill Set installed. Run /kfsp:help to get started."
+# Slash commands — should show 16
+ls ~/.claude/commands/kfsp/ | wc -l
+
+# Agents — should show 15 kfsp-* files
+ls ~/.claude/agents/kfsp-*.md 2>/dev/null | wc -l
 ```
 
-## Post-Install Setup
-
-### 1. Verify installation
+### Step 2: Verify slash commands work
 
 In Claude Code, type:
 ```
 /kfsp:help
 ```
 
-You should see the complete skill guide with 13 skills across 5 tiers.
+You should see the complete guide with 15 skills across 5 tiers.
 
-### 2. Initialize Dev Journal
+### Step 3: Verify agents are available
+
+In Claude Code, when you use the Agent tool, the following agent types should be available:
+- `kfsp-guard`, `kfsp-sweep`, `kfsp-ux-parity`, `kfsp-pre-commit`
+- `kfsp-doc-pilot`, `kfsp-pre-mortem`, `kfsp-sentinel`, `kfsp-surface-test`
+- `kfsp-release-gate`, `kfsp-dev-journal`, `kfsp-sync-check`, `kfsp-post-phase`
+- `kfsp-incident-review`, `kfsp-ux-audit`, `kfsp-product-health`
+
+### Expected file listing
+
+```
+~/.claude/commands/kfsp/
+├── help.md
+├── guard.md
+├── dev-journal.md
+├── incident-review.md
+├── sweep.md
+├── pre-commit.md
+├── sync-check.md
+├── post-phase.md
+├── surface-test.md
+├── sentinel.md
+├── release-gate.md
+├── ux-parity.md
+├── ux-audit.md
+├── doc-pilot.md
+├── pre-mortem.md
+└── product-health.md
+
+~/.claude/agents/
+├── kfsp-guard.md
+├── kfsp-sweep.md
+├── kfsp-ux-parity.md
+├── kfsp-pre-commit.md
+├── kfsp-doc-pilot.md
+├── kfsp-pre-mortem.md
+├── kfsp-sentinel.md
+├── kfsp-surface-test.md
+├── kfsp-release-gate.md
+├── kfsp-dev-journal.md
+├── kfsp-incident-review.md
+├── kfsp-sync-check.md
+├── kfsp-post-phase.md
+├── kfsp-ux-audit.md
+└── kfsp-product-health.md
+```
+
+---
+
+## Post-Install Setup
+
+### Initialize Dev Journal
 
 ```
 /kfsp:dev-journal --init
 ```
 
-This creates the journal directory structure in your project.
+Creates the journal directory structure in your project for recording decisions and incidents.
 
-### 3. Copy reference docs (optional)
+### Install Companion Tools (Optional)
 
-If you want the Interaction Surface Map template:
-```bash
-cp references/INTERACTION_SURFACE_MAP.md your-project/docs/
-```
+| Tool | Purpose | Check | Install |
+|------|---------|-------|---------|
+| [GSD](https://github.com/gsd-build/get-shit-done) | Plan → Execute → Verify | `/gsd:help` | See GSD repo |
+| [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | Autonomous iteration loops | `ralph --help` | See Ralph repo |
 
-## Installing Companion Tools
-
-### GSD (Get Shit Done)
-
-Check if already installed:
-```
-/gsd:help
-```
-
-If not installed, see: https://github.com/get-shit-done/gsd
-
-GSD provides: `/gsd:new-project`, `/gsd:plan-phase`, `/gsd:execute-phase`, `/gsd:verify-work`
-
-### Ralph Loop
-
-Check if already installed:
-```
-/ralph-loop --help
-```
-
-If not installed, see: https://github.com/anthropics/ralph-loop
-
-Ralph provides: `ralph --monitor`, `ralph-enable`
-
-### Domain Skills (Optional)
-
-For Flutter projects:
-```bash
-# If your project uses Flutter, add Flutter-specific skills:
-# These are typically in your project's .claude/skills/ directory
-```
-
-## Adapting Skills to Your Project
-
-See the "Adapting for Your Project" section in README.md for details on:
-1. Source path detection
-2. Design token paths
-3. Doc registry mapping
-4. Feature list customization
+---
 
 ## Updating
 
 ```bash
-# Pull latest from GitHub
+# Pull latest
 cd /path/to/kfsp-skill-set && git pull
 
-# Re-copy commands
+# Re-install both commands AND agents
 cp -r commands/kfsp/ ~/.claude/commands/kfsp/
-# Or: cp -r commands/kfsp/ ~/.claude/projects/<hash>/commands/kfsp/
+cp agents/kfsp/*.md ~/.claude/agents/
 ```
 
 ## Uninstalling
 
 ```bash
-# Project-level
-rm -rf ~/.claude/projects/<your-project-hash>/commands/kfsp/
-
-# Global
+# Remove slash commands
 rm -rf ~/.claude/commands/kfsp/
+
+# Remove agents
+rm -f ~/.claude/agents/kfsp-*.md
 ```
+
+---
 
 ## Troubleshooting
 
 ### Skills don't appear as slash commands
+- Restart Claude Code session (close and reopen)
+- Verify files exist: `ls ~/.claude/commands/kfsp/`
+- Check permissions: `chmod 644 ~/.claude/commands/kfsp/*.md`
+
+### Agents not spawning
+- Verify files exist: `ls ~/.claude/agents/kfsp-*.md`
+- Check YAML frontmatter is valid (each file starts with `---`)
 - Restart Claude Code session
-- Verify files are in correct directory
-- Check file permissions: `chmod 644 ~/.claude/commands/kfsp/*.md`
 
 ### Skills can't find source code
-- Edit the source path detection in each skill
-- Default paths are KFSP-specific — adapt to your project structure
+- Skills use path detection — edit each skill to match your project structure
+- Default paths are KFSP-specific (Vietnamese stock app)
 
 ### "File has not been read yet" error
-- This is normal — skills read files on demand
-- The skill will auto-read required files during execution
+- Normal behavior — skills read files on demand during execution

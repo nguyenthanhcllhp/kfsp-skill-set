@@ -1,16 +1,83 @@
-# 🥋 KFSP Skill Set
+# 🥋 KFSP Skill Set v2.0
 
 **15 production-grade skills for agent-driven product development.**
 
 Build apps from zero to store with confidence — for both human teams and AI agent swarms.
 
+## What's New in v2.0
+
+### From Skill Specs → Agent Format
+
+**v1.0** listed skills as slash command specs — instructions that Claude reads and follows inline.
+
+**v2.0** converts every skill into a **standalone agent** (`.claude/agents/` format) alongside the slash commands. Why?
+
+| Problem with v1.0 | How v2.0 solves it |
+|---|---|
+| Skills run inline in main conversation — consume context window | Agents spawn as **subprocesses** with their own context |
+| Skills can't be composed or orchestrated | Agents can be **spawned by other agents** (e.g., GSD executor spawns kfsp-guard) |
+| Skills must be manually triggered by user typing `/kfsp:sweep` | Agents can be **auto-triggered** by orchestrators after every code change |
+| Skills share context with dev work — get confused | Agents get **fresh context** — focused on their single job |
+| No parallelism — one skill at a time | Multiple agents can run **in parallel** (sweep + ux-parity simultaneously) |
+
+**Bottom line:** Slash commands = quick manual checks. Agents = autonomous protection layer that runs without human reminding.
+
+### Package Structure
+
+```
+kfsp-skill-set/
+├── README.md                          ← You are here
+├── INSTALL.md                         ← Installation + verification guide
+├── commands/kfsp/                     ← 16 slash command files (/kfsp:*)
+│   ├── help.md
+│   ├── guard.md                       ← T1: Continuous guardian
+│   ├── dev-journal.md                 ← T1: Developer journal
+│   ├── incident-review.md             ← T1: Post-incident review
+│   ├── sweep.md                       ← T2: Blast radius analysis
+│   ├── pre-commit.md                  ← T2: Commit validation
+│   ├── sync-check.md                  ← T2: Source sync
+│   ├── post-phase.md                  ← T2: Phase completion
+│   ├── surface-test.md                ← T3: 4-surface contract testing
+│   ├── sentinel.md                    ← T3: Regression detection
+│   ├── release-gate.md                ← T3: Pre-release gate
+│   ├── ux-parity.md                   ← T4: Design-code parity
+│   ├── ux-audit.md                    ← T4: UX heuristic evaluation
+│   ├── doc-pilot.md                   ← T4-T5: Documentation autopilot
+│   ├── pre-mortem.md                  ← T5: Risk forecast
+│   └── product-health.md              ← T5: PM health dashboard
+├── agents/kfsp/                       ← 15 agent files (kfsp-*.md) ← NEW in v2.0
+│   ├── kfsp-guard.md
+│   ├── kfsp-sweep.md
+│   ├── kfsp-ux-parity.md
+│   ├── kfsp-pre-commit.md
+│   ├── kfsp-doc-pilot.md
+│   ├── kfsp-pre-mortem.md
+│   ├── kfsp-sentinel.md
+│   ├── kfsp-surface-test.md
+│   ├── kfsp-release-gate.md
+│   ├── kfsp-dev-journal.md
+│   ├── kfsp-incident-review.md
+│   ├── kfsp-sync-check.md
+│   ├── kfsp-post-phase.md
+│   ├── kfsp-ux-audit.md
+│   └── kfsp-product-health.md
+├── references/
+│   └── INTERACTION_SURFACE_MAP.md
+└── examples/
+    └── README.md
+```
+
+---
+
+## 5-Tier Protection Model
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  T5 🎯 BUSINESS IMPACT                                  │
-│  doc-pilot · pre-mortem                                 │
+│  doc-pilot · pre-mortem · product-health                │
 ├─────────────────────────────────────────────────────────┤
 │  T4 👤 USER EXPERIENCE                                   │
-│  ux-parity · doc-pilot                                  │
+│  ux-parity · ux-audit · doc-pilot                       │
 ├─────────────────────────────────────────────────────────┤
 │  T3 🧪 QUALITY ASSURANCE                                 │
 │  surface-test · sentinel · release-gate                 │
@@ -34,96 +101,128 @@ When AI agents build your product, things can go wrong silently:
 - **Drift** — code diverges from design, docs fall behind
 - **Silent failure** — contracts between services break without error
 
-KFSP Skill Set provides **5 layers of protection** that catch these problems across **4 interaction surfaces** (user-facing, backend, third-party services, internal components).
+KFSP Skill Set provides **5 layers of protection** across **4 interaction surfaces** (user-facing, backend, third-party services, internal components).
 
 ---
 
 ## Quick Start
 
-### 1. Install
+### Install (one command)
 
 ```bash
-# Clone or download
-git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git
-
-# Copy commands to your project's Claude config
-cp -r kfsp-skill-set/commands/kfsp/ \
-  ~/.claude/projects/<your-project-hash>/commands/kfsp/
-
-# Or install globally (available in all projects)
-cp -r kfsp-skill-set/commands/kfsp/ \
-  ~/.claude/commands/kfsp/
+git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git /tmp/kfsp-skill-set \
+  && cp -r /tmp/kfsp-skill-set/commands/kfsp/ ~/.claude/commands/kfsp/ \
+  && cp /tmp/kfsp-skill-set/agents/kfsp/*.md ~/.claude/agents/ \
+  && rm -rf /tmp/kfsp-skill-set \
+  && echo "✅ KFSP Skill Set v2.0 installed (commands + agents)."
 ```
 
-### 2. Initialize
+### Verify
 
 ```bash
-# In Claude Code:
-/kfsp:dev-journal --init    # Start your developer journal
-/kfsp:doc-pilot --status    # Baseline your documentation
-/kfsp:help                  # See all commands
+# Check slash commands (should show 16 files)
+ls ~/.claude/commands/kfsp/ | wc -l
+
+# Check agents (should show 15 kfsp-* files)
+ls ~/.claude/agents/kfsp-*.md | wc -l
+
+# In Claude Code — type /kfsp: and see dropdown
+/kfsp:help
 ```
 
-### 3. Develop!
+See `INSTALL.md` for detailed installation + verification guide.
+
+### Use
 
 ```bash
-/kfsp:pre-mortem "Add user authentication"   # Forecast risks
+/kfsp:pre-mortem "Add user authentication"   # Forecast risks BEFORE building
 # ... write code ...
-/kfsp:pre-commit                              # Validate before commit
-/kfsp:sweep auth_controller.dart              # Check blast radius
-/kfsp:doc-pilot --what-changed auth           # Update docs
+/kfsp:sweep auth_controller.dart              # Check blast radius AFTER changes
+/kfsp:ux-parity login                         # Verify design match
+/kfsp:pre-commit                              # Validate BEFORE committing
+/kfsp:doc-pilot --what-changed                # Track doc updates needed
 ```
 
 ---
 
-## All 13 Skills
+## All Skills
 
 ### T5 🎯 Business Impact + T4 👤 User Experience
 
-| Skill | What it does | When to use |
-|-------|-------------|-------------|
-| `/kfsp:product-health` | **NEW** PM's comprehensive dashboard: 8 dimensions (UX, Tech, Docs, Business, Legal, Ops, Data, Growth). Score /80 with gap analysis. | Monthly or before major launch |
-| `/kfsp:doc-pilot` | Tracks which docs need updating. Knows what info goes into which file. Ensures user guide is ready before store submission. | After every feature change |
-| `/kfsp:pre-mortem` | Before building anything, imagines it already failed. Identifies risks across all 4 interaction surfaces. Produces Go/No-Go decision. | Before starting new feature |
-| `/kfsp:ux-audit` | **NEW** UX evaluation using Nielsen 10 heuristics + accessibility + user flow analysis. Designed for PMs with no UX background. Templates included. | After building screens, before release |
-| `/kfsp:ux-parity` | Compares actual UI against design specs. Finds hardcoded colors, wrong spacing, typography drift. | After building screens |
+| Skill | Command | Agent | What it does |
+|-------|---------|-------|-------------|
+| Product Health | `/kfsp:product-health` | `kfsp-product-health` | PM's 8-dimension dashboard. Score /100. |
+| Doc Pilot | `/kfsp:doc-pilot` | `kfsp-doc-pilot` | Tracks which docs need updating. Ensures user guide ready before store. |
+| Pre-Mortem | `/kfsp:pre-mortem` | `kfsp-pre-mortem` | Imagines feature already failed. Risks across 4 surfaces. |
+| UX Audit | `/kfsp:ux-audit` | `kfsp-ux-audit` | Nielsen 10 heuristics + accessibility + domain checks. |
+| UX Parity | `/kfsp:ux-parity` | `kfsp-ux-parity` | Compares actual UI vs design specs. Finds hardcoded colors, spacing drift. |
 
 ### T3 🧪 Quality Assurance
 
-| Skill | What it does | When to use |
-|-------|-------------|-------------|
-| `/kfsp:surface-test` | Tests interaction contracts across 4 surfaces: user↔app, app↔backend, app↔services, component↔component. | Before releases |
-| `/kfsp:sentinel` | Takes baseline snapshot before changes, compares after. Detects regressions in files, routes, providers, tokens. | Before/after refactoring |
-| `/kfsp:release-gate` | 10 comprehensive gates (build, security, design, UX, tests, deps, surfaces, docs, store, rollback). Scores /100 with Go/No-Go. | Before submitting to store |
+| Skill | Command | Agent | What it does |
+|-------|---------|-------|-------------|
+| Surface Test | `/kfsp:surface-test` | `kfsp-surface-test` | Tests contracts across 4 surfaces. |
+| Sentinel | `/kfsp:sentinel` | `kfsp-sentinel` | Baseline before changes, compare after. Detects regressions. |
+| Release Gate | `/kfsp:release-gate` | `kfsp-release-gate` | 10 gates, score /100, Go/No-Go decision. |
 
 ### T2 🔧 Code Integrity
 
-| Skill | What it does | When to use |
-|-------|-------------|-------------|
-| `/kfsp:sweep` | Analyzes blast radius after code changes. Checks design tokens, routes, providers, widgets, tests, docs. | After every code change |
-| `/kfsp:pre-commit` | Validates code before commit: no hardcoded values, no secrets, no broken imports, file size limits. | Before every commit |
-| `/kfsp:sync-check` | Verifies all source copies are in sync, docs match code reality. | Weekly or before handoff |
-| `/kfsp:post-phase` | Post-milestone checklist: update docs, sync sources, run regression, archive artifacts. | After completing a phase |
+| Skill | Command | Agent | What it does |
+|-------|---------|-------|-------------|
+| Sweep | `/kfsp:sweep` | `kfsp-sweep` | Blast radius after code changes. Tokens, routes, providers, tests, docs. |
+| Pre-Commit | `/kfsp:pre-commit` | `kfsp-pre-commit` | No hardcoded values, no secrets, no broken imports. |
+| Sync Check | `/kfsp:sync-check` | `kfsp-sync-check` | All source copies in sync, docs match code. |
+| Post-Phase | `/kfsp:post-phase` | `kfsp-post-phase` | Phase completion checklist: docs, sync, regression. |
 
 ### T1 🛡️ Agent Safety
 
-| Skill | What it does | When to use |
-|-------|-------------|-------------|
-| `/kfsp:guard` | Continuous guardian. Checks structural integrity, design system fidelity, cross-cutting concerns, spec alignment, agent safety. Health score /100. | After agent runs any task |
-| `/kfsp:dev-journal` | Developer journal — records decisions, incidents, learnings as "precedents" (like case law). Searchable by future agents/humans. | After every important decision |
-| `/kfsp:incident-review` | Post-incident analysis: timeline, 5 Whys root cause, blast radius on 4 surfaces, prevention plan, skill updates needed. | After any bug or crash |
+| Skill | Command | Agent | What it does |
+|-------|---------|-------|-------------|
+| Guard | `/kfsp:guard` | `kfsp-guard` | Health score /100. Structure, design system, cross-cutting, safety. |
+| Dev Journal | `/kfsp:dev-journal` | `kfsp-dev-journal` | Records decisions/incidents as searchable precedents. |
+| Incident Review | `/kfsp:incident-review` | `kfsp-incident-review` | 5 Whys root cause, blast radius, prevention plan. |
 
-### Utility
+---
 
-| Skill | What it does |
-|-------|-------------|
-| `/kfsp:help` | Shows complete guide with tier map, workflows, and portable setup instructions |
+## Commands vs Agents — When to Use Which
+
+| Use Case | Use Command | Use Agent |
+|----------|-------------|-----------|
+| Quick manual check | `/kfsp:sweep myfile.dart` | — |
+| Auto-trigger after code change | — | Agent spawned by orchestrator |
+| Part of GSD execute-phase | — | GSD executor spawns kfsp-guard |
+| Parallel checks | — | Spawn sweep + ux-parity simultaneously |
+| Deep scan needing focus | — | Agent gets full context window |
+| Quick pre-commit gate | `/kfsp:pre-commit` | — |
+
+---
+
+## Workflows
+
+### Frequency Pyramid
+
+```
+Every commit (~30s):      /kfsp:pre-commit
+Every change (~2min):     /kfsp:sweep  (or auto: kfsp-sweep agent)
+Every feature (~5min):    /kfsp:pre-mortem → dev → /kfsp:ux-parity
+Every phase (~10min):     /kfsp:post-phase → /kfsp:doc-pilot
+Every release (~15min):   /kfsp:release-gate → /kfsp:surface-test
+On demand:                /kfsp:incident-review, /kfsp:dev-journal
+Weekly:                   /kfsp:guard --deep
+```
+
+### Chain Workflows
+
+```
+New Feature:   pre-mortem → [develop] → sweep → ux-parity → doc-pilot → dev-journal
+Bug Fix:       [fix] → sweep → pre-commit → commit → dev-journal
+Release:       sentinel --baseline → [develop] → sentinel --compare → release-gate → surface-test
+Agent Loop:    [agent task] → guard → if OK continue, if FAIL → stop + incident-review
+```
 
 ---
 
 ## The 4 Interaction Surfaces
-
-Every app interacts in 4 directions. KFSP skills monitor all of them:
 
 ```
                     ┌──────────────┐
@@ -145,111 +244,17 @@ Every app interacts in 4 directions. KFSP skills monitor all of them:
                     └──────────────┘
 ```
 
-Each surface has **contracts** (expected behavior), **standards** (thresholds), **monitors** (continuous checks), and **tests** (verification).
-
 See `references/INTERACTION_SURFACE_MAP.md` for the complete map with 36 interaction types.
 
 ---
 
-## Workflows
+## Companion Tools
 
-### Frequency Pyramid
-
-Run the most frequent checks fastest:
-
-```
-Every commit (~30s):      /kfsp:pre-commit
-Every change (~2min):     /kfsp:sweep
-Every feature (~5min):    /kfsp:pre-mortem → dev → /kfsp:ux-parity
-Every phase (~10min):     /kfsp:post-phase → /kfsp:doc-pilot
-Every release (~15min):   /kfsp:release-gate → /kfsp:surface-test
-On demand:                /kfsp:incident-review, /kfsp:dev-journal
-Weekly:                   /kfsp:guard --deep
-```
-
-### Chain Workflows
-
-**New Feature:**
-```
-pre-mortem → [develop] → sweep → ux-parity → doc-pilot --what-changed → dev-journal --log decision
-```
-
-**Bug Fix:**
-```
-[fix] → sweep → pre-commit → commit → dev-journal --log incident
-```
-
-**Release:**
-```
-sentinel --baseline → [develop] → sentinel --compare → release-gate → surface-test all → doc-pilot --checklist
-```
-
-**Agent Autonomous:**
-```
-[agent task] → guard → if OK continue, if FAIL → stop + incident-review
-```
-
----
-
-## Companion Tools (Recommended)
-
-KFSP Skill Set works standalone, but is designed to pair with:
-
-### 🔧 GSD (Get Shit Done) — Planning & Execution Framework
-
-> Spec-driven development: plan → tasks → execute → verify
-
-- **What:** 33 commands for project planning, phase management, and atomic execution
-- **Why pair:** GSD handles *what to build*, KFSP skills ensure *it's built safely*
-- **Install:** See [GSD GitHub](https://github.com/get-shit-done/gsd) or check if pre-installed:
-  ```bash
-  # Test if GSD is available:
-  /gsd:help
-  ```
-- **Key commands:** `/gsd:new-project`, `/gsd:plan-phase`, `/gsd:execute-phase`, `/gsd:verify-work`
-
-### 🔄 Ralph Loop — Autonomous Iteration
-
-> AI runs in a loop until task is done. Git is memory between loops.
-
-- **What:** Continuous self-referential AI loops with monitoring dashboard
-- **Why pair:** Ralph handles *autonomous execution*, KFSP guard verifies after each loop
-- **Install:** See [Ralph Loop](https://github.com/anthropics/ralph-loop) or:
-  ```bash
-  # Test if Ralph is available:
-  /ralph-loop --help
-  ```
-- **Key commands:** `ralph --monitor`, `ralph-enable`
-
-### 🦋 Domain Skills (Optional)
-
-Add domain-specific skills based on your tech stack:
-
-| Tech | Skill | Source |
-|------|-------|--------|
-| Flutter | `flutter-patterns`, `flutter-development` | Built-in or custom |
-| React Native | `react-native-patterns` | Custom |
-| Next.js | `nextjs-patterns` | Community |
-| Python | `python-patterns` | Community |
-
-### Combined Workflow
-
-```
-┌─────────────────────────────────────────────┐
-│  PLAN  │  GSD: /gsd:plan-phase              │
-│        │  KFSP: /kfsp:pre-mortem            │
-├────────┼────────────────────────────────────┤
-│  BUILD │  GSD: /gsd:execute-phase           │
-│   or   │  KFSP: /kfsp:pre-commit (each)    │
-│  Ralph │  Ralph: ralph --monitor            │
-│        │  KFSP: /kfsp:guard (each loop)     │
-├────────┼────────────────────────────────────┤
-│ VERIFY │  GSD: /gsd:verify-work             │
-│        │  KFSP: /kfsp:release-gate          │
-│        │  KFSP: /kfsp:surface-test all      │
-│        │  KFSP: /kfsp:doc-pilot --checklist │
-└────────┴────────────────────────────────────┘
-```
+| Tool | Purpose | How it pairs with KFSP |
+|------|---------|----------------------|
+| [GSD](https://github.com/gsd-build/get-shit-done) | Plan → Execute → Verify | GSD handles *what to build*, KFSP ensures *it's built safely* |
+| [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | Autonomous iteration | Ralph handles *execution loops*, KFSP guard verifies after each loop |
+| Domain Skills | Tech-specific patterns | Flutter, React, Python skills for conventions |
 
 ---
 
@@ -257,117 +262,12 @@ Add domain-specific skills based on your tech stack:
 
 KFSP skills are designed to be project-agnostic. To adapt:
 
-### 1. Source Path Detection
+1. **Source paths** — Edit path detection in each skill to match your project structure
+2. **Design tokens** — Edit `ux-parity.md` to point to your token files (CSS, Tailwind, etc.)
+3. **Doc registry** — Edit `doc-pilot.md` to map your documentation structure
+4. **Feature list** — Edit `guard.md` to match your expected folder structure
 
-Every skill auto-detects your source code location. Edit the path list in each skill:
-
-```bash
-# Default (KFSP Flutter):
-for path in "/tmp/kfsp_flutter" "$HOME/Desktop/kfsp_flutter" "Product/source"; do
-  [ -d "$path/lib" ] && SOURCE="$path" && break
-done
-
-# Your project (e.g., React Native):
-for path in "./src" "../app/src" "$HOME/projects/myapp/src"; do
-  [ -d "$path" ] && SOURCE="$path" && break
-done
-```
-
-### 2. Design Token Paths
-
-Edit `ux-parity.md` to point to your design token files:
-
-```bash
-# KFSP Flutter:
-COLORS="lib/core/theme/kfsp_colors.dart"
-
-# Your project:
-COLORS="src/styles/colors.ts"  # or tailwind.config.js, etc.
-```
-
-### 3. Doc Registry
-
-Edit `doc-pilot.md` to map your documentation structure:
-
-```markdown
-# Your project's doc mapping:
-| Change | Write to |
-|--------|----------|
-| API change | docs/api-spec.md |
-| UI change | docs/components.md |
-| Feature done | CHANGELOG.md |
-```
-
-### 4. Feature List
-
-Edit `guard.md` expected folder structure to match your project.
-
-### Skills That Work Without Changes
-
-These skills are already project-agnostic:
-- `pre-mortem` — risk analysis framework (universal)
-- `dev-journal` — journal system (universal)
-- `incident-review` — post-mortem template (universal)
-- `sentinel` — file/route/provider diffing (universal)
-- `release-gate` — release checklist (universal)
-
----
-
-## For Agent Teams / Swarms
-
-KFSP Skill Set is specifically designed for AI agent safety:
-
-| Problem | How KFSP Solves It |
-|---------|-------------------|
-| **Hallucination** | `guard` verifies every change against real codebase |
-| **Context loss** | `dev-journal` stores precedents, searchable by new agents |
-| **Scope creep** | `pre-mortem` defines scope, `guard` enforces it |
-| **Regression** | `sentinel` snapshots before/after, `sweep` traces blast radius |
-| **Design drift** | `ux-parity` checks tokens, `sync-check` verifies copies |
-| **Silent failures** | `surface-test` validates contracts on all 4 surfaces |
-| **Missing docs** | `doc-pilot` auto-reminds and maps info → document |
-| **No learning** | `dev-journal` records, `incident-review` analyzes patterns |
-| **Loss of control** | 5-tier model + `guard` after every agent task |
-
-### Agent Swarm Setup
-
-```bash
-# Each agent in the swarm should:
-1. Read /kfsp:help on startup → understand available protections
-2. Run /kfsp:guard after every task → verify safety
-3. Log decisions via /kfsp:dev-journal --log decision → preserve context
-4. Search journal via /kfsp:dev-journal --search <topic> → leverage precedents
-```
-
----
-
-## Package Contents
-
-```
-kfsp-skill-set/
-├── README.md                          ← You are here
-├── INSTALL.md                         ← Detailed install guide
-├── commands/kfsp/                     ← 16 skill files
-│   ├── help.md                        ← /kfsp:help (start here)
-│   ├── product-health.md              ← T5: PM's 8-dimension health dashboard
-│   ├── doc-pilot.md                   ← T5: Documentation autopilot
-│   ├── pre-mortem.md                  ← T5: Risk forecast
-│   ├── ux-audit.md                    ← T4: UX heuristic evaluation (for non-UX PMs)
-│   ├── ux-parity.md                   ← T4: Design-code parity
-│   ├── surface-test.md                ← T3: 4-surface contract testing
-│   ├── sentinel.md                    ← T3: Regression detection
-│   ├── release-gate.md                ← T3: Pre-release gate
-│   ├── sweep.md                       ← T2: Blast radius analysis
-│   ├── pre-commit.md                  ← T2: Commit validation
-│   ├── sync-check.md                  ← T2: Source sync
-│   ├── post-phase.md                  ← T2: Phase completion
-│   ├── guard.md                       ← T1: Continuous guardian
-│   ├── dev-journal.md                 ← T1-T5: Developer journal
-│   └── incident-review.md            ← Cross: Post-incident
-├── references/                        ← Reference documents
-│   └── INTERACTION_SURFACE_MAP.md     ← 4-surface contract reference
-└── examples/                          ← Example outputs (coming soon)
-```
+Skills that work without changes: `pre-mortem`, `dev-journal`, `incident-review`, `sentinel`, `release-gate`
 
 ---
 
@@ -375,9 +275,9 @@ kfsp-skill-set/
 
 **This skill set is NOT created by a domain expert.** It is distilled from personal thinking, experience, and intuition of a non-tech Product Manager building a real product with AI. The ideas, checklists, and frameworks here are generalized from a Vietnamese stock analysis app — if something feels unfamiliar, try asking AI to translate/adapt it to your context rather than forcing interpretation.
 
-**You are fully responsible for your own actions.** Whether you use these skills, modify them, or ignore them — every decision and its consequences belong to the person who acts. This includes me, the creator, who has been and will always be accountable for my own actions regardless of what tools, skills, or references I consulted beforehand.
+**You are fully responsible for your own actions.** Whether you use these skills, modify them, or ignore them — every decision and its consequences belong to the person who acts.
 
-**This is a snapshot of work-in-progress.** This version was published while the project is still mid-development — packaged to preserve a "trail of thoughts" that were getting messy and needed structure. Skills will be updated as the product evolves. If updates seem slow, I'm probably working on another domain (check my other repos). If my GitHub goes quiet entirely — well, I've chosen peace and happiness, and that's fine too. 🙏
+**This is a snapshot of work-in-progress.** Skills will be updated as the product evolves.
 
 ---
 
@@ -400,6 +300,5 @@ Created by **[Thanh Nguyen](https://github.com/nguyenthanhcllhp)** with [Claude 
 Born from building [KFSP](https://kfsp.vn/home/#trang-chu).
 
 Inspired by:
-- [GSD (Get Shit Done)](https://github.com/get-shit-done/gsd) — planning & execution framework
-- [Ralph Loop](https://github.com/anthropics/ralph-loop) — autonomous iteration
-- [Product-Manager-Skills](https://github.com/deanpeters/Product-Manager-Skills) — PM skill framework
+- [GSD (Get Shit Done)](https://github.com/gsd-build/get-shit-done) — planning & execution framework
+- [Ralph Loop](https://github.com/frankbria/ralph-claude-code) — autonomous iteration
