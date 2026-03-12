@@ -220,6 +220,29 @@ Release:       sentinel --baseline → [develop] → sentinel --compare → rele
 Agent Loop:    [agent task] → guard → if OK continue, if FAIL → stop + incident-review
 ```
 
+### Doc-First Response Rule
+
+> **Every response** from the agent to the user **MUST** include a documentation update section:
+>
+> ```
+> 📝 Docs đã cập nhật:
+> - file_1.md — what changed
+> - file_2.md — what changed
+> ```
+>
+> If no docs were affected: `📝 Không có doc nào bị ảnh hưởng`
+
+**Why?** Documentation drift is the #1 silent killer in agent-driven development. If docs aren't updated at the same time as code, they become stale within hours. This rule makes doc updates a **gate** — not optional, not "nice to have".
+
+**What to update:**
+- `MEMORY.md` / project memory — current state, decisions, patterns
+- `HANDOFF_STATUS.md` — progress, bugs, next steps
+- `FEATURE_SPECS.md` — feature list changes
+- `DEBUG_LOG.md` — incidents, decisions
+- `dev-journal` — precedents for future agents/humans
+
+**Add this to your project's `CLAUDE.md`** to enforce it in your own workflow.
+
 ---
 
 ## The 4 Interaction Surfaces
