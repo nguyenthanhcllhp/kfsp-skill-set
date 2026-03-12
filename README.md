@@ -271,6 +271,131 @@ See `references/INTERACTION_SURFACE_MAP.md` for the complete map with 36 interac
 
 ---
 
+## Agent Orchestration Architecture
+
+### How It Works — No Single Orchestrator
+
+KFSP does **NOT** have a master orchestrator agent. Instead, it uses a **distributed model** where different systems spawn KFSP agents as needed:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    WHO SPAWNS KFSP AGENTS?               │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌──────────────┐    Spawns agents after each task       │
+│  │ GSD Executor │───→ kfsp-guard (health check)          │
+│  │ (Orchestrator)│───→ kfsp-sweep (blast radius)          │
+│  └──────────────┘                                        │
+│                                                          │
+│  ┌──────────────┐    Spawns agents after each loop       │
+│  │ Ralph Loop   │───→ kfsp-guard (safety gate)           │
+│  │ (Iterator)   │───→ kfsp-pre-commit (before commit)    │
+│  └──────────────┘                                        │
+│                                                          │
+│  ┌──────────────┐    User types /kfsp:sweep              │
+│  │ Human (You)  │───→ Slash command runs inline          │
+│  │              │     OR spawns agent subprocess         │
+│  └──────────────┘                                        │
+│                                                          │
+│  ┌──────────────┐    Main Claude session spawns agents   │
+│  │ Claude Code  │───→ kfsp-sweep + kfsp-ux-parity        │
+│  │ (Main Agent) │     (parallel, in background)          │
+│  └──────────────┘                                        │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Orchestrator vs Sub-Agent — Roles
+
+| Role | Who | What they do |
+|------|-----|-------------|
+| **Orchestrator** | GSD / Ralph / Main Claude session | Plans work, writes code, decides WHEN to spawn KFSP agents |
+| **Sub-Agent** | KFSP agents (kfsp-sweep, kfsp-guard, etc.) | Read-only analysis — scan code, produce reports, score quality |
+| **Human** | You | Reviews reports, approves/rejects, gives feedback |
+
+**Key insight:** KFSP agents are **read-only analysts** — they READ code, GREP patterns, and PRODUCE reports. They do NOT write code or modify files. The orchestrator (GSD/Ralph/main session) is the one that writes code and calls KFSP agents to verify the work.
+
+### Data Flow in a Typical Session
+
+```
+1. Human: "Build feature X"
+       │
+2. Main Agent: reads design specs, writes code
+       │
+3. Main Agent spawns sub-agents (parallel):
+       ├──→ kfsp-sweep agent   ──→ returns blast radius report
+       ├──→ kfsp-ux-parity agent ──→ returns parity score
+       └──→ kfsp-dev-journal agent ──→ logs decision
+       │
+4. Main Agent: reads reports, fixes issues found
+       │
+5. Main Agent: updates docs (Doc-First Rule)
+       │
+6. Main Agent: responds to human with summary
+```
+
+### Session Lifecycle of a Sub-Agent
+
+```
+SPAWN ──→ FRESH CONTEXT ──→ READ FILES ──→ ANALYZE ──→ REPORT ──→ DIE
+           (no history)     (Glob/Grep/    (apply      (markdown    (context
+                             Read/Bash)     checks)     output)     freed)
+```
+
+Each sub-agent:
+- Gets a **fresh context window** (no prior conversation history)
+- Has access to **read-only tools** (Read, Glob, Grep, Bash)
+- Produces a **structured report** (scores, findings, recommendations)
+- **Dies after reporting** — does not persist or modify state
+- Can run **in parallel** with other sub-agents
+
+### Chaining Agents (Sequential Workflows)
+
+Some workflows require agents to run in sequence because later agents depend on earlier results:
+
+```
+post-phase N
+    │
+    ├─1→ doc-pilot --what-changed    (what docs need updating?)
+    ├─2→ sync-check                   (are source copies in sync?)
+    └─3→ guard                        (overall health score)
+```
+
+The orchestrator (main session) runs each agent, reads the result, then decides whether to continue or stop.
+
+### Parallel Agents (Independent Checks)
+
+When checks are independent, the orchestrator spawns them simultaneously:
+
+```
+After code change:
+    ├──→ kfsp-sweep        (blast radius)     ─┐
+    ├──→ kfsp-ux-parity    (design match)      ├──→ All results back
+    └──→ kfsp-dev-journal  (log decision)     ─┘
+```
+
+### Build Report Rule
+
+Every build session MUST produce a **build report** saved to `docs/build_reports/`. Format:
+
+```
+docs/build_reports/
+├── 2026-03-12_P1_dark-light-mode.md
+├── 2026-03-15_P2_fa-stock-detail.md
+└── ...
+```
+
+Each report includes:
+- Deliverables (what was built)
+- Files changed
+- Skills run (sweep, ux-parity, etc.) with results
+- Testing results
+- Tech debt created
+- Docs updated
+- Next steps
+
+---
+
 ## Companion Tools
 
 | Tool | Purpose | How it pairs with KFSP |
