@@ -90,58 +90,49 @@ Phân loại mỗi deliverable thành test categories:
 - Background/resume
 - Offline behavior
 
-## Step 3: Generate Test Brief
+## Step 3: Generate Test Brief — FILE HTML (BẮT BUỘC)
 
 ### Output Location
-Write to: `Product/kfsp_flutter_migration/docs/build_reports/` (append to existing build report)
+Write to: `Product/kfsp_flutter_migration/docs/build_reports/YYYY-MM-DD_test-brief.html`
 
-### Output Format
+### ⚠️ QUY TẮC OUTPUT — KHÔNG ĐƯỢC DÙNG MARKDOWN
 
-```markdown
-## 🧪 Test Checklist cho Thanh
+> **BẮT BUỘC:** Test brief PHẢI là file `.html` tương tác.
+> PM mở trực tiếp trên trình duyệt hoặc Claude preview để điền.
+> KHÔNG tạo file `.md` cho test brief.
+> Chi tiết quy tắc: `docs/15_TESTING_RULES.md`
 
-**Build:** [build date + scope]
-**Device:** iPhone Simulator (iOS XX) — test cả dark + light mode
-**Thời gian ước tính:** X phút
+### Yêu cầu file HTML
 
-### Hướng dẫn test
-1. Mở app trên simulator
-2. Test từng item theo bảng bên dưới
-3. Đánh dấu ✅ (pass) hoặc ❌ (fail) + ghi chú
-4. Bug → dùng `/kfsp:bug-log` hoặc ghi vào bảng
+1. **Giao diện SÁNG** (light mode) — nền `#F6F6F8`, thẻ trắng
+2. **100% tiếng Việt** — tiêu đề, nút, placeholder, hướng dẫn
+3. **Tương tác:** bấm Đạt/Lỗi/Bỏ qua, gõ ghi chú, tick checkbox
+4. **Hình + Video:** mỗi mục test + form bug có nút đính kèm hình/video
+5. **Lưu tự động:** localStorage — đóng mở trình duyệt vẫn còn
+6. **Sao chép kết quả:** nút export → copy Markdown dán vào chat
+7. **Form báo lỗi:** tích hợp sẵn, tự tạo mã BUG-YYYYMMDD-NN
 
-### Test Items
+### Cấu trúc HTML bắt buộc
 
-| # | Category | Test item | Kỳ vọng | Cách test | Priority |
-|---|----------|-----------|---------|-----------|----------|
-| 1 | 🎨 UI | [item] | [expected] | [steps] | P0/P1/P2 |
-| 2 | 🧭 Nav | [item] | [expected] | [steps] | P0/P1/P2 |
-| ... | | | | | |
-
-### Dark Mode Checklist
-| # | Screen | Light mode OK | Dark mode OK |
-|---|--------|---------------|--------------|
-| 1 | [screen] | ⬜ | ⬜ |
-
-### Regression Check (features cũ vẫn hoạt động)
-| # | Feature | Test nhanh | Expected |
-|---|---------|------------|----------|
-| 1 | Onboarding 5 slides | Swipe qua 5 slides | Smooth, dot indicator đúng |
-| 2 | Bottom nav 6 tabs | Tap từng tab | Tab switch, content hiện |
-| ... | | | |
-
-### Known Limitations (KHÔNG cần test)
-- [list items that are known issues / out of scope]
-
-### Bug Report Template
-Nếu tìm thấy bug, ghi:
-- **Ở đâu:** [screen name]
-- **Làm gì:** [steps]
-- **Kỳ vọng:** [expected]
-- **Thực tế:** [actual]
-- **Screenshot:** [chụp]
-- **Severity:** Critical / High / Medium / Low
 ```
+1. Tiêu đề + mô tả build + thời gian ước tính
+2. Hướng dẫn ngắn
+3. Thanh thống kê (Đạt / Lỗi / Bỏ qua / Hoàn thành)
+4. Danh sách Test — mỗi mục:
+   - Số + Nhóm + Tên + Ưu tiên (P0/P1/P2)
+   - Kỳ vọng + Cách test
+   - Nút: Đạt / Lỗi / Bỏ qua / Xóa
+   - Ô ghi chú + nút đính kèm hình/video
+5. Bảng chế độ tối — checkbox Sáng/Tối
+6. Kiểm tra hồi quy — checkbox
+7. Form báo lỗi — có trường đính kèm hình/video
+8. Hạn chế đã biết
+9. Thanh sticky: "Sao chép kết quả" + "Làm lại"
+```
+
+### Template tham khảo
+Dùng file gần nhất trong `docs/build_reports/*_test-brief.html` làm template.
+Sửa `tests[]`, `regressions[]`, `darkScreens[]` trong `<script>` cho đúng build.
 
 ## Step 4: Priority Rules
 

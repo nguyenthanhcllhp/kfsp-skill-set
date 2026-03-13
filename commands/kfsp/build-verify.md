@@ -167,6 +167,42 @@ flutter build ios --debug --simulator 2>&1
 **Ready for PM testing.** Run `/kfsp:test-brief` to generate test checklist.
 ```
 
+## CHECK 9: 🎬 Feature Completeness — 6 Dimensions (2026-03-13+)
+
+For each NEW or MODIFIED feature in this build, verify:
+
+```bash
+# Check: Animation present (transitions, loading states)
+grep -rn "AnimatedContainer\|SlideTransition\|FadeTransition\|shimmer\|CircularProgressIndicator" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart"
+
+# Check: Actions present (GestureDetector, onTap, navigation)
+grep -rn "onTap\|onPressed\|GestureDetector\|context\.go\|context\.push" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart"
+
+# Check: Error handling (try/catch, error states)
+grep -rn "catch\|error\|ErrorWidget\|retry" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart"
+```
+
+**6 Dimensions Checklist:**
+- [ ] Animation — transitions, loading shimmer, feedback visual (NOT static)
+- [ ] Action — tap, drill-down, navigate, breadcrumb, swipe handlers
+- [ ] Logic — business rules, edge cases, error/empty/loading states, Pro/Free gate
+- [ ] Customer Insight — feature solves what user pain point?
+- [ ] Value — Pro vs Free differentiation clear?
+- [ ] UX/UI Test — dark/light mode, device test, design parity
+
+## CHECK 10: 🇻🇳 Vietnamese Language — Diacritics (2026-03-13+)
+
+```bash
+# Scan for Vietnamese text WITHOUT diacritics (common patterns)
+grep -rn "'Tat ca'\|'Ngan hang'\|'Co phieu'\|'Nganh'\|'Khoi luong'\|'Gia tri'\|'Von hoa'\|'Dinh gia'\|'Bieu do'\|'Thi truong'" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart\|// \|///\|heat_map_model.dart"
+```
+
+**Criteria:**
+- User-facing text (labels, titles, buttons, tooltips) MUST use Vietnamese WITH diacritics
+- Code comments/variable names: no-diacritics OK
+- API field names: no-diacritics OK (server-defined)
+- Enum labels shown to users → MUST have diacritics
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief
@@ -174,4 +210,8 @@ flutter build ios --debug --simulator 2>&1
 3. **Quick mode:** Dùng trong development loop (sau mỗi code change nhỏ)
 4. **Full mode:** Dùng trước khi giao PM (build + verify)
 5. **Chain:** `build-verify → [PASS] → test-brief → bug-log`
+6. **Feature completeness:** Every feature must pass 6-dimension check (animation, action, logic, insight, value, UX)
+7. **Vietnamese text:** All user-facing text must use proper diacritics
+8. **Simulator testing:** Agent CANNOT self-navigate iOS Simulator. After build+install: ASK Thanh to tap/navigate → screenshot → verify → send self-test report
+9. **Git remote safety:** NEVER push/pull/rename any git remote without Thanh's explicit permission. NEVER assume GitHub = GitLab. Always confirm: remote name + URL + branch → wait for OK
 </instructions>

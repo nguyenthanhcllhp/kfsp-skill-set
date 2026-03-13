@@ -152,4 +152,14 @@ done 2>/dev/null | head -20
 - ⚠️ Warnings only → **PASS with warnings — commit OK, fix soon**
 - ℹ️ Info only → **PASS — clean commit**
 ```
+
+## CHECK 7: 🔒 Git Remote Verification (2026-03-13+)
+
+Before any commit that might be pushed:
+- Verify `git remote -v` → `origin` points to expected URL
+- App code: `https://gitlab.com/phudh3/flutter_kfsp_app.git`
+- Skills: `https://github.com/nguyenthanhcllhp/kfsp-skill-set.git`
+- **NEVER** push without Thanh's explicit permission
+- **NEVER** assume GitHub = GitLab
+- If remote looks wrong → 🔴 FAIL — ask Thanh before proceeding
 </instructions>

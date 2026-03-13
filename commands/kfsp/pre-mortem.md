@@ -47,6 +47,24 @@ Identify:
 - Dependencies of those files (from Impact Map)
 - Existing tests that cover these areas
 
+## Step 1.5: Feature Completeness Forecast (6 Dimensions — 2026-03-13+)
+
+Before analyzing risks, verify the PLAN includes all 6 dimensions:
+
+| # | Dimension | Planned? | Notes |
+|---|-----------|----------|-------|
+| 1 | **Animation** | ✅/❌ | Transitions, loading, feedback visual? |
+| 2 | **Action** | ✅/❌ | All tappable elements have handlers? Drill-down? Navigate? |
+| 3 | **Logic** | ✅/❌ | Business rules, edge cases, error/empty states? |
+| 4 | **Customer Insight** | ✅/❌ | What user pain point does this solve? |
+| 5 | **Value** | ✅/❌ | Pro vs Free? Competitive advantage? |
+| 6 | **UX/UI Test** | ✅/❌ | Design parity plan? Dark/light mode? |
+
+Also check:
+- **Vietnamese text:** All user-facing strings use proper diacritics (có dấu)?
+
+If any dimension is ❌ → flag as risk and add to mitigation plan.
+
 ## Step 2: Pre-Mortem on 4 Surfaces
 
 For each surface, imagine the change is DONE and FAILED:

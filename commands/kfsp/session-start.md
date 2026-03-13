@@ -232,6 +232,18 @@ Skip Steps 4-5 (doc audit). Only do:
 - Step 3 (detect changes — file count only)
 - Step 6 (health check)
 - Abbreviated report
+
+## 🔒 Git Remote Safety Check (2026-03-13+)
+
+During Step 1 (Git Status), ALSO verify:
+```bash
+git remote -v
+```
+- App code (`flutter_kfsp_app`): `origin` MUST = `https://gitlab.com/phudh3/flutter_kfsp_app.git`
+- Skills (`kfsp-skill-set`): `origin` MUST = GitHub `nguyenthanhcllhp/kfsp-skill-set`
+- If remote was renamed/changed → 🔴 FLAG immediately → ask Thanh
+- **NEVER** push to any remote without Thanh's explicit permission
+- **NEVER** assume GitHub = GitLab or vice versa
 </instructions>
 </content>
 </invoke>

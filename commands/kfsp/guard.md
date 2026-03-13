@@ -210,6 +210,37 @@ Check if recent changes might break build:
 1. [prioritized]
 ```
 
+## Guardian Check 6: 🎬 Feature Completeness — 6 Dimensions (2026-03-13+)
+
+For each feature screen, verify presence of:
+```bash
+# Animation: transitions, loading indicators
+grep -rn "AnimatedContainer\|SlideTransition\|FadeTransition\|shimmer\|CircularProgressIndicator\|_slidePage" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart" | wc -l
+
+# Actions: interactive handlers
+grep -rn "onTap\|onPressed\|GestureDetector\|onStockTap\|onSectorDrillDown" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart" | wc -l
+
+# Error handling: loading/error/empty states
+grep -rn "isLoading\|error\|isEmpty\|CircularProgressIndicator\|retry" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart" | wc -l
+```
+
+Flag:
+- Feature with 0 animations → 🔴 Missing animation dimension
+- Feature with 0 interactive handlers → 🔴 Missing action dimension
+- Feature with 0 error handling → 🔴 Missing logic dimension
+
+## Guardian Check 7: 🇻🇳 Vietnamese Diacritics — User-Facing Text (2026-03-13+)
+
+```bash
+# Scan for Vietnamese text WITHOUT diacritics in user-facing strings
+grep -rn "'Tat ca'\|'Ngan hang'\|'Co phieu'\|'Nganh'\|'Khoi luong'\|'Gia tri'\|'Von hoa'\|'Dinh gia'\|'Bieu do'\|'Thi truong'\|'Bang gia'\|'Canh bao'\|'Ghi chu'" "$SOURCE/lib/" --include="*.dart" | grep -v "_test.dart\|// \|///\|model\.dart\|enum.*code"
+```
+
+**Criteria:**
+- User-facing text (labels, titles, buttons) MUST use Vietnamese WITH diacritics
+- Code/API field names: no-diacritics acceptable
+- Flag: any user-visible string without diacritics → 🟡 WARN
+
 ## Nếu `--deep` mode:
 
 Thêm các check:
@@ -217,4 +248,17 @@ Thêm các check:
 - Cross-file data flow tracing: follow data from mock_data → provider → widget → UI
 - Performance check: find widgets that rebuild unnecessarily (missing const, heavy build methods)
 - Accessibility check: find widgets without semantics labels
+
+## Guardian Check 8: 🔒 Git Remote Safety (2026-03-13+)
+
+**Check:**
+- Verify no unauthorized remote changes (renamed, added, removed)
+- Verify `origin` still points to correct URL (GitLab for app, GitHub for skills)
+- Flag any push to wrong platform
+
+**Criteria:**
+- App code (`flutter_kfsp_app`) → GitLab `origin` = `https://gitlab.com/phudh3/flutter_kfsp_app.git`
+- KFSP Skills → GitHub `nguyenthanhcllhp/kfsp-skill-set`
+- Any mismatch → 🔴 CRITICAL
+- Any remote rename without Thanh's permission → 🔴 CRITICAL
 </instructions>
