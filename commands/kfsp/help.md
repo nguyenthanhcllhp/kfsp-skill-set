@@ -1,6 +1,6 @@
 ---
 name: kfsp:help
-description: Show all KFSP proprietary skills — 13 skills across 5 tiers for agent-driven product development
+description: Show all KFSP proprietary skills — 14 skills across 5 tiers for agent-driven product development
 allowed-tools:
   - Read
 ---
@@ -12,8 +12,8 @@ Hiển thị danh sách tất cả KFSP skills, tier map, workflow, và portable
 Output the following directly:
 
 ```markdown
-# 🥋 KFSP Skill Set v3.0
-**13 skills · 5 tầng bảo vệ · Human + Agent compatible**
+# 🥋 KFSP Skill Set v3.1
+**14 skills · 5 tầng bảo vệ · Human + Agent compatible**
 
 > Bộ skill độc quyền cho phát triển sản phẩm end-to-end.
 > Thiết kế để: human dùng được, agent swarm an toàn, reusable cho project mới.
@@ -48,7 +48,7 @@ Output the following directly:
 
 ---
 
-## 📋 Tất cả 13 Skills
+## 📋 Tất cả 14 Skills
 
 ### T5 🎯 BUSINESS IMPACT + T4 👤 USER EXPERIENCE
 
@@ -82,6 +82,7 @@ Output the following directly:
 | `/kfsp:guard [--deep] [--report-only]` | 🛡️ Guardian: health score + agent safety | 1-5 phút |
 | `/kfsp:dev-journal [--log\|--search\|--digest\|--init]` | 📔 Nhật ký "án lệ" — decisions, incidents, learnings | 1-5 phút |
 | `/kfsp:incident-review <mô-tả>` | 🚨 Post-incident: 5 Whys + prevention + skill updates | 5-10 phút |
+| `/kfsp:session-start [--quick\|--skip-pull]` | 🚀 Session startup: git check, code-doc drift, memory update | 1-3 phút |
 
 ### Utility
 
@@ -96,6 +97,7 @@ Output the following directly:
 ### Pyramid: Thường xuyên nhất = nhanh nhất
 
 ```
+Mỗi session mới (~2p):   session-start
 Mỗi commit (~30s):      pre-commit
 Mỗi thay đổi (~2p):     sweep
 Mỗi feature (~3p):      pre-mortem (trước) → ux-parity (sau)
