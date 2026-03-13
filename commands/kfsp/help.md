@@ -1,6 +1,6 @@
 ---
 name: kfsp:help
-description: Show all KFSP proprietary skills — 14 skills across 5 tiers for agent-driven product development
+description: Show all KFSP proprietary skills — 17 skills across 5 tiers for agent-driven product development
 allowed-tools:
   - Read
 ---
@@ -12,8 +12,8 @@ Hiển thị danh sách tất cả KFSP skills, tier map, workflow, và portable
 Output the following directly:
 
 ```markdown
-# 🥋 KFSP Skill Set v3.1
-**14 skills · 5 tầng bảo vệ · Human + Agent compatible**
+# 🥋 KFSP Skill Set v3.2
+**17 skills · 5 tầng bảo vệ · Human + Agent compatible**
 
 > Bộ skill độc quyền cho phát triển sản phẩm end-to-end.
 > Thiết kế để: human dùng được, agent swarm an toàn, reusable cho project mới.
@@ -34,7 +34,8 @@ Output the following directly:
 ├─────────────────────────────────────────────────────────┤
 │  T3 🧪 QUALITY ASSURANCE                                 │
 │  Tests pass? Regression? Contracts đúng?                │
-│  Skills: surface-test, sentinel, release-gate           │
+│  Skills: surface-test, sentinel, release-gate,          │
+│          test-brief, bug-log, build-verify              │
 ├─────────────────────────────────────────────────────────┤
 │  T2 🔧 CODE INTEGRITY                                    │
 │  Blast radius? Dependencies? Tokens? Sync?              │
@@ -48,7 +49,7 @@ Output the following directly:
 
 ---
 
-## 📋 Tất cả 14 Skills
+## 📋 Tất cả 17 Skills
 
 ### T5 🎯 BUSINESS IMPACT + T4 👤 USER EXPERIENCE
 
@@ -65,6 +66,9 @@ Output the following directly:
 | `/kfsp:surface-test [front\|back\|lateral\|internal\|all] [--quick]` | 🧪 Test contracts 4 bề mặt tương tác | 1-5 phút |
 | `/kfsp:sentinel [--baseline\|--compare\|--quick]` | 📸 Regression: snapshot trước → so sánh sau | 30s-3 phút |
 | `/kfsp:release-gate [--quick] [--store-check]` | 🚦 Gate trước release: 10 gates, score /100 | 2-8 phút |
+| `/kfsp:test-brief [build-report] [--from-changes]` | 📋 Tạo test checklist cho PM — test gì, kỳ vọng gì, cách test | 1-2 phút |
+| `/kfsp:bug-log [--log\|--list\|--resolve\|--stats]` | 🐛 Log bug từ PM testing, track resolution xuyên sessions | 30s-1 phút |
+| `/kfsp:build-verify [--quick\|--full]` | ✅ Gate tự động trước khi giao PM — analyze, test, checks | 30s-5 phút |
 
 ### T2 🔧 CODE INTEGRITY
 
@@ -101,11 +105,13 @@ Mỗi session mới (~2p):   session-start
 Mỗi commit (~30s):      pre-commit
 Mỗi thay đổi (~2p):     sweep
 Mỗi feature (~3p):      pre-mortem (trước) → ux-parity (sau)
+Mỗi build session:      build-verify → [PASS] → test-brief → giao PM
+PM tìm bug:             bug-log --log → track → bug-log --resolve
 Mỗi phase (~10p):       post-phase → doc-pilot → sync-check
 Mỗi release (~15p):     sentinel → release-gate → surface-test → doc-pilot --checklist
 Khi có sự cố:           incident-review → dev-journal --log incident
 Sau mỗi decision:       dev-journal --log decision
-Định kỳ (tuần):         guard --deep → doc-pilot --status
+Định kỳ (tuần):         guard --deep → doc-pilot --status → bug-log --stats
 Agent tự động:          guard (sau mỗi task)
 ```
 
@@ -115,10 +121,13 @@ Agent tự động:          guard (sau mỗi task)
 pre-mortem → [dev] → sweep → ux-parity → doc-pilot --what-changed → dev-journal --log decision
 
 **🔧 Bug fix:**
-[fix] → sweep → pre-commit → commit → dev-journal --log incident
+bug-log --list → [fix] → sweep → pre-commit → commit → bug-log --resolve → dev-journal --log incident
+
+**📦 Build session xong:**
+build-verify → [PASS] → test-brief → giao PM test → PM test → bug-log (nếu có bug)
 
 **🚀 Release:**
-sentinel --baseline → [dev] → sentinel --compare → release-gate → surface-test all → doc-pilot --checklist
+sentinel --baseline → [dev] → sentinel --compare → release-gate → surface-test all → doc-pilot --checklist → bug-log --stats (0 critical/high)
 
 **📦 Phase complete:**
 post-phase N → doc-pilot --status → sync-check → guard → dev-journal --log learning
