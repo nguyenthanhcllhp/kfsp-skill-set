@@ -62,7 +62,7 @@ Doc Pilot biết:
 
 | Thay đổi | Ghi vào | Mô tả ghi |
 |----------|---------|-----------|
-| UI mới/sửa | `docs/04_FEATURE_SPECS.md` | Screen name, behavior, mock data |
+| UI mới/sửa | `docs/04_FEATURE_SPECS.md` | Screen name, behavior, data source (real API + offline fallback) |
 | UI mới/sửa | `HDSD_KFSP/` trang tương ứng | Screenshot + hướng dẫn user step-by-step |
 | API mới/sửa | `docs/10_API_SOCKET_SPEC.md` | Endpoint, request/response format |
 | Design token mới/sửa | `docs/03_DESIGN_SYSTEM.md` | Token name, value, where used |

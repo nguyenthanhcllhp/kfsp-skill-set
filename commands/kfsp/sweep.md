@@ -80,12 +80,14 @@ Grep: class.*extends.*Widget → liệt kê tất cả widgets
 Check: mỗi widget có được sử dụng ít nhất 1 nơi? (dead widget detection)
 ```
 
-## Step 6: Mock Data Consistency (📊)
+## Step 6: Real Data Integration + Offline Fallback (📊) — REAL DATA MODE
 
 ```
-Read: mock_data.dart → check mock data structure
-Grep: kDebugMode → liệt kê tất cả debug bypasses
-Check: mỗi screen có mock data path khi kDebugMode = true?
+Read: stock_provider.dart → check real API/socket integration
+Grep: SocketClient\|emitWithAck\|api_client → liệt kê tất cả real data sources
+Check: mỗi screen có offline fallback khi API/socket unavailable?
+Read: mock_data.dart → verify fallback structure matches real API response fields
+Check: socket join/leave lifecycle đúng? (emit join trước on, leave khi dispose)
 ```
 
 ## Step 7: Test Coverage Gap (🧪)

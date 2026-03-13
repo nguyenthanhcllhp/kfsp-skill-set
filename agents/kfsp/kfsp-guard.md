@@ -25,14 +25,15 @@ Your job: Scan structure → check design system fidelity → cross-validate cod
 - ThemeExtension completeness
 
 ## 3. Cross-Cutting (/25)
-- kDebugMode bypass in every controller
+- Real API/Socket integration in every feature (REAL DATA MODE — mock only as offline fallback)
+- Socket join/leave lifecycle correct (emit join before listen, leave on dispose)
 - SharedPreferences keys centralized
 - Error handling consistency (async with try/catch)
 
 ## 4. Spec Alignment (/15)
 - Features in code vs features in roadmap
 - Routes in code vs routes in docs
-- Mock data coverage
+- Offline fallback coverage (mock data available for API failure scenarios)
 
 ## 5. Agent Safety (/10)
 - No secrets in code

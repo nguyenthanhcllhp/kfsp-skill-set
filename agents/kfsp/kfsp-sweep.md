@@ -38,9 +38,10 @@ Reference: `Product/kfsp_flutter_migration/docs/13_DEPENDENCY_IMPACT_MAP.md`
 - Check import paths valid
 - Detect dead widgets (defined but never used)
 
-## 5. Mock Data
-- Verify kDebugMode bypass in every controller
-- Check mock data coverage for each screen
+## 5. Real Data Integration (REAL DATA MODE — 2026-03-13+)
+- Verify real API/Socket integration in every feature (NOT mock as primary)
+- Check offline fallback coverage for each screen (mock data available for API failure)
+- Verify socket join/leave lifecycle (emit join before listen, leave on dispose)
 
 ## 6. Test Coverage
 - Cross-check lib/ files vs test/ files

@@ -516,30 +516,38 @@ TEST:
   - Widget: screen renders for loading/data/error
 ```
 
-#### I06: Mock Data → Real Data Transition
+#### I06: Real Data Integration + Offline Fallback (REAL DATA MODE — 2026-03-13+)
 ```
 CONTRACT:
-  mock_data.dart structure MUST mirror real API response
-  kDebugMode check pattern:
-    if (kDebugMode) return MockData.stockList;
-    else return await api.getStockList();
+  REAL DATA is primary source: Socket.IO events + REST API
+  Mock data is OFFLINE FALLBACK ONLY — shown when API/socket unavailable
+  Pattern:
+    final data = await api.getStockList();  // Real API first
+    if (data.isEmpty) return MockData.stockList;  // Fallback only
 
-  Mock data fields = API response fields (name, type, optionality)
+  Fallback mock fields MUST match real API response fields
 
-TRANSITION CHECKLIST:
-  For each mock → real migration:
-  - [ ] API endpoint documented in docs/10
+SOCKET PROTOCOL (BẮT BUỘC):
+  - emit('join', [stockCodes]) BEFORE on('updateliveindex', handler)
+  - emit('leave', [stockCodes]) on dispose
+  - emitWithAck args: wrap list in [] → emitWithAck('event', [listArg], cb)
+  - updateliveindex fields: price/vol/totalval (NOT lastprice/lastvol/totalvalue)
+
+INTEGRATION CHECKLIST:
+  For each feature with real data:
+  - [ ] API endpoint/socket event documented in docs/10
   - [ ] Model class handles all API fields
   - [ ] Model.fromJson handles null/missing
-  - [ ] Error handling: API fail → show error state (not crash)
+  - [ ] Error handling: API fail → show error state or offline fallback (not crash)
   - [ ] Loading state shown during API call
-  - [ ] Remove kDebugMode bypass (or keep for dev)
+  - [ ] Offline fallback mock data available
+  - [ ] Socket join/leave lifecycle correct
 
 CHANGE IMPACT:
-  Mock data structure differs from real API:
+  Real API response structure changes:
     → Runtime crash on field access
-    → 🔴 App works in dev (mock) but crashes in prod (real)
-    → HIGHEST RISK transition point!
+    → 🔴 Field name mismatch between socket events (verified gotcha!)
+    → Socket event field names differ from initial fetch response fields
 ```
 
 ---

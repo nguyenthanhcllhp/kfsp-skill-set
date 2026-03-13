@@ -109,12 +109,15 @@ Check kfsp_theme.dart registers ThemeExtension.
 
 ## Guardian Check 3: 🔗 Cross-Cutting Concerns
 
-### 3a: kDebugMode Bypass Completeness
+### 3a: Real Data Integration Verification (REAL DATA MODE — 2026-03-13+)
 ```bash
-# Every controller/provider that fetches data should have kDebugMode bypass
-grep -rn "kDebugMode" lib/ --include="*.dart" | grep -v "_test.dart"
-# Check: any new API call without kDebugMode bypass?
-grep -rn "\.get(\|\.post(\|\.put(\|\.delete(" lib/ --include="*.dart" | grep -v "kDebugMode" | grep -v "_test.dart"
+# Every provider/controller that fetches data should use REAL API (Socket.IO/REST)
+# Mock data CHỈ làm offline fallback — KHÔNG phải primary source
+grep -rn "SocketClient\|emitWithAck\|laravel_api_client\|nest_api_client" lib/ --include="*.dart" | grep -v "_test.dart"
+# Check: any screen still using mock data as PRIMARY source (not fallback)?
+grep -rn "MockData\.\|mock_data" lib/ --include="*.dart" | grep -v "fallback\|offline\|isEmpty\|_test.dart"
+# Verify join/leave lifecycle for socket listeners
+grep -rn "emit.*join\|emit.*leave" lib/ --include="*.dart"
 ```
 
 ### 3b: SharedPreferences Keys
@@ -143,9 +146,10 @@ Read app_router.dart → extract all routes.
 Read docs/02_ARCHITECTURE_GUIDE.md → route list in doc.
 Compare.
 
-### 4c: Mock Data Completeness
-Read mock_data.dart → extract mock data structures.
-Check: every screen that needs data has mock data path?
+### 4c: Offline Fallback Coverage (REAL DATA MODE)
+Read mock_data.dart → extract fallback data structures.
+Check: every screen with real API data has offline fallback when API unavailable?
+Check: fallback mock structure matches real API response fields?
 
 ## Guardian Check 5: 🛡️ Agent Safety Checks
 
@@ -157,7 +161,7 @@ cd [source_path] && git status --short 2>/dev/null | grep "^D " | head -20
 
 ### 5b: No Secret Leaks
 ```bash
-grep -rni "password\|secret\|api.key\|token\|bearer\|private.key" lib/ --include="*.dart" | grep -v "kDebugMode\|// \|TODO\|FIXME"
+grep -rni "password\|secret\|api.key\|token\|bearer\|private.key" lib/ --include="*.dart" | grep -v "// \|TODO\|FIXME"
 ```
 
 ### 5c: No External Dependencies Added Without Review

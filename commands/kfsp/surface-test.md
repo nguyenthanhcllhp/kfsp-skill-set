@@ -82,12 +82,14 @@ grep -rn "ErrorWidget\|EmptyState\|NoData\|error.*state\|empty.*state" lib/featu
 
 ## SURFACE 2: BACK (App ↔ Backend) 🔴
 
-### 2a: API Endpoint Coverage
+### 2a: API + Socket Endpoint Coverage (REAL DATA MODE)
 ```bash
-# Extract API calls from code
-grep -rn "\.get(\|\.post(\|\.put(\|\.delete(" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v "kDebugMode"
+# Extract API calls from code (REST + Socket.IO)
+grep -rn "\.get(\|\.post(\|\.put(\|\.delete(\|emitWithAck\|SocketClient" lib/ --include="*.dart" | grep -v "_test.dart"
 # Cross-check with docs/10_API_SOCKET_SPEC.md
-# Flag: API in code but not in doc, or vice versa
+# Flag: API/socket event in code but not in doc, or vice versa
+# Verify socket join/leave lifecycle
+grep -rn "emit.*join\|emit.*leave" lib/ --include="*.dart"
 ```
 
 ### 2b: Response Model Validation
@@ -98,12 +100,13 @@ grep -rn "class.*Model\|class.*Entity\|class.*Response\|fromJson\|toJson" lib/ -
 # Check: fromJson handles null/missing fields gracefully
 ```
 
-### 2c: Mock ↔ Real Data Contract
+### 2c: Real Data ↔ Offline Fallback Contract (REAL DATA MODE)
 ```bash
-# Compare mock data structure with model structure
-# mock_data.dart fields should match model fields exactly
-grep -rn "mock\|Mock\|kDebugMode" lib/ --include="*.dart" | grep -v "_test.dart"
-# Flag: mock data has field that model doesn't, or vice versa
+# Verify fallback mock structure matches real API/socket response
+# Mock data is ONLY for offline fallback — NOT primary source
+grep -rn "MockData\.\|mock_data" lib/ --include="*.dart" | grep -v "_test.dart"
+# Flag: screen using mock as primary data source (should use real API)
+# Verify: socket event field names match model fields (known gotcha: updateliveindex uses price/vol/totalval)
 ```
 
 ### 2d: Auth Flow Contract
