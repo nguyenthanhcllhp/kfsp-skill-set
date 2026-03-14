@@ -153,7 +153,25 @@ done 2>/dev/null | head -20
 - ℹ️ Info only → **PASS — clean commit**
 ```
 
-## CHECK 7: 🔒 Git Remote Verification (2026-03-13+)
+## CHECK 7: 🔢 Number Formatting (2026-03-15+)
+
+```bash
+# Tìm toStringAsFixed dùng cho số lớn (nên dùng NumberFormat thay vì toStringAsFixed)
+grep -rn "toStringAsFixed" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v "perChange\|percent"
+
+# Tìm số hiển thị user-facing thiếu NumberFormat
+grep -rn "\.toString()" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v "// "
+```
+
+**Rule:**
+- Dấu `.` = thập phân, dấu `,` = phần nghìn
+- Dùng `NumberFormat` từ `intl` — KHÔNG `toStringAsFixed` cho số lớn
+- Kiểm tra như chính tả — bắt buộc trước khi ship
+- Ví dụ: `26,000` ✅ `26000` ❌ / `1,572.6 Tỷ` ✅ `1572.6 Tỷ` ❌
+
+**Severity:** ⚠️ Warning — flag nhưng không block commit.
+
+## CHECK 8: 🔒 Git Remote Verification (2026-03-13+)
 
 Before any commit that might be pushed:
 - Verify `git remote -v` → `origin` points to expected URL

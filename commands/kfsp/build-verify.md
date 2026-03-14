@@ -203,6 +203,31 @@ grep -rn "'Tat ca'\|'Ngan hang'\|'Co phieu'\|'Nganh'\|'Khoi luong'\|'Gia tri'\|'
 - API field names: no-diacritics OK (server-defined)
 - Enum labels shown to users → MUST have diacritics
 
+## CHECK 11: 🔢 Number Formatting — Dấu chấm/Phẩy (2026-03-15+)
+
+**Gate:** ⚠️ Warning — must review before shipping financial data.
+
+**Rule:** Tất cả số hiển thị PHẢI dùng:
+- Dấu `.` cho thập phân (1.56%)
+- Dấu `,` cho phần nghìn (1,000,000)
+- Kiểm tra như chính tả tiếng Việt có dấu — bắt buộc trước khi ship
+
+**Check:**
+```bash
+# Tìm toStringAsFixed dùng cho số lớn (nên dùng NumberFormat)
+grep -rn "toStringAsFixed" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v "perChange\|percent"
+
+# Tìm số hiển thị thiếu NumberFormat
+grep -rn "\.toString()" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v "// "
+```
+
+**Criteria:**
+- Dùng `NumberFormat` từ package `intl` — KHÔNG dùng `toStringAsFixed` cho số lớn (giá, KL, GT, vốn hoá)
+- `toStringAsFixed` CHỈ OK cho phần trăm nhỏ (perChange, percent)
+- Ví dụ đúng: `26,000` (không phải `26000`), `1,572.6 Tỷ` (không phải `1572.6 Tỷ`)
+- Phải hỏi Thanh confirm đơn vị khi không chắc chắn (Triệu/Tỷ/nghìn đồng/%)
+- Áp dụng cho: hiển thị (labels, cards, charts), input fields, placeholder text, live rendering
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief
