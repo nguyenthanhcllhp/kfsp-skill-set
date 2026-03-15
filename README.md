@@ -1,26 +1,29 @@
-# 🥋 KFSP Skill Set v2.0
+# 🥋 KFSP Skill Set v3.2
 
-**15 production-grade skills for agent-driven product development.**
+**17 production-grade skills for agent-driven product development.**
 
 Build apps from zero to store with confidence — for both human teams and AI agent swarms.
 
-## What's New in v2.0
+## What's New in v3.2
 
-### From Skill Specs → Agent Format
+### v3.2 (2026-03-15)
+- **ORCHESTRATION.md** — Master integration guide: KFSP + GSD + Ralph workflow
+- **Phase-as-Project Rule** — Mỗi phase = 1 project với 6 chiều bắt buộc
+- **Dev Journal Compliance** — 8-layer enforcement across all skills
+- **Number Formatting Rule** — Dấu `.` thập phân, `,` phần nghìn (financial app)
 
-**v1.0** listed skills as slash command specs — instructions that Claude reads and follows inline.
+### v3.0 (2026-03-13)
+- +3 skills: `test-brief`, `bug-log`, `build-verify` → PM testing workflow
+- +1 skill: `session-start` → Session initialization with drift detection
+- **Feature Completeness Rule** — 6 dimensions per feature
+- **Vietnamese Diacritics Rule** — All user-facing text must have diacritics
+- **Data Accuracy Rule** — Zero tolerance for "approximate" in financial data
+- **Simulator Testing Rule** — Agent must ask PM to navigate, take screenshots
+- **Git Remote Safety Rule** — Never push without explicit permission
 
-**v2.0** converts every skill into a **standalone agent** (`.claude/agents/` format) alongside the slash commands. Why?
-
-| Problem with v1.0 | How v2.0 solves it |
-|---|---|
-| Skills run inline in main conversation — consume context window | Agents spawn as **subprocesses** with their own context |
-| Skills can't be composed or orchestrated | Agents can be **spawned by other agents** (e.g., GSD executor spawns kfsp-guard) |
-| Skills must be manually triggered by user typing `/kfsp:sweep` | Agents can be **auto-triggered** by orchestrators after every code change |
-| Skills share context with dev work — get confused | Agents get **fresh context** — focused on their single job |
-| No parallelism — one skill at a time | Multiple agents can run **in parallel** (sweep + ux-parity simultaneously) |
-
-**Bottom line:** Slash commands = quick manual checks. Agents = autonomous protection layer that runs without human reminding.
+### v2.0
+- Converted skills from inline specs to **standalone agent** format (`.claude/agents/`)
+- Agent subprocess isolation, parallel execution, auto-trigger by orchestrators
 
 ### Package Structure
 
@@ -28,12 +31,13 @@ Build apps from zero to store with confidence — for both human teams and AI ag
 kfsp-skill-set/
 ├── README.md                          ← You are here
 ├── INSTALL.md                         ← Installation + verification guide
-├── ORCHESTRATION.md                   ← ⭐ GSD + Ralph integration guide (BẮT BUỘC đọc)
-├── commands/kfsp/                     ← 17 slash command files (/kfsp:*)
+├── ORCHESTRATION.md                   ← GSD + Ralph integration (BẮT BUỘC đọc)
+├── commands/kfsp/                     ← 20 slash command files (/kfsp:*)
 │   ├── help.md
 │   ├── guard.md                       ← T1: Continuous guardian
 │   ├── dev-journal.md                 ← T1: Developer journal
 │   ├── incident-review.md             ← T1: Post-incident review
+│   ├── session-start.md               ← T1: Session initialization
 │   ├── sweep.md                       ← T2: Blast radius analysis
 │   ├── pre-commit.md                  ← T2: Commit validation
 │   ├── sync-check.md                  ← T2: Source sync
@@ -41,12 +45,15 @@ kfsp-skill-set/
 │   ├── surface-test.md                ← T3: 4-surface contract testing
 │   ├── sentinel.md                    ← T3: Regression detection
 │   ├── release-gate.md                ← T3: Pre-release gate
+│   ├── test-brief.md                  ← T3: PM test checklist (HTML)
+│   ├── bug-log.md                     ← T3: Bug tracking
+│   ├── build-verify.md                ← T3: Post-build verification gate
 │   ├── ux-parity.md                   ← T4: Design-code parity
 │   ├── ux-audit.md                    ← T4: UX heuristic evaluation
 │   ├── doc-pilot.md                   ← T4-T5: Documentation autopilot
 │   ├── pre-mortem.md                  ← T5: Risk forecast
 │   └── product-health.md              ← T5: PM health dashboard
-├── agents/kfsp/                       ← 15 agent files (kfsp-*.md) ← NEW in v2.0
+├── agents/kfsp/                       ← 15 agent files (kfsp-*.md)
 │   ├── kfsp-guard.md
 │   ├── kfsp-sweep.md
 │   ├── kfsp-ux-parity.md
@@ -82,12 +89,13 @@ kfsp-skill-set/
 ├─────────────────────────────────────────────────────────┤
 │  T3 🧪 QUALITY ASSURANCE                                 │
 │  surface-test · sentinel · release-gate                 │
+│  test-brief · bug-log · build-verify                    │
 ├─────────────────────────────────────────────────────────┤
 │  T2 🔧 CODE INTEGRITY                                    │
 │  sweep · pre-commit · sync-check · post-phase           │
 ├─────────────────────────────────────────────────────────┤
 │  T1 🛡️ AGENT SAFETY                                      │
-│  guard · dev-journal · incident-review                  │
+│  guard · dev-journal · incident-review · session-start  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -101,6 +109,7 @@ When AI agents build your product, things can go wrong silently:
 - **Context loss** — agent forgets decisions from 3 conversations ago
 - **Drift** — code diverges from design, docs fall behind
 - **Silent failure** — contracts between services break without error
+- **Shortcuts** — agent takes approximations in financial data
 
 KFSP Skill Set provides **5 layers of protection** across **4 interaction surfaces** (user-facing, backend, third-party services, internal components).
 
@@ -112,20 +121,18 @@ KFSP Skill Set provides **5 layers of protection** across **4 interaction surfac
 
 ```bash
 git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git /tmp/kfsp-skill-set \
-  && cp -r /tmp/kfsp-skill-set/commands/kfsp/ ~/.claude/commands/kfsp/ \
-  && cp /tmp/kfsp-skill-set/agents/kfsp/*.md ~/.claude/agents/ \
-  && rm -rf /tmp/kfsp-skill-set \
-  && echo "✅ KFSP Skill Set v2.0 installed (commands + agents)."
+  && mkdir -p ~/.claude/commands/kfsp/ \
+  && cp /tmp/kfsp-skill-set/commands/kfsp/*.md ~/.claude/commands/kfsp/ \
+  && mkdir -p ~/.claude/agents/ \
+  && cp /tmp/kfsp-skill-set/agents/kfsp/*.md ~/.claude/agents/ 2>/dev/null \
+  && echo "✅ KFSP Skill Set v3.2 installed ($(ls ~/.claude/commands/kfsp/*.md | wc -l | tr -d ' ') commands)."
 ```
 
 ### Verify
 
 ```bash
-# Check slash commands (should show 16 files)
+# Check slash commands (should show 20 files)
 ls ~/.claude/commands/kfsp/ | wc -l
-
-# Check agents (should show 15 kfsp-* files)
-ls ~/.claude/agents/kfsp-*.md | wc -l
 
 # In Claude Code — type /kfsp: and see dropdown
 /kfsp:help
@@ -136,113 +143,150 @@ See `INSTALL.md` for detailed installation + verification guide.
 ### Use
 
 ```bash
-/kfsp:pre-mortem "Add user authentication"   # Forecast risks BEFORE building
+/kfsp:session-start                                # Start every session here
+/kfsp:pre-mortem "Add user authentication"         # Forecast risks BEFORE building
 # ... write code ...
-/kfsp:sweep auth_controller.dart              # Check blast radius AFTER changes
-/kfsp:ux-parity login                         # Verify design match
-/kfsp:pre-commit                              # Validate BEFORE committing
-/kfsp:doc-pilot --what-changed                # Track doc updates needed
+/kfsp:sweep auth_controller.dart                   # Check blast radius AFTER changes
+/kfsp:ux-parity login                              # Verify design match
+/kfsp:pre-commit                                   # Validate BEFORE committing
+/kfsp:build-verify                                 # Gate BEFORE handing to PM
+/kfsp:test-brief                                   # Generate PM test checklist (HTML)
+/kfsp:doc-pilot --what-changed                     # Track doc updates needed
 ```
 
 ---
 
-## All Skills
+## All 17 Skills
 
 ### T5 🎯 Business Impact + T4 👤 User Experience
 
-| Skill | Command | Agent | What it does |
-|-------|---------|-------|-------------|
-| Product Health | `/kfsp:product-health` | `kfsp-product-health` | PM's 8-dimension dashboard. Score /100. |
-| Doc Pilot | `/kfsp:doc-pilot` | `kfsp-doc-pilot` | Tracks which docs need updating. Ensures user guide ready before store. |
-| Pre-Mortem | `/kfsp:pre-mortem` | `kfsp-pre-mortem` | Imagines feature already failed. Risks across 4 surfaces. |
-| UX Audit | `/kfsp:ux-audit` | `kfsp-ux-audit` | Nielsen 10 heuristics + accessibility + domain checks. |
-| UX Parity | `/kfsp:ux-parity` | `kfsp-ux-parity` | Compares actual UI vs design specs. Finds hardcoded colors, spacing drift. |
+| Skill | Command | What it does |
+|-------|---------|-------------|
+| Product Health | `/kfsp:product-health` | PM's 8-dimension dashboard. Score /100. |
+| Doc Pilot | `/kfsp:doc-pilot` | Tracks which docs need updating. Ensures user guide ready before store. |
+| Pre-Mortem | `/kfsp:pre-mortem` | Imagines feature already failed. Risks across 4 surfaces. 6-dimension check. |
+| UX Audit | `/kfsp:ux-audit` | Nielsen 10 heuristics + accessibility + domain checks. |
+| UX Parity | `/kfsp:ux-parity` | Compares actual UI vs design specs. Finds hardcoded colors, spacing drift. |
 
 ### T3 🧪 Quality Assurance
 
-| Skill | Command | Agent | What it does |
-|-------|---------|-------|-------------|
-| Surface Test | `/kfsp:surface-test` | `kfsp-surface-test` | Tests contracts across 4 surfaces. |
-| Sentinel | `/kfsp:sentinel` | `kfsp-sentinel` | Baseline before changes, compare after. Detects regressions. |
-| Release Gate | `/kfsp:release-gate` | `kfsp-release-gate` | 10 gates, score /100, Go/No-Go decision. |
+| Skill | Command | What it does |
+|-------|---------|-------------|
+| Surface Test | `/kfsp:surface-test` | Tests contracts across 4 interaction surfaces. |
+| Sentinel | `/kfsp:sentinel` | Baseline before changes, compare after. Detects regressions. |
+| Release Gate | `/kfsp:release-gate` | 12 gates, score /100, Go/No-Go. Charter + journal check. |
+| Test Brief | `/kfsp:test-brief` | Generates HTML test checklist for PM after each build. |
+| Bug Log | `/kfsp:bug-log` | Structured bug logging from PM testing. Track resolution. |
+| Build Verify | `/kfsp:build-verify` | 14 automated checks. Gate before handing build to PM. |
 
 ### T2 🔧 Code Integrity
 
-| Skill | Command | Agent | What it does |
-|-------|---------|-------|-------------|
-| Sweep | `/kfsp:sweep` | `kfsp-sweep` | Blast radius after code changes. Tokens, routes, providers, tests, docs. |
-| Pre-Commit | `/kfsp:pre-commit` | `kfsp-pre-commit` | No hardcoded values, no secrets, no broken imports. |
-| Sync Check | `/kfsp:sync-check` | `kfsp-sync-check` | All source copies in sync, docs match code. |
-| Post-Phase | `/kfsp:post-phase` | `kfsp-post-phase` | Phase completion checklist: docs, sync, regression. |
+| Skill | Command | What it does |
+|-------|---------|-------------|
+| Sweep | `/kfsp:sweep` | Blast radius after code changes. Tokens, routes, providers, tests, docs. |
+| Pre-Commit | `/kfsp:pre-commit` | No hardcoded values, no secrets, no broken imports. Journal check. |
+| Sync Check | `/kfsp:sync-check` | All source copies in sync, docs match code. |
+| Post-Phase | `/kfsp:post-phase` | Phase completion: charter 6/6, journal compliance, docs, sync. |
 
 ### T1 🛡️ Agent Safety
 
-| Skill | Command | Agent | What it does |
-|-------|---------|-------|-------------|
-| Guard | `/kfsp:guard` | `kfsp-guard` | Health score /100. Structure, design system, cross-cutting, safety. |
-| Dev Journal | `/kfsp:dev-journal` | `kfsp-dev-journal` | Records decisions/incidents as searchable precedents. |
-| Incident Review | `/kfsp:incident-review` | `kfsp-incident-review` | 5 Whys root cause, blast radius, prevention plan. |
+| Skill | Command | What it does |
+|-------|---------|-------------|
+| Guard | `/kfsp:guard` | Health score /100. 10 checks: structure, design, cross-cutting, charter, journal. |
+| Dev Journal | `/kfsp:dev-journal` | Records decisions/incidents as searchable precedents. 10 entry types. |
+| Incident Review | `/kfsp:incident-review` | 5 Whys root cause, blast radius, prevention plan. |
+| Session Start | `/kfsp:session-start` | Git check, tool detection, code-doc drift, charter/journal status. |
 
 ---
 
-## Commands vs Agents — When to Use Which
+## Enforcement Rules (v3.0+)
 
-| Use Case | Use Command | Use Agent |
-|----------|-------------|-----------|
-| Quick manual check | `/kfsp:sweep myfile.dart` | — |
-| Auto-trigger after code change | — | Agent spawned by orchestrator |
-| Part of GSD execute-phase | — | GSD executor spawns kfsp-guard |
-| Parallel checks | — | Spawn sweep + ux-parity simultaneously |
-| Deep scan needing focus | — | Agent gets full context window |
-| Quick pre-commit gate | `/kfsp:pre-commit` | — |
+These rules are embedded across multiple skills for automatic enforcement:
+
+| Rule | Enforced by | Since |
+|------|-------------|-------|
+| **Feature Completeness** (6 dimensions) | pre-mortem, build-verify, guard | v3.0 |
+| **Vietnamese Diacritics** | build-verify, guard, pre-commit | v3.0 |
+| **Data Accuracy** (zero tolerance) | All skills — CLAUDE.md level | v3.0 |
+| **Simulator Testing** (ask PM) | build-verify, test-brief | v3.0 |
+| **Git Remote Safety** | pre-commit, guard, session-start | v3.0 |
+| **Phase-as-Project** (6 dimensions) | post-phase, guard, session-start, release-gate | v3.2 |
+| **Dev Journal Compliance** | 8 skills — full chain | v3.2 |
+| **Number Formatting** | build-verify, pre-commit | v3.2 |
+| **Test Case Coverage** | build-verify, pre-commit, release-gate | v3.2 |
+
+### 8-Layer Enforcement Chain
+
+```
+session-start → pre-mortem → pre-commit → build-verify →
+test-brief → post-phase → guard → release-gate
+```
+
+Every skill in the chain checks for charter, journal, and rule compliance.
 
 ---
 
 ## Workflows
 
-### Frequency Pyramid
+### Auto-Trigger Table
 
-```
-Every commit (~30s):      /kfsp:pre-commit
-Every change (~2min):     /kfsp:sweep  (or auto: kfsp-sweep agent)
-Every feature (~5min):    /kfsp:pre-mortem → dev → /kfsp:ux-parity
-Every phase (~10min):     /kfsp:post-phase → /kfsp:doc-pilot
-Every release (~15min):   /kfsp:release-gate → /kfsp:surface-test
-On demand:                /kfsp:incident-review, /kfsp:dev-journal
-Weekly:                   /kfsp:guard --deep
-```
+| When | Run |
+|------|-----|
+| Session starts | `session-start` (git check, drift detect, tool detect) |
+| Before feature | `pre-mortem` → plan 6 dimensions |
+| After code change | `sweep` (blast radius) |
+| After UI change | `ux-parity` (design match) |
+| Before commit | `pre-commit` (validation gate) |
+| After build | `build-verify` → `test-brief` → PM test |
+| PM finds bug | `bug-log --log` → fix → `bug-log --resolve` |
+| Phase complete | `post-phase N` → `guard` → `sync-check` |
+| Before release | `release-gate` → `surface-test` → `doc-pilot --checklist` |
+| Decision made | `dev-journal --log decision` |
+| Incident | `incident-review` → `dev-journal --log incident` |
 
 ### Chain Workflows
 
 ```
-New Feature:   pre-mortem → [develop] → sweep → ux-parity → doc-pilot → dev-journal
-Bug Fix:       [fix] → sweep → pre-commit → commit → dev-journal
-Release:       sentinel --baseline → [develop] → sentinel --compare → release-gate → surface-test
-Agent Loop:    [agent task] → guard → if OK continue, if FAIL → stop + incident-review
+New Feature:   pre-mortem → [develop] → sweep → ux-parity → build-verify → test-brief
+Bug Fix:       [fix] → sweep → pre-commit → commit → bug-log --resolve
+Release:       sentinel --baseline → [develop] → sentinel --compare → release-gate
+Phase Close:   post-phase N → guard → sync-check → doc-pilot --status
+Session:       session-start → [check drift] → [fix if needed] → start work
 ```
 
 ### Doc-First Response Rule
 
-> **Every response** from the agent to the user **MUST** include a documentation update section:
+> **Every response** from the agent to the user **MUST** include:
 >
 > ```
 > 📝 Docs đã cập nhật:
 > - file_1.md — what changed
-> - file_2.md — what changed
+>
+> 🥋 Skills đã chạy:
+> - sweep — [result]
+> - guard — [score]
 > ```
 >
-> If no docs were affected: `📝 Không có doc nào bị ảnh hưởng`
+> If no docs affected: `📝 Không có doc nào bị ảnh hưởng`
+> If no code change: `🥋 Không có code change — không cần chạy skill`
 
-**Why?** Documentation drift is the #1 silent killer in agent-driven development. If docs aren't updated at the same time as code, they become stale within hours. This rule makes doc updates a **gate** — not optional, not "nice to have".
+---
 
-**What to update:**
-- `MEMORY.md` / project memory — current state, decisions, patterns
-- `HANDOFF_STATUS.md` — progress, bugs, next steps
-- `FEATURE_SPECS.md` — feature list changes
-- `DEBUG_LOG.md` — incidents, decisions
-- `dev-journal` — precedents for future agents/humans
+## Companion Tools — GSD + Ralph Integration
 
-**Add this to your project's `CLAUDE.md`** to enforce it in your own workflow.
+| Tool | Role | How it pairs with KFSP |
+|------|------|----------------------|
+| [GSD](https://github.com/gsd-build/get-shit-done) | 🧠 Bộ não — Planning & execution | GSD handles *what to build*, KFSP ensures *it's built safely* |
+| [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | 🦶 Đôi chân — Autonomous iteration | Ralph handles *execution loops*, KFSP guard verifies after each loop |
+| KFSP | 🥋 Áo giáp — Protection | KFSP wraps around GSD/Ralph as quality shield |
+
+> **📖 Read [`ORCHESTRATION.md`](ORCHESTRATION.md)** for full integration details: detection scripts, spawn rules, enforcement layers, 5 workflow templates.
+
+`/kfsp:session-start` auto-detects GSD + Ralph and selects the appropriate workflow mode:
+- **Full Orchestration**: KFSP + GSD + Ralph
+- **GSD + KFSP**: Planning + protection (no auto-loop)
+- **KFSP Only**: Protection only
+- **Unprotected**: ⚠️ Warning — install KFSP first
 
 ---
 
@@ -272,142 +316,39 @@ See `references/INTERACTION_SURFACE_MAP.md` for the complete map with 36 interac
 
 ---
 
-## Agent Orchestration Architecture
+## Agent Architecture
 
-### How It Works — No Single Orchestrator
+### Distributed Model — No Single Orchestrator
 
-KFSP does **NOT** have a master orchestrator agent. Instead, it uses a **distributed model** where different systems spawn KFSP agents as needed:
+KFSP uses a **distributed model** where different systems spawn KFSP agents:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    WHO SPAWNS KFSP AGENTS?               │
 ├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────┐    Spawns agents after each task       │
-│  │ GSD Executor │───→ kfsp-guard (health check)          │
-│  │ (Orchestrator)│───→ kfsp-sweep (blast radius)          │
-│  └──────────────┘                                        │
-│                                                          │
-│  ┌──────────────┐    Spawns agents after each loop       │
-│  │ Ralph Loop   │───→ kfsp-guard (safety gate)           │
-│  │ (Iterator)   │───→ kfsp-pre-commit (before commit)    │
-│  └──────────────┘                                        │
-│                                                          │
-│  ┌──────────────┐    User types /kfsp:sweep              │
-│  │ Human (You)  │───→ Slash command runs inline          │
-│  │              │     OR spawns agent subprocess         │
-│  └──────────────┘                                        │
-│                                                          │
-│  ┌──────────────┐    Main Claude session spawns agents   │
-│  │ Claude Code  │───→ kfsp-sweep + kfsp-ux-parity        │
-│  │ (Main Agent) │     (parallel, in background)          │
-│  └──────────────┘                                        │
-│                                                          │
+│  GSD Executor  ───→ kfsp-guard after each task          │
+│  Ralph Loop    ───→ kfsp-guard after each iteration     │
+│  Human (/kfsp) ───→ Slash command runs inline           │
+│  Claude Code   ───→ Spawns agents in parallel           │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Orchestrator vs Sub-Agent — Roles
-
-| Role | Who | What they do |
-|------|-----|-------------|
-| **Orchestrator** | GSD / Ralph / Main Claude session | Plans work, writes code, decides WHEN to spawn KFSP agents |
-| **Sub-Agent** | KFSP agents (kfsp-sweep, kfsp-guard, etc.) | Read-only analysis — scan code, produce reports, score quality |
-| **Human** | You | Reviews reports, approves/rejects, gives feedback |
-
-**Key insight:** KFSP agents are **read-only analysts** — they READ code, GREP patterns, and PRODUCE reports. They do NOT write code or modify files. The orchestrator (GSD/Ralph/main session) is the one that writes code and calls KFSP agents to verify the work.
-
-### Data Flow in a Typical Session
-
-```
-1. Human: "Build feature X"
-       │
-2. Main Agent: reads design specs, writes code
-       │
-3. Main Agent spawns sub-agents (parallel):
-       ├──→ kfsp-sweep agent   ──→ returns blast radius report
-       ├──→ kfsp-ux-parity agent ──→ returns parity score
-       └──→ kfsp-dev-journal agent ──→ logs decision
-       │
-4. Main Agent: reads reports, fixes issues found
-       │
-5. Main Agent: updates docs (Doc-First Rule)
-       │
-6. Main Agent: responds to human with summary
-```
-
-### Session Lifecycle of a Sub-Agent
-
-```
-SPAWN ──→ FRESH CONTEXT ──→ READ FILES ──→ ANALYZE ──→ REPORT ──→ DIE
-           (no history)     (Glob/Grep/    (apply      (markdown    (context
-                             Read/Bash)     checks)     output)     freed)
-```
-
-Each sub-agent:
-- Gets a **fresh context window** (no prior conversation history)
-- Has access to **read-only tools** (Read, Glob, Grep, Bash)
-- Produces a **structured report** (scores, findings, recommendations)
-- **Dies after reporting** — does not persist or modify state
-- Can run **in parallel** with other sub-agents
-
-### Chaining Agents (Sequential Workflows)
-
-Some workflows require agents to run in sequence because later agents depend on earlier results:
-
-```
-post-phase N
-    │
-    ├─1→ doc-pilot --what-changed    (what docs need updating?)
-    ├─2→ sync-check                   (are source copies in sync?)
-    └─3→ guard                        (overall health score)
-```
-
-The orchestrator (main session) runs each agent, reads the result, then decides whether to continue or stop.
-
-### Parallel Agents (Independent Checks)
-
-When checks are independent, the orchestrator spawns them simultaneously:
-
-```
-After code change:
-    ├──→ kfsp-sweep        (blast radius)     ─┐
-    ├──→ kfsp-ux-parity    (design match)      ├──→ All results back
-    └──→ kfsp-dev-journal  (log decision)     ─┘
-```
+**Key insight:** KFSP agents are **read-only analysts** — they READ code, GREP patterns, and PRODUCE reports. They do NOT write code. The orchestrator writes code and calls KFSP agents to verify.
 
 ### Build Report Rule
 
-Every build session MUST produce a **build report** saved to `docs/build_reports/`. Format:
+Every build session MUST produce a **build report** with 9 sections:
+1. Goals (from Project Charter)
+2. Deliverables (status)
+3. Success Criteria (results)
+4. Files Changed
+5. Technical Decisions
+6. Test Checklist for PM
+7. Skills Run (with results)
+8. Known Issues
+9. Next Steps
 
-```
-docs/build_reports/
-├── 2026-03-12_P1_dark-light-mode.md
-├── 2026-03-15_P2_fa-stock-detail.md
-└── ...
-```
-
-Each report includes:
-- Deliverables (what was built)
-- Files changed
-- Skills run (sweep, ux-parity, etc.) with results
-- Testing results
-- Tech debt created
-- Docs updated
-- Next steps
-
----
-
-## Companion Tools — GSD + Ralph Integration
-
-| Tool | Purpose | How it pairs with KFSP |
-|------|---------|----------------------|
-| [GSD](https://github.com/gsd-build/get-shit-done) | Plan → Execute → Verify | GSD handles *what to build*, KFSP ensures *it's built safely* |
-| [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | Autonomous iteration | Ralph handles *execution loops*, KFSP guard verifies after each loop |
-| Domain Skills | Tech-specific patterns | Flutter, React, Python skills for conventions |
-
-> **📖 Đọc [`ORCHESTRATION.md`](ORCHESTRATION.md)** — chi tiết phối hợp, spawn rules, enforcement layers, workflow templates.
-
-`/kfsp:session-start` tự detect GSD + Ralph và chọn workflow phù hợp.
+Saved to: `docs/build_reports/YYYY-MM-DD_P{N}_{description}.md`
 
 ---
 
@@ -416,21 +357,33 @@ Each report includes:
 KFSP skills are designed to be project-agnostic. To adapt:
 
 1. **Source paths** — Edit path detection in each skill to match your project structure
-2. **Design tokens** — Edit `ux-parity.md` to point to your token files (CSS, Tailwind, etc.)
+2. **Design tokens** — Edit `ux-parity.md` to point to your token files
 3. **Doc registry** — Edit `doc-pilot.md` to map your documentation structure
 4. **Feature list** — Edit `guard.md` to match your expected folder structure
+5. **Rules** — Add project-specific rules to CLAUDE.md (data accuracy, language, etc.)
 
-Skills that work without changes: `pre-mortem`, `dev-journal`, `incident-review`, `sentinel`, `release-gate`
+Skills that work without changes: `pre-mortem`, `dev-journal`, `incident-review`, `sentinel`, `release-gate`, `session-start`
 
 ---
 
 ## Disclaimer
 
-**This skill set is NOT created by a domain expert.** It is distilled from personal thinking, experience, and intuition of a non-tech Product Manager building a real product with AI. The ideas, checklists, and frameworks here are generalized from a Vietnamese stock analysis app — if something feels unfamiliar, try asking AI to translate/adapt it to your context rather than forcing interpretation.
+**This skill set is NOT created by a domain expert.** It is distilled from personal thinking, experience, and intuition of a non-tech Product Manager building a real product with AI. The ideas, checklists, and frameworks here are generalized from a Vietnamese stock analysis app — if something feels unfamiliar, try asking AI to translate/adapt it to your context.
 
 **You are fully responsible for your own actions.** Whether you use these skills, modify them, or ignore them — every decision and its consequences belong to the person who acts.
 
-**This is a snapshot of work-in-progress.** Skills will be updated as the product evolves.
+**This is a snapshot of work-in-progress.** Skills are updated as the product evolves.
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v3.2 | 2026-03-15 | ORCHESTRATION.md, Phase-as-Project, Dev Journal Compliance, Number Formatting |
+| v3.0 | 2026-03-13 | +4 skills (17 total), 6 enforcement rules, simulator testing, git safety |
+| v2.0 | 2026-03-10 | Agent format, distributed orchestration, parallel execution |
+| v1.0 | 2026-03-08 | Initial 13 slash command specs |
 
 ---
 
