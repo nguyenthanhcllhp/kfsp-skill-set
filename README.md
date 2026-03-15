@@ -28,7 +28,8 @@ Build apps from zero to store with confidence — for both human teams and AI ag
 kfsp-skill-set/
 ├── README.md                          ← You are here
 ├── INSTALL.md                         ← Installation + verification guide
-├── commands/kfsp/                     ← 16 slash command files (/kfsp:*)
+├── ORCHESTRATION.md                   ← ⭐ GSD + Ralph integration guide (BẮT BUỘC đọc)
+├── commands/kfsp/                     ← 17 slash command files (/kfsp:*)
 │   ├── help.md
 │   ├── guard.md                       ← T1: Continuous guardian
 │   ├── dev-journal.md                 ← T1: Developer journal
@@ -396,13 +397,17 @@ Each report includes:
 
 ---
 
-## Companion Tools
+## Companion Tools — GSD + Ralph Integration
 
 | Tool | Purpose | How it pairs with KFSP |
 |------|---------|----------------------|
 | [GSD](https://github.com/gsd-build/get-shit-done) | Plan → Execute → Verify | GSD handles *what to build*, KFSP ensures *it's built safely* |
 | [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | Autonomous iteration | Ralph handles *execution loops*, KFSP guard verifies after each loop |
 | Domain Skills | Tech-specific patterns | Flutter, React, Python skills for conventions |
+
+> **📖 Đọc [`ORCHESTRATION.md`](ORCHESTRATION.md)** — chi tiết phối hợp, spawn rules, enforcement layers, workflow templates.
+
+`/kfsp:session-start` tự detect GSD + Ralph và chọn workflow phù hợp.
 
 ---
 

@@ -21,6 +21,12 @@ Khi agent (Claude hoặc future agents) thực hiện thay đổi code, Guardian
 
 **Triết lý:** "Trust but verify" — Agent làm tốt, Guardian kiểm tra lại.
 
+**Orchestration:**
+- **GSD executor** PHẢI spawn guard sau mỗi task (score < 70 = STOP execution)
+- **Ralph loop** PHẢI chạy guard --quick sau mỗi iteration (score < 70 = BREAK loop)
+- **Manual mode:** chạy guard sau mỗi code change
+- Chi tiết: xem `ORCHESTRATION.md` trong kfsp-skill-set repo
+
 **Flags:**
 - `--deep` → Full deep scan (chậm hơn, kỹ hơn)
 - `--report-only` → Chỉ báo cáo, không đề xuất fix

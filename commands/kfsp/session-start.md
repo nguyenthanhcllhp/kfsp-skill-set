@@ -34,18 +34,30 @@ KFSP Session Start — Quy trình bắt đầu phiên làm việc mới.
 </objective>
 
 <instructions>
-## Step 0: Read Context
+## Step 0: Read Context + Detect Tools
 
-Đọc memory để hiểu state từ session trước:
+### 0a: Đọc memory:
 ```
 Read: memory/MEMORY.md
 Read: memory/flutter-migration.md
 ```
+Ghi nhận: state, source path, known bugs.
 
-Ghi nhận:
-- Last known state (branch, phase, progress)
-- Working source path
-- Known bugs/issues
+### 0b: Detect Orchestration Tools (BẮT BUỘC)
+```bash
+KFSP_COUNT=$(ls ~/.claude/commands/kfsp/*.md 2>/dev/null | wc -l | tr -d ' ')
+GSD_COUNT=$(ls ~/.claude/commands/gsd/*.md 2>/dev/null | wc -l | tr -d ' ')
+RALPH=$(command -v ralph 2>/dev/null && echo "installed" || ([ -f ".ralph/PROMPT.md" ] && echo "enabled" || echo "not found"))
+echo "KFSP: $KFSP_COUNT | GSD: $GSD_COUNT | Ralph: $RALPH"
+```
+
+**Workflow mode:**
+- KFSP ≥ 17 + GSD + Ralph → **Full Orchestration**
+- KFSP ≥ 17 + GSD → **GSD + KFSP**
+- KFSP ≥ 17 only → **KFSP Only**
+- Thiếu KFSP → ⚠️ Cảnh báo user
+
+> Chi tiết: `ORCHESTRATION.md` trong kfsp-skill-set repo.
 
 ## Step 1: Git Status Check
 
@@ -191,6 +203,14 @@ echo "Test files: $(find test -name '*_test.dart' 2>/dev/null | wc -l)"
 **Date:** [timestamp]
 **Branch:** [branch name]
 **Source:** [path]
+
+## Orchestration Tools
+| Tool | Status | Mode |
+|------|--------|------|
+| KFSP | ✅/❌ [N] commands | Bảo vệ |
+| GSD | ✅/⚠️ [N] commands | Planning |
+| Ralph | ✅/⚠️ | Auto-loop |
+| **Workflow:** | [Full / GSD+KFSP / KFSP Only / ⚠️ Unprotected] | |
 
 ## Git Status
 - Branch: [name] (ahead/behind: X/Y)

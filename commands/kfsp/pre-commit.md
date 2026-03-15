@@ -171,6 +171,24 @@ grep -rn "\.toString()" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v
 
 **Severity:** ⚠️ Warning — flag nhưng không block commit.
 
+## CHECK 9: 📋 Test Case Registry (2026-03-15+)
+
+```bash
+REGISTRY="Product/kfsp_flutter_migration/docs/test_cases/master_test_registry.html"
+if [ -f "$REGISTRY" ]; then
+  # Check if changed screens have test cases
+  CHANGED_SCREENS=$(git diff --cached --name-only | grep "lib/screens\|lib/features" | sed 's|.*/||;s|_screen\.dart||;s|_page\.dart||' | sort -u)
+  for screen in $CHANGED_SCREENS; do
+    TC=$(grep -ci "$screen" "$REGISTRY" 2>/dev/null || echo "0")
+    [ "$TC" -eq 0 ] && echo "⚠️ Screen '$screen' modified but has 0 test cases in registry"
+  done
+else
+  echo "⚠️ Master Test Registry not found — consider creating one"
+fi
+```
+
+**Severity:** ⚠️ Warning — flag nhưng không block commit. Nhắc agent thêm test cases.
+
 ## CHECK 8: 🔒 Git Remote Verification (2026-03-13+)
 
 Before any commit that might be pushed:

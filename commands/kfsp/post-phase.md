@@ -23,6 +23,12 @@ KFSP Post-Phase Checklist — Chạy sau khi hoàn thành một phase trong Clea
 5. Migration package sẵn sàng handoff bất kỳ lúc nào
 
 **Quy tắc KFSP:** "Mỗi phase = 1 lần build & test trên thiết bị thật."
+
+**Orchestration:**
+- Chạy SAU khi GSD verify-work xong (hoặc thay thế nếu không có GSD)
+- TRƯỚC khi GSD complete-milestone
+- Guard score cuối PHẢI ≥ 70 để close phase
+- Chi tiết: xem `ORCHESTRATION.md` trong kfsp-skill-set repo
 </objective>
 
 <instructions>

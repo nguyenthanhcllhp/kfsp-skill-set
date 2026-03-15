@@ -131,7 +131,22 @@ echo "Empty states: $EMPTY_SCREENS / $TOTAL_SCREENS screens"
 TEST_COUNT=$(find "$SOURCE/test/" -name "*_test.dart" 2>/dev/null | wc -l)
 LIB_COUNT=$(find "$SOURCE/lib/" -name "*.dart" | wc -l)
 echo "Tests: $TEST_COUNT, Source: $LIB_COUNT, Ratio: $(echo "scale=1; $TEST_COUNT * 100 / $LIB_COUNT" | bc)%"
+
+# Master Test Registry coverage
+REGISTRY="Product/kfsp_flutter_migration/docs/test_cases/master_test_registry.html"
+if [ -f "$REGISTRY" ]; then
+  TC_COUNT=$(grep -c '"id":' "$REGISTRY" 2>/dev/null || echo "0")
+  echo "📋 Master Test Registry: $TC_COUNT test cases"
+  # Check all screens have test cases
+  SCREENS=$(find "$SOURCE/lib/screens" -maxdepth 1 -type d 2>/dev/null | wc -l)
+  echo "Screens: $SCREENS, Test cases: $TC_COUNT"
+fi
 ```
+
+**Gate criteria:**
+- Test registry exists with ≥50 test cases → ✅
+- No registry → ⚠️ (-5 points)
+- Critical screens without test cases → ⚠️ (-3 points per screen)
 
 ## GATE 6: 📦 Dependencies
 

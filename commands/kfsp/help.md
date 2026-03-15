@@ -96,6 +96,27 @@ Output the following directly:
 
 ---
 
+## 🔗 Phối hợp với GSD + Ralph
+
+KFSP Skill Set hoạt động TỐT NHẤT khi kết hợp với **GSD** (planning) và **Ralph Loop** (auto-execution).
+
+| Hệ thống | Vai trò | Check |
+|-----------|---------|-------|
+| **KFSP** | 🛡️ Bảo vệ (17 skills, 5 tầng) | `ls ~/.claude/commands/kfsp/ \| wc -l` ≥ 17 |
+| **GSD** | 📋 Plan → Execute → Verify | `/gsd:help` |
+| **Ralph** | 🔄 Auto-loop cho task phức tạp | `which ralph` |
+
+**Tài liệu chi tiết:** Đọc `ORCHESTRATION.md` trong repo này.
+
+**Quick reference:**
+- GSD plan → include KFSP pre-mortem output (risks + test cases)
+- GSD execute → spawn KFSP sweep + guard sau mỗi task
+- Ralph loop → KFSP guard sau mỗi iteration (score < 70 = break)
+- Mỗi commit → KFSP pre-commit gate
+- Mỗi build → KFSP build-verify + test-brief
+
+---
+
 ## ⏱️ Khi nào chạy skill nào?
 
 ### Pyramid: Thường xuyên nhất = nhanh nhất
@@ -141,10 +162,10 @@ post-phase N → doc-pilot --status → sync-check → guard → dev-journal --l
 
 ### Bước 1: Cài tools nền
 ```bash
-# GSD (Get Shit Done) — planning + execution framework
-# Ralph Loop — autonomous iteration loop
-# Đã cài global, dùng được ở mọi project
+# GSD (Get Shit Done) — https://github.com/gsd-build/get-shit-done
+# Ralph Loop — https://github.com/frankbria/ralph-claude-code
 ```
+> ⚠️ Đọc `ORCHESTRATION.md` để biết cách 3 hệ thống phối hợp.
 
 ### Bước 2: Cài domain skills (tùy project)
 ```bash

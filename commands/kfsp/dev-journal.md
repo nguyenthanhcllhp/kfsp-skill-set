@@ -89,6 +89,11 @@ Create INDEX.md:
 | learning | 🟢 | Khi rút ra bài học |
 | discovery | 🟡 | Khi phát hiện điều bất ngờ |
 | experiment | 🔬 | Khi thử approach mới |
+| test-change | 🧪 | Khi thêm/sửa/xoá test case |
+| phase-start | 🚀 | Khi bắt đầu phase mới (with charter summary) |
+| phase-complete | 🏁 | Khi hoàn thành phase (results vs plan) |
+| pm-feedback | 💬 | Khi PM đưa feedback |
+| bug-fix | 🔧 | Khi fix bug (link to bug-log) |
 
 ## All Entries
 | Date | Type | Title | Tags | Link |

@@ -28,6 +28,12 @@ Phân tích trên 4 bề mặt tương tác:
 - Trước khi upgrade dependency
 - Trước khi đổi API contract
 - Trước khi đổi design tokens
+
+**Orchestration:**
+- Chạy TRƯỚC `/gsd:plan-phase` → output risks + test cases đưa vào plan
+- Ralph: chạy trước `ralph-enable` để define scope + risks
+- Output test cases → thêm vào Master Test Registry
+- Chi tiết: xem `ORCHESTRATION.md` trong kfsp-skill-set repo
 </objective>
 
 <instructions>

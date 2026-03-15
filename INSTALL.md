@@ -130,12 +130,16 @@ In Claude Code, when you use the Agent tool, the following agent types should be
 
 Creates the journal directory structure in your project for recording decisions and incidents.
 
-### Install Companion Tools (Optional)
+### Install Companion Tools (KHUYẾN NGHỊ MẠNH)
+
+KFSP hoạt động TỐT NHẤT khi kết hợp với GSD + Ralph. Xem [`ORCHESTRATION.md`](ORCHESTRATION.md).
 
 | Tool | Purpose | Check | Install |
 |------|---------|-------|---------|
 | [GSD](https://github.com/gsd-build/get-shit-done) | Plan → Execute → Verify | `/gsd:help` | See GSD repo |
 | [Ralph Loop](https://github.com/frankbria/ralph-claude-code) | Autonomous iteration loops | `ralph --help` | See Ralph repo |
+
+**Verify:** Chạy `/kfsp:session-start` — tự detect tất cả.
 
 ---
 

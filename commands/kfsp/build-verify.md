@@ -228,6 +228,29 @@ grep -rn "\.toString()" lib/ --include="*.dart" | grep -v "_test.dart" | grep -v
 - Phải hỏi Thanh confirm đơn vị khi không chắc chắn (Triệu/Tỷ/nghìn đồng/%)
 - Áp dụng cho: hiển thị (labels, cards, charts), input fields, placeholder text, live rendering
 
+## CHECK 12: 📋 Test Case Coverage (2026-03-15+)
+
+**Gate:** ⚠️ Warning — modified screens MUST have test cases in Master Test Registry.
+
+```bash
+REGISTRY="Product/kfsp_flutter_migration/docs/test_cases/master_test_registry.html"
+if [ -f "$REGISTRY" ]; then
+  TC_COUNT=$(grep -c '"id":' "$REGISTRY" 2>/dev/null || echo "0")
+  echo "📋 Master Test Registry: $TC_COUNT test cases"
+else
+  echo "⚠️ Master Test Registry NOT FOUND"
+fi
+```
+
+**Check per modified screen:**
+For each screen/feature modified in this build:
+1. Find test cases with matching screen prefix (e.g., `MK-` for Market, `HM-` for Heatmap)
+2. If no test cases exist → ⚠️ FLAG: "Screen [X] modified but has 0 test cases"
+3. If test cases exist but are outdated → ⚠️ FLAG: "Test cases may need updating"
+
+**Output row:**
+| 12 | 📋 Test Coverage | ✅/⚠️ | X screens covered, Y missing |
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief
