@@ -182,6 +182,34 @@ Nếu phát hiện drift:
 
 3. Nếu `--quick` → chỉ cập nhật memory, skip docs
 
+## Step 5.5: Phase-as-Project + Dev Journal Check (2026-03-15+)
+
+### Check Project Charter exists for current phase:
+```bash
+PHASE=$(grep -r "Phase hiện tại" memory/flutter-migration.md 2>/dev/null | grep -oP "P\d+" | head -1)
+if [ -n "$PHASE" ]; then
+  CHARTER="Product/kfsp_flutter_migration/docs/build_reports/${PHASE}_project_charter.md"
+  [ -f "$CHARTER" ] && echo "✅ Charter: $CHARTER" || echo "⚠️ NO CHARTER for $PHASE — cần tạo trước khi code"
+fi
+```
+
+### Check Dev Journal has entries:
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+ENTRIES=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+echo "📔 Dev journal entries (${MONTH}): $ENTRIES"
+[ "$ENTRIES" -eq 0 ] && echo "⚠️ No journal entries — remember to log decisions"
+```
+
+### Add to report (Step 7):
+```markdown
+## Phase Compliance
+- Project Charter: ✅/⚠️ [path or "cần tạo"]
+- Dev Journal: X entries this month
+- Build Reports: Y reports this phase
+```
+
 ## Step 6: Quick Health Check
 
 Chạy mini version của `guard`:

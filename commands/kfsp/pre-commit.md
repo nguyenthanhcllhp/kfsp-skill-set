@@ -189,6 +189,25 @@ fi
 
 **Severity:** ⚠️ Warning — flag nhưng không block commit. Nhắc agent thêm test cases.
 
+## CHECK 10: 📔 Dev Journal Compliance (2026-03-15+)
+
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+
+# Check if any major decision was made without journal entry
+ENTRIES=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+echo "📔 Journal entries (${MONTH}): $ENTRIES"
+
+# Check: if committing significant changes, should have decision entry
+CHANGED_FILES=$(git diff --cached --name-only | wc -l | tr -d ' ')
+if [ "$CHANGED_FILES" -gt 5 ] && [ "$ENTRIES" -eq 0 ]; then
+  echo "⚠️ Committing $CHANGED_FILES files but 0 journal entries — document decisions!"
+fi
+```
+
+**Severity:** ⚠️ Warning — nhắc nhở, không block commit.
+
 ## CHECK 8: 🔒 Git Remote Verification (2026-03-13+)
 
 Before any commit that might be pushed:

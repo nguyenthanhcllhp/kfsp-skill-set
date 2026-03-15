@@ -251,6 +251,35 @@ For each screen/feature modified in this build:
 **Output row:**
 | 12 | 📋 Test Coverage | ✅/⚠️ | X screens covered, Y missing |
 
+## CHECK 13: 📋 Project Charter Alignment (2026-03-15+)
+
+**Gate:** ⚠️ Warning — build deliverables SHOULD map to Project Charter.
+
+```bash
+PHASE=$(grep -r "Phase hiện tại" memory/flutter-migration.md 2>/dev/null | grep -oP "P\d+" | head -1)
+CHARTER="Product/kfsp_flutter_migration/docs/build_reports/${PHASE}_project_charter.md"
+if [ -f "$CHARTER" ]; then
+  echo "✅ Charter found — verify deliverables match"
+  grep -A 20 "Deliverables" "$CHARTER" | head -20
+else
+  echo "⚠️ No Project Charter — build not mapped to project goals"
+fi
+```
+
+## CHECK 14: 📔 Dev Journal Entries (2026-03-15+)
+
+**Gate:** ⚠️ Warning — code changes SHOULD have corresponding journal entries.
+
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+ENTRIES=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+echo "📔 Dev journal entries (${MONTH}): $ENTRIES"
+[ "$ENTRIES" -eq 0 ] && echo "⚠️ No journal entries — decisions not documented"
+```
+
+**Severity:** ⚠️ Warning — nhắc agent ghi journal, không block build.
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief

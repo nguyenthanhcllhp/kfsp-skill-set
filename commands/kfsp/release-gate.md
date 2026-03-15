@@ -201,7 +201,46 @@ cat "$SOURCE/ios/Runner/Info.plist" | head -50
 cat "$SOURCE/android/app/build.gradle" | grep -i "sdk\|version\|sign"
 ```
 
-## GATE 10: 🚀 Rollback Readiness
+## GATE 10: 📋 Project Charter Complete (2026-03-15+)
+
+```bash
+# Find all phase charters
+find "Product/kfsp_flutter_migration/docs/build_reports/" -name "*charter*" 2>/dev/null
+# Verify current phase charter has all 6 dimensions
+PHASE=$(grep -r "Phase hiện tại" memory/flutter-migration.md 2>/dev/null | grep -oP "P\d+" | head -1)
+CHARTER="Product/kfsp_flutter_migration/docs/build_reports/${PHASE}_project_charter.md"
+if [ -f "$CHARTER" ]; then
+  DIMS=0
+  for dim in "Goals" "Scope" "Deliverables" "Success Criteria" "Stakeholders" "Resources"; do
+    grep -q "$dim" "$CHARTER" && DIMS=$((DIMS + 1))
+  done
+  echo "Charter: $DIMS/6 dimensions complete"
+else
+  echo "❌ No charter for $PHASE"
+fi
+```
+
+**Gate criteria:**
+- Charter exists with 6/6 dimensions → ✅
+- Charter exists but incomplete → ⚠️ (-3 points per missing dimension)
+- No charter → ❌ (-10 points)
+
+## GATE 11: 📔 Dev Journal Coverage (2026-03-15+)
+
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+TOTAL=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+DECISIONS=$(grep -rl "decision\|Decision" "$JOURNAL_DIR/$MONTH/" 2>/dev/null | wc -l | tr -d ' ')
+echo "Journal: $TOTAL entries, $DECISIONS decisions"
+```
+
+**Gate criteria:**
+- ≥5 entries with ≥1 decision → ✅
+- 1-4 entries → ⚠️ (-3 points)
+- 0 entries → ⚠️ (-5 points)
+
+## GATE 12: 🚀 Rollback Readiness
 
 - [ ] Previous version available for rollback
 - [ ] Feature flags for new features (can disable remotely)
@@ -229,6 +268,8 @@ cat "$SOURCE/android/app/build.gradle" | grep -i "sdk\|version\|sign"
 | 🔗 Surface Contracts | ✅/⚠️ | X/10 | [summary] |
 | 📝 Docs | ✅/⚠️ | X/10 | [summary] |
 | 🍎🤖 Store (if checked) | ✅/❌ | X/10 | [summary] |
+| 📋 Charter | ✅/⚠️ | X/10 | [summary] |
+| 📔 Journal | ✅/⚠️ | X/10 | [summary] |
 | 🚀 Rollback | ✅/⚠️ | X/10 | [summary] |
 
 ## Overall: [X]/100

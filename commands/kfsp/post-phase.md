@@ -51,6 +51,60 @@ Product/kfsp_flutter_migration/docs/11_CLEAN_SLATE_PLAN.md
 | 3 | TradingView chart 30 mã VN30 |
 | 4 | FA 13 tabs + stock detail |
 
+## Step 0.5: 📋 Project Charter Verification (BẮT BUỘC — 2026-03-15+)
+
+**GATE:** Phase KHÔNG ĐƯỢC close nếu chưa có Project Charter hoàn chỉnh 6/6 chiều.
+
+```bash
+CHARTER="Product/kfsp_flutter_migration/docs/build_reports/P${PHASE}_project_charter.md"
+if [ -f "$CHARTER" ]; then
+  echo "✅ Charter found: $CHARTER"
+  # Verify all 6 dimensions present
+  for dim in "Goals" "Scope" "Deliverables" "Success Criteria" "Stakeholders" "Resources"; do
+    grep -q "$dim" "$CHARTER" && echo "  ✅ $dim" || echo "  ❌ MISSING: $dim"
+  done
+else
+  echo "❌ NO PROJECT CHARTER — must create before closing phase"
+  echo "File expected: $CHARTER"
+fi
+```
+
+**6 chiều bắt buộc:**
+
+| # | Chiều | Verify |
+|---|-------|--------|
+| 1 | **Goals** | Mục tiêu cụ thể, đo lường được — ĐÃ ĐẠT? |
+| 2 | **Scope** | In scope / out of scope — có scope creep không? |
+| 3 | **Deliverables** | Screens, widgets, APIs — đã giao đủ? |
+| 4 | **Success Criteria** | Pass/fail — kết quả? |
+| 5 | **Stakeholders** | PM approved? Dev confirmed? |
+| 6 | **Resources** | Effort thực tế vs estimate? |
+
+**Nếu thiếu charter → TẠO NGAY trước khi tiếp tục close phase.**
+
+## Step 0.6: 📔 Dev Journal Compliance Check
+
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+# Check for phase-start entry
+grep -rl "phase-start\|Phase.*Start" "$JOURNAL_DIR/$MONTH/" 2>/dev/null | head -5
+# Check for decision entries during this phase
+grep -rl "decision\|Decision" "$JOURNAL_DIR/$MONTH/" 2>/dev/null | wc -l
+# Check for any entries at all
+ENTRIES=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l)
+echo "Dev journal entries this month: $ENTRIES"
+```
+
+**Required entries for phase close:**
+- [ ] `phase-start` entry (with charter summary)
+- [ ] At least 1 `decision` entry per major technical choice
+- [ ] `bug-fix` entries for all bugs found and fixed
+- [ ] `pm-feedback` entries for all Thanh feedback
+- [ ] `phase-complete` entry (results vs plan) — CREATE NOW
+
+**Nếu thiếu entries → agent PHẢI bổ sung trước khi close phase.**
+
 ## Step 1: Build Verification ✅
 
 Confirm với user:
@@ -147,6 +201,23 @@ Tạo hoặc update phase summary:
 | 4. Source Synced | ✅/❌ | [copies synced] |
 | 5. Impact Sweep | ✅/⚠️ | [findings count] |
 | 6. Phase Archived | ✅ | [summary] |
+
+## Project Charter Status
+| Chiều | Status | Notes |
+|-------|--------|-------|
+| Goals | ✅/❌ | [achieved?] |
+| Scope | ✅/⚠️ | [scope creep?] |
+| Deliverables | ✅/❌ | [all delivered?] |
+| Success Criteria | ✅/❌ | [met?] |
+| Stakeholders | ✅/❌ | [PM approved?] |
+| Resources | ✅/⚠️ | [effort vs estimate] |
+
+## Dev Journal Compliance
+- phase-start entry: ✅/❌
+- decision entries: X found
+- bug-fix entries: X found
+- pm-feedback entries: X found
+- phase-complete entry: ✅/❌
 
 ## Ready for Phase [N+1]: YES ✅ / NO ❌
 [if NO, list blockers]

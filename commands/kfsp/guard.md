@@ -247,6 +247,50 @@ grep -rn "'Tat ca'\|'Ngan hang'\|'Co phieu'\|'Nganh'\|'Khoi luong'\|'Gia tri'\|'
 - Code/API field names: no-diacritics acceptable
 - Flag: any user-visible string without diacritics → 🟡 WARN
 
+## Guardian Check 9: 📋 Phase-as-Project Compliance (2026-03-15+)
+
+```bash
+# Check if current phase has a Project Charter
+PHASE=$(grep -r "Phase hiện tại" memory/flutter-migration.md 2>/dev/null | grep -oP "P\d+" | head -1 || echo "unknown")
+CHARTER="Product/kfsp_flutter_migration/docs/build_reports/${PHASE}_project_charter.md"
+[ -f "$CHARTER" ] && echo "✅ Charter: $CHARTER" || echo "❌ NO CHARTER for $PHASE"
+
+# Check 6 dimensions in charter
+if [ -f "$CHARTER" ]; then
+  for dim in "Goals" "Scope" "Deliverables" "Success Criteria" "Stakeholders" "Resources"; do
+    grep -q "$dim" "$CHARTER" && echo "  ✅ $dim" || echo "  ❌ $dim MISSING"
+  done
+fi
+```
+
+Flag:
+- Phase has no charter → 🔴 CRITICAL (-10 points)
+- Charter missing dimensions → ⚠️ WARNING (-3 per dimension)
+
+## Guardian Check 10: 📔 Dev Journal Compliance (2026-03-15+)
+
+```bash
+JOURNAL_DIR="Product/kfsp_flutter_migration/journal"
+MONTH=$(date +%Y-%m)
+
+# Count entries this month
+ENTRIES=$(find "$JOURNAL_DIR/$MONTH/" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+echo "Journal entries this month: $ENTRIES"
+
+# Check for required entry types
+DECISIONS=$(grep -rl "decision\|Decision\|🔷" "$JOURNAL_DIR/$MONTH/" 2>/dev/null | wc -l | tr -d ' ')
+INCIDENTS=$(grep -rl "incident\|Incident\|🔴" "$JOURNAL_DIR/$MONTH/" 2>/dev/null | wc -l | tr -d ' ')
+echo "Decisions: $DECISIONS, Incidents: $INCIDENTS"
+
+# Check INDEX.md exists and is current
+[ -f "$JOURNAL_DIR/INDEX.md" ] && echo "✅ INDEX exists" || echo "❌ INDEX missing"
+```
+
+Flag:
+- 0 journal entries for current phase → 🔴 CRITICAL (-10 points)
+- No decision entries but code changed → ⚠️ WARNING (-5 points)
+- INDEX.md missing or outdated → ⚠️ WARNING (-3 points)
+
 ## Nếu `--deep` mode:
 
 Thêm các check:

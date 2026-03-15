@@ -161,6 +161,20 @@ Based on item count:
 - 16-30 items: ~30 phút
 - 30+: ~45-60 phút (recommend split sessions)
 
+## Step 6: Map to Project Charter (2026-03-15+)
+
+If a Project Charter exists for the current phase:
+```bash
+PHASE=$(grep -r "Phase hiện tại" memory/flutter-migration.md 2>/dev/null | grep -oP "P\d+" | head -1)
+CHARTER="Product/kfsp_flutter_migration/docs/build_reports/${PHASE}_project_charter.md"
+[ -f "$CHARTER" ] && echo "✅ Mapping test items to charter deliverables"
+```
+
+**Map each test item to charter deliverables:**
+- Test item covers Deliverable X → tag as "Charter: X"
+- Deliverable without test coverage → ⚠️ FLAG: "Deliverable [X] has no test items"
+- Add charter coverage summary to test brief header
+
 ## Integration with Build Report
 
 **BẮT BUỘC:** Mỗi build report PHẢI có section `🧪 Test Checklist cho Thanh`.
