@@ -280,6 +280,55 @@ echo "📔 Dev journal entries (${MONTH}): $ENTRIES"
 
 **Severity:** ⚠️ Warning — nhắc agent ghi journal, không block build.
 
+## CHECK 15: 🧪 Unit Test First — TDD Gate (2026-03-19+)
+
+**Gate:** ❌ FAIL nếu feature mới KHÔNG có unit test.
+
+**Rule:** Mọi feature/widget MỚI hoặc SỬA ĐỔI PHẢI có unit test TRƯỚC KHI dev.
+
+**Workflow bắt buộc:**
+```
+1. Viết test (expected behavior) → test FAIL (chưa có code)
+2. Viết code → test PASS
+3. Refactor → test vẫn PASS
+```
+
+**Check:**
+```bash
+# Đếm test files vs source files cho features đã thay đổi
+TESTS=$(find "$SOURCE/test" -name "*_test.dart" 2>/dev/null | wc -l | tr -d ' ')
+SRC=$(find "$SOURCE/lib/screens" -name "*.dart" 2>/dev/null | wc -l | tr -d ' ')
+echo "🧪 Tests: $TESTS files, Source: $SRC files (ratio: $(echo "scale=1; $TESTS * 100 / $SRC" | bc)%)"
+```
+
+**Criteria:**
+- Feature mới PHẢI có ít nhất 1 test file tương ứng
+- Widget test cho UI, unit test cho logic/model/provider
+- Agent KHÔNG ĐƯỢC báo "hoàn thành" feature mà chưa có test
+- Test phải cover: happy path + edge cases (null, empty, error)
+
+## CHECK 16: 📦 Build Deliverable Gate (2026-03-19+)
+
+**Gate:** ❌ FAIL nếu build KHÔNG có deliverable cho PM.
+
+**Rule:** Mọi build PHẢI có deliverable rõ ràng giao cho PM, bao gồm:
+
+1. **Bảng thay đổi** — liệt kê CỤ THỂ đã làm gì (files, widgets, logic)
+2. **Screenshot/evidence** — chụp simulator hoặc mô tả kết quả
+3. **So sánh trước/sau** — nếu sửa UI: before vs after
+4. **Bugs đã biết** — liệt kê rõ, không giấu
+5. **Cần test gì** — chỉ rõ cho PM biết cần kiểm tra mục nào
+
+**Agent KHÔNG ĐƯỢC:**
+- Build xong rồi hỏi "anh muốn em làm gì tiếp"
+- Build xong chỉ nói "build thành công" mà không giao deliverable
+- Chờ PM hỏi mới báo cáo
+
+**Agent PHẢI:**
+- TỰ ĐỘNG giao deliverable ngay sau build
+- Format rõ ràng: bảng, bullet points, screenshots
+- Ghi rõ "Cần anh test: ..." ở cuối
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief
@@ -291,4 +340,6 @@ echo "📔 Dev journal entries (${MONTH}): $ENTRIES"
 7. **Vietnamese text:** All user-facing text must use proper diacritics
 8. **Simulator testing:** Agent CANNOT self-navigate iOS Simulator. After build+install: ASK Thanh to tap/navigate → screenshot → verify → send self-test report
 9. **Git remote safety:** NEVER push/pull/rename any git remote without Thanh's explicit permission. NEVER assume GitHub = GitLab. Always confirm: remote name + URL + branch → wait for OK
+10. **Unit Test First:** Mọi feature mới PHẢI có unit test TRƯỚC KHI viết code. Test → Code → Refactor.
+11. **Build Deliverable:** Mọi build PHẢI tự động giao deliverable cho PM — bảng thay đổi, screenshots, bugs, cần test gì. KHÔNG chờ PM hỏi.
 </instructions>

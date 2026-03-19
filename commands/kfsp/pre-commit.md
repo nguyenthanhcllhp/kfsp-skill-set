@@ -217,4 +217,28 @@ Before any commit that might be pushed:
 - **NEVER** push without Thanh's explicit permission
 - **NEVER** assume GitHub = GitLab
 - If remote looks wrong → 🔴 FAIL — ask Thanh before proceeding
+
+## CHECK 9: 🧪 Unit Test Verification (2026-03-19+)
+
+**Gate:** ⚠️ Warning — code changes SHOULD have corresponding tests.
+
+```bash
+# Check: modified source files have matching test files
+git diff --cached --name-only | grep "lib/.*\.dart$" | while read -r src; do
+  test_file=$(echo "$src" | sed 's|lib/|test/|;s|\.dart$|_test.dart|')
+  if [ ! -f "$test_file" ]; then
+    echo "⚠️ No test for: $src"
+  fi
+done
+```
+
+**Rule:** Mọi feature/widget mới PHẢI có unit test. Agent KHÔNG ĐƯỢC commit code mà chưa có test tương ứng.
+
+## CHECK 10: 📦 Deliverable Check (2026-03-19+)
+
+**Gate:** ⚠️ Warning — commit SHOULD be part of a deliverable.
+
+Agent PHẢI đảm bảo trước khi commit:
+- Đã có deliverable rõ ràng cho PM (bảng thay đổi, screenshots, cần test gì)
+- KHÔNG commit "work in progress" mà chưa giao deliverable
 </instructions>

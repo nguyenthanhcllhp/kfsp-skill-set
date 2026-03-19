@@ -311,4 +311,25 @@ Thêm các check:
 - KFSP Skills → GitHub `nguyenthanhcllhp/kfsp-skill-set`
 - Any mismatch → 🔴 CRITICAL
 - Any remote rename without Thanh's permission → 🔴 CRITICAL
+
+## Guardian Check 9: 🧪 Unit Test Coverage (2026-03-19+)
+
+**Check:**
+```bash
+TESTS=$(find "$SOURCE/test" -name "*_test.dart" 2>/dev/null | wc -l | tr -d ' ')
+SRC=$(find "$SOURCE/lib/screens" -name "*.dart" 2>/dev/null | wc -l | tr -d ' ')
+echo "🧪 Test coverage: $TESTS test files / $SRC source files"
+```
+
+**Criteria:**
+- 0 test files → 🔴 CRITICAL (-15 points)
+- Feature mới mà không có test → 🔴 CRITICAL (-10 points)
+- **Rule:** Unit test TRƯỚC khi dev. Test → Code → Refactor.
+
+## Guardian Check 10: 📦 Build Deliverable Compliance (2026-03-19+)
+
+**Criteria:**
+- Build xong mà không giao deliverable cho PM → 🔴 CRITICAL (-10 points)
+- Deliverable thiếu screenshots / "cần test gì" → ⚠️ WARNING (-3 points)
+- **Rule:** Mọi build PHẢI tự động giao deliverable. KHÔNG chờ PM hỏi.
 </instructions>
