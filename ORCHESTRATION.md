@@ -187,6 +187,93 @@ Agent code → /kfsp:sweep → /kfsp:ux-parity → /kfsp:pre-commit → commit �
 
 ---
 
+## 3.3 Spec → Build → Verify: 2 Luồng Song Song
+
+> **Vấn đề cốt lõi:** Có spec, có build, nhưng KHÔNG CÓ AI so sánh kết quả với spec ban đầu.
+> Skills về test có đầy đủ trong CLAUDE.md, nhưng thực tế test ít được tạo vì thiếu CẦU NỐI.
+
+### Kiến trúc Test/QA — 2 Luồng Song Song:
+
+```
+                    📋 SPEC / PLAN
+                   (Source of Truth)
+                  ↙                ↘
+         DEV STREAM               QA STREAM
+         ┌──────────┐            ┌──────────────────┐
+         │ Step 1:  │            │ Step 0:          │
+    ┌────│ TDD —    │            │ Từ spec → sinh:  │
+    │    │ viết unit│            │ • Expected tests │
+    │    │ test     │            │ • Expected       │
+    │    │ TRƯỚC    │            │   changelog      │
+    │    └────┬─────┘            │ • Pass/fail      │
+    │         ↓                  │   criteria       │
+    │    ┌──────────┐            └────────┬─────────┘
+    │    │ Step 2:  │                     │
+    │    │ Code →   │                     │ (Lưu trữ —
+    │    │ Test     │                     │  chờ build)
+    │    │ PASS     │                     │
+    │    └────┬─────┘                     │
+    │         ↓                           │
+    │    ┌──────────┐                     │
+    │    │ Step 3:  │                     │
+    │    │ Build +  │                     │
+    │    │ Install  │                     │
+    │    └────┬─────┘                     │
+    │         ↓                           ↓
+    │    ┌─────────────────────────────────────┐
+    │    │        VERIFICATION GATE             │
+    │    │                                      │
+    │    │  build-verify:                       │
+    │    │  ├── CHECK 1-16: Automated gates    │
+    │    │  └── CHECK 17: Spec Compliance ←────│── So sánh actual vs expected
+    │    │                                      │
+    │    │  test-brief:                        │
+    │    │  ├── Step 0: Expected tests (từ QA) │
+    │    │  └── Step 1-5: Build → PM test      │
+    │    │                                      │
+    │    │  Spec Compliance Report:             │
+    │    │  ├── X/Y deliverables completed     │
+    │    │  ├── Unplanned work flagged          │
+    │    │  └── Missing items listed            │
+    │    └───────────────┬─────────────────────┘
+    │                    │
+    │              ┌─────┴──────┐
+    │              │  PASS?     │
+    │              └─────┬──────┘
+    │              YES ↙     ↘ NO
+    │         ┌──────────┐  ┌──────────────┐
+    │         │ test-brief│  │ Bug Loop:    │
+    │         │ → PM test │  │ bug-log →    │
+    │         └──────────┘  │ fix → verify │
+    │                       │ (max 3 loops)│
+    └───────────────────────│ rồi back ↑   │
+                            └──────────────┘
+```
+
+### Bug Loop Control (Build ⇄ Dev):
+```
+Build FAIL → bug-log --log (BUG-YYYYMMDD-NN)
+    ↓
+Dev fix → sweep → pre-commit → commit
+    ↓
+Build lại → build-verify
+    ↓
+Vẫn FAIL? → Loop lại (max 3 lần)
+    ↓
+Quá 3 lần → incident-review → escalate PM
+```
+
+### Áp dụng Cross-Domain:
+
+| Domain | Spec | Dev Stream | QA Stream | Verify |
+|--------|------|------------|-----------|--------|
+| **Product** | Feature spec, GSD plan | TDD → code → build | Unit test, functional test | Screenshot, build-verify |
+| **Marketing** | Campaign brief | Content → design → publish | Audience check, message check | Analytics, A/B results |
+| **Sales** | Deal playbook | Qualify → propose → negotiate | Criteria check, pricing check | Win/loss review |
+| **HR** | Job spec | Source → screen → interview | Skills check, culture check | Hiring decision review |
+
+---
+
 ## 4. GSD ↔ KFSP Mapping Chi Tiết
 
 ### 4.1 GSD Commands → KFSP Skills (Auto-Trigger)

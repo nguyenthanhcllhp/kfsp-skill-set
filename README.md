@@ -1,10 +1,27 @@
-# 🥋 KFSP Skill Set v3.2
+# 🥋 KFSP Skill Set v3.3
 
 **17 production-grade skills for agent-driven product development.**
 
 Build apps from zero to store with confidence — for both human teams and AI agent swarms.
 
-## What's New in v3.2
+### 📖 Deep-Dive Documentation
+| Document | Language | What it covers |
+|----------|----------|---------------|
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | English | Holistic architecture — fractal model, 5-tier protection, 6 project stages, Test/QA flow, 20 skills, cross-domain translation, agent model |
+| **[OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)** | Vietnamese | Internal operations — 16 sections, trigger table, enforcement chain, workflow templates, bug flow, case study P2.5 |
+| **[Interactive Diagram](docs/architecture-diagram.html)** | Vietnamese | Onboarding HTML — 3 tabs: flow drilldown, skill groups, case study |
+| **[ORCHESTRATION.md](ORCHESTRATION.md)** | Vietnamese | GSD + Ralph integration, spawn rules, 10-layer enforcement |
+
+## What's New in v3.3
+
+### v3.3 (2026-03-20)
+- **ARCHITECTURE.md** — Holistic skill architecture document (English, GitHub-facing)
+- **OPERATIONS_GUIDE.md** — Internal operations guide (Vietnamese, 16 sections)
+- **Interactive diagram** — HTML onboarding with flow drilldown + case study
+- **Spec Compliance Check** — `build-verify` CHECK 17: compare build vs plan deliverables
+- **Test from Spec** — `test-brief` Step 0: generate expected test cases FROM spec BEFORE build
+- **Verification Flow** — `ORCHESTRATION.md` + 2-stream Spec→Build→Verify architecture
+- **Cross-domain** — All skills now include domain translation (product → marketing → sales → HR)
 
 ### v3.2 (2026-03-15)
 - **ORCHESTRATION.md** — Master integration guide: KFSP + GSD + Ralph workflow
@@ -31,7 +48,11 @@ Build apps from zero to store with confidence — for both human teams and AI ag
 kfsp-skill-set/
 ├── README.md                          ← You are here
 ├── INSTALL.md                         ← Installation + verification guide
+├── ARCHITECTURE.md                    ← Holistic architecture (English, deep-dive)
+├── OPERATIONS_GUIDE.md                ← Internal operations guide (Vietnamese, SSOT)
 ├── ORCHESTRATION.md                   ← GSD + Ralph integration (BẮT BUỘC đọc)
+├── docs/
+│   └── architecture-diagram.html      ← Interactive onboarding diagram
 ├── commands/kfsp/                     ← 20 slash command files (/kfsp:*)
 │   ├── help.md
 │   ├── guard.md                       ← T1: Continuous guardian
@@ -125,7 +146,7 @@ git clone https://github.com/nguyenthanhcllhp/kfsp-skill-set.git /tmp/kfsp-skill
   && cp /tmp/kfsp-skill-set/commands/kfsp/*.md ~/.claude/commands/kfsp/ \
   && mkdir -p ~/.claude/agents/ \
   && cp /tmp/kfsp-skill-set/agents/kfsp/*.md ~/.claude/agents/ 2>/dev/null \
-  && echo "✅ KFSP Skill Set v3.2 installed ($(ls ~/.claude/commands/kfsp/*.md | wc -l | tr -d ' ') commands)."
+  && echo "✅ KFSP Skill Set v3.3 installed ($(ls ~/.claude/commands/kfsp/*.md | wc -l | tr -d ' ') commands)."
 ```
 
 ### Verify
@@ -177,7 +198,7 @@ See `INSTALL.md` for detailed installation + verification guide.
 | Release Gate | `/kfsp:release-gate` | 12 gates, score /100, Go/No-Go. Charter + journal check. |
 | Test Brief | `/kfsp:test-brief` | Generates HTML test checklist for PM after each build. |
 | Bug Log | `/kfsp:bug-log` | Structured bug logging from PM testing. Track resolution. |
-| Build Verify | `/kfsp:build-verify` | 14 automated checks. Gate before handing build to PM. |
+| Build Verify | `/kfsp:build-verify` | 17 automated checks incl. Spec Compliance. Gate before PM. |
 
 ### T2 🔧 Code Integrity
 
@@ -214,6 +235,8 @@ These rules are embedded across multiple skills for automatic enforcement:
 | **Dev Journal Compliance** | 8 skills — full chain | v3.2 |
 | **Number Formatting** | build-verify, pre-commit | v3.2 |
 | **Test Case Coverage** | build-verify, pre-commit, release-gate | v3.2 |
+| **Spec Compliance** (build vs plan) | build-verify (CHECK 17), test-brief (Step 0) | v3.3 |
+| **Test from Spec** (QA stream) | test-brief (Step 0), build-verify | v3.3 |
 
 ### 8-Layer Enforcement Chain
 
@@ -247,7 +270,8 @@ Every skill in the chain checks for charter, journal, and rule compliance.
 ### Chain Workflows
 
 ```
-New Feature:   pre-mortem → [develop] → sweep → ux-parity → build-verify → test-brief
+New Feature:   pre-mortem → test-brief Step 0 (spec→expected tests) → [TDD→develop]
+               → sweep → ux-parity → build-verify (CHECK 17: spec compliance) → test-brief → PM test
 Bug Fix:       [fix] → sweep → pre-commit → commit → bug-log --resolve
 Release:       sentinel --baseline → [develop] → sentinel --compare → release-gate
 Phase Close:   post-phase N → guard → sync-check → doc-pilot --status
@@ -380,6 +404,7 @@ Skills that work without changes: `pre-mortem`, `dev-journal`, `incident-review`
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v3.3 | 2026-03-20 | ARCHITECTURE.md, OPERATIONS_GUIDE.md, interactive diagram, Spec Compliance, Test from Spec |
 | v3.2 | 2026-03-15 | ORCHESTRATION.md, Phase-as-Project, Dev Journal Compliance, Number Formatting |
 | v3.0 | 2026-03-13 | +4 skills (17 total), 6 enforcement rules, simulator testing, git safety |
 | v2.0 | 2026-03-10 | Agent format, distributed orchestration, parallel execution |

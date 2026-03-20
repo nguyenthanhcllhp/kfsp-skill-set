@@ -329,6 +329,71 @@ echo "🧪 Tests: $TESTS files, Source: $SRC files (ratio: $(echo "scale=1; $TES
 - Format rõ ràng: bảng, bullet points, screenshots
 - Ghi rõ "Cần anh test: ..." ở cuối
 
+## CHECK 17: 📋 Spec Compliance — So sánh Build vs Plan (2026-03-20+)
+
+**Gate:** ⚠️ Warning — mọi build PHẢI được so sánh với plan/spec gốc.
+
+**Vấn đề giải quyết:** Agent build xong nhưng KHÔNG AI so sánh kết quả với spec ban đầu.
+Deliverables bị thiếu, bị lệch, hoặc làm thừa mà không ai biết.
+
+**Quy trình:**
+```
+PLAN/SPEC (source of truth)
+    ↓
+Liệt kê deliverables kỳ vọng (từ plan)
+    ↓
+So sánh với deliverables thực tế (từ code/git)
+    ↓
+Spec Compliance Report
+```
+
+**Check:**
+```bash
+# 1. Tìm plan file gần nhất
+PLAN=$(find .planning/ -name "PLAN.md" -path "*phase*" 2>/dev/null | sort -r | head -1)
+if [ -z "$PLAN" ]; then
+  PLAN=$(find . -name "*plan*.md" -o -name "*charter*.md" 2>/dev/null | sort -r | head -1)
+fi
+
+if [ -n "$PLAN" ]; then
+  echo "📋 Plan found: $PLAN"
+  # Extract deliverables/tasks from plan
+  grep -E "^\s*-\s*\[" "$PLAN" 2>/dev/null | head -20
+  echo "---"
+  # Compare with git changes
+  echo "📦 Files changed in this build:"
+  git diff --name-only HEAD~5..HEAD -- lib/ 2>/dev/null | head -30
+else
+  echo "⚠️ No plan file found — build not mapped to spec"
+fi
+```
+
+**Spec Compliance Report format:**
+```markdown
+## 📋 Spec Compliance Report
+
+| # | Plan Item | Status | Evidence |
+|---|-----------|--------|----------|
+| 1 | [deliverable từ plan] | ✅ Done / ⚠️ Partial / ❌ Missing | [file hoặc commit] |
+| 2 | ... | ... | ... |
+
+**Coverage:** X/Y items completed (Z%)
+**Unplanned work:** [liệt kê việc làm thêm ngoài plan]
+**Missing:** [liệt kê deliverables trong plan nhưng chưa làm]
+```
+
+**Criteria:**
+- Coverage ≥ 80% → ✅ PASS
+- Coverage 50-79% → ⚠️ WARN (liệt kê missing items)
+- Coverage < 50% → ❌ FAIL (build không đáp ứng spec)
+- Có unplanned work → ⚠️ NOTE (ghi nhận, không block)
+
+**Cross-domain translation:**
+- Product dev: "Plan item" = feature/screen/widget từ GSD plan
+- Marketing: "Plan item" = campaign element/content piece từ brief
+- Sales: "Plan item" = qualification criteria từ sales playbook
+- HR: "Plan item" = process step từ hiring plan
+
 ## Integration Rules
 
 1. **GATE:** Build verify MUST pass before creating test-brief

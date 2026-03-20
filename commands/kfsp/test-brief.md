@@ -40,6 +40,82 @@ Test Brief tự động tạo checklist dựa trên deliverables của build ses
 - `--from-changes` → scan recent git changes
 - Rỗng → tìm build report gần nhất trong `docs/build_reports/`
 
+## Step 0: Sinh Test Cases TỪ Spec (TRƯỚC KHI BUILD)
+
+> **Triết lý:** Test cases PHẢI được sinh ra từ SPEC/PLAN, KHÔNG phải từ code đã viết.
+> Nếu test cases chỉ dựa trên "agent nhớ gì đã làm" → dễ bỏ sót deliverables.
+
+### Khi nào chạy Step 0?
+- **Trước khi bắt đầu dev** (trong giai đoạn PLAN) → tạo "Expected Test Cases"
+- **Sau khi build xong** (trong giai đoạn BUILD/TEST) → so sánh actual vs expected
+
+### Quy trình 2 luồng song song:
+```
+         SPEC / PLAN
+        ↙           ↘
+  DEV STREAM        QA STREAM
+  ┌──────────┐      ┌──────────────────────┐
+  │ TDD:     │      │ Step 0:              │
+  │ viết     │      │ Từ spec → sinh       │
+  │ unit     │      │ expected test cases  │
+  │ test →   │      │ + expected changelog │
+  │ code →   │      │                      │
+  │ build    │      │ (TRƯỚC khi build)    │
+  └────┬─────┘      └──────────┬───────────┘
+       ↓                       ↓
+    BUILD                  VERIFY
+       ↓                       ↓
+  actual output    so sánh actual vs expected
+       ↓                       ↓
+    ┌──────────────────────────────┐
+    │  Spec Compliance Report      │
+    │  Coverage: X/Y items (Z%)    │
+    └──────────────────────────────┘
+```
+
+### Cách sinh Expected Test Cases từ Spec:
+```bash
+# 1. Tìm plan/spec file
+PLAN=$(find .planning/ -name "PLAN.md" -path "*phase*" 2>/dev/null | sort -r | head -1)
+CHARTER=$(find . -path "*/build_reports/*charter*" 2>/dev/null | sort -r | head -1)
+SPEC="$PLAN"
+[ -z "$SPEC" ] && SPEC="$CHARTER"
+
+if [ -n "$SPEC" ]; then
+  echo "📋 Spec found: $SPEC"
+else
+  echo "⚠️ No spec/plan found — test cases will be from code changes only"
+fi
+```
+
+### Từ mỗi spec item → sinh test case:
+| Spec Item | → Test Case | Priority |
+|-----------|------------|----------|
+| "Screen X hiển thị data Y" | Mở screen X → verify data Y | P0 |
+| "Tap stock → navigate chart" | Tap stock → verify chart page opens | P0 |
+| "Dark mode support" | Switch dark mode → verify colors | P1 |
+| "Error state khi API fail" | Disconnect → verify error UI | P1 |
+| "Loading shimmer" | Slow network → verify shimmer | P2 |
+
+### Expected Changelog (từ spec):
+```markdown
+## Expected Changelog (sinh từ Plan)
+- [ ] Screen X: thêm data column Y
+- [ ] Widget Z: support dark mode
+- [ ] Navigation: X → Y drill-down
+- [ ] API: connect endpoint /abc
+```
+
+Sau khi build xong, so sánh Expected Changelog vs Actual Changes (git diff) → **Spec Compliance Report**.
+
+### Cross-domain:
+- **Product:** Spec = feature spec / GSD plan → Test = UI/functional test cases
+- **Marketing:** Spec = campaign brief → Test = launch checklist (audience, channel, timing)
+- **Sales:** Spec = deal criteria → Test = qualification checklist
+- **HR:** Spec = job requirements → Test = interview evaluation rubric
+
+---
+
 ## Step 1: Collect Deliverables
 
 ### From Build Report:
