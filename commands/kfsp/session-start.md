@@ -36,12 +36,26 @@ KFSP Session Start — Quy trình bắt đầu phiên làm việc mới.
 <instructions>
 ## Step 0: Read Context + Detect Tools
 
-### 0a: Đọc memory:
+### 0a: Đọc memory + plan files:
 ```
 Read: memory/MEMORY.md
 Read: memory/flutter-migration.md
 ```
 Ghi nhận: state, source path, known bugs.
+
+### 0a2: Đọc plan files (SOURCE OF TRUTH — 2026-03-20+)
+```bash
+# Tìm plan files trong project
+find . -path "*/docs/plans/*.md" -o -path "*/.planning/phases/*/PLAN.md" 2>/dev/null | sort -r | head -10
+```
+
+Đọc plan file mới nhất → ghi nhận:
+- Phase/task hiện tại
+- Tasks đã done vs đang làm vs chưa làm
+- Context/decisions quan trọng
+
+**Quy tắc:** File plan > memory > conversation context.
+Nếu memory nói "Task 3 đang làm" nhưng plan file nói "Task 3 ✅ Done" → tin plan file.
 
 ### 0b: Detect Orchestration Tools (BẮT BUỘC)
 ```bash

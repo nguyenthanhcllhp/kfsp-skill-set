@@ -128,6 +128,21 @@ Tạo regression checklist và hỏi user confirm từng item.
 
 ## Step 3: Update Docs 📝
 
+### 3-pre: docs/plans/ — Cập nhật Plan File (SOURCE OF TRUTH — 2026-03-20+)
+
+```bash
+# Tìm plan file cho phase vừa xong
+find . -path "*/docs/plans/*P${PHASE}*" -o -path "*/docs/plans/*p${PHASE}*" 2>/dev/null
+```
+
+Cập nhật:
+- Tất cả tasks → ✅ Done (hoặc ghi lý do chưa done)
+- Last updated date
+- Notes/decisions phát sinh
+- Final status line
+
+**BẮT BUỘC:** Plan file là source of truth. Nếu plan file không khớp memory → sửa memory theo plan file.
+
 ### 3a: docs/08_HANDOFF_STATUS.md
 Cập nhật:
 - Phase completion: ✅ cho phase vừa xong
