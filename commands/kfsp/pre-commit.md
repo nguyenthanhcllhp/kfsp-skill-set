@@ -40,6 +40,9 @@ Agent PHẢI thực hiện 2 bước khi chạy pre-commit:
 | 8 | 🇻🇳 Vietnamese diacritics | PASS | ... |
 | 9 | 🔢 Number formatting | PASS | ... |
 | 10 | 📝 Changelog vs preprod | Generated | ... |
+| 11 | 🧪 Unit test coverage | ≥80% files | lib/*.dart → test/*_test.dart |
+| 12 | 🧪 Flutter test pass | ALL PASS | `flutter test` |
+| 13 | 🧪 Test-code ratio | ≥0.3 (logic) | test/ vs lib/ LOC |
 ```
 
 ### Bước 2 — SAU KHI chạy: Lôi lại bảng + điền kết quả thực tế
@@ -50,7 +53,10 @@ Agent PHẢI thực hiện 2 bước khi chạy pre-commit:
 | 1 | 🎨 Hardcoded colors MỚI | 0 | 0 | ✅ PASS |
 | 2 | 🎨 Hardcoded fontSize MỚI | 0 | 2 | ❌ FAIL |
 | ... |
-→ Tổng: X/10 PASS, Y FAIL → cần fix / OK to commit
+| 11 | 🧪 Unit test coverage | ≥80% | 75% (15/20) | ⚠️ WARN |
+| 12 | 🧪 Flutter test pass | ALL PASS | 42 pass, 0 fail | ✅ PASS |
+| 13 | 🧪 Test-code ratio | ≥0.3 | 0.25 | ⚠️ WARN |
+→ Tổng: X/13 PASS, Y FAIL → cần fix / OK to commit
 ```
 
 Agent KHÔNG ĐƯỢC bỏ qua bước 1 hoặc bước 2. PM cần thấy CẢ HAI bảng.
@@ -280,6 +286,9 @@ done 2>/dev/null | head -20
 | 4 | 📦 Imports | ✅/❌ | N broken |
 | 5 | 🏗️ Conventions | ✅/ℹ️ | N suggestions |
 | 6 | 🧹 Dead Code | ✅/ℹ️ | N candidates |
+| 7 | 🧪 Unit Test Coverage | ✅/🔴/⚠️ | X/Y files have tests (Z%) |
+| 8 | 🧪 Flutter Test Pass | ✅/🔴 | X passed, Y failed, Z skipped |
+| 9 | 🧪 Test-Code Ratio | ✅/⚠️ | ratio: 0.XX (target ≥0.3) |
 
 ## Design System Compliance Detail
 | File | Color(0x | Colors.* | fontSize | EdgeInsets | Verdict |
@@ -363,21 +372,164 @@ Before any commit that might be pushed:
 - **NEVER** assume GitHub = GitLab
 - If remote looks wrong → 🔴 FAIL — ask Thanh before proceeding
 
-## CHECK 9: 🧪 Unit Test Verification (2026-03-19+)
+## CHECK 9: 🧪 Unit Test Coverage (2026-03-20+)
 
-**Gate:** ⚠️ Warning — code changes SHOULD have corresponding tests.
+**Gate:**
+- Pure logic files (models, utils, providers, controllers): 🔴 **BLOCK** nếu không có test
+- Widget/screen files: ⚠️ **WARN** nếu không có widget test (flag, không block)
+- Token/theme files: ⚠️ **WARN** nếu không có test (token values nên được test)
+
+### Step 1: Map lib/ files → test/ files
+```bash
+TOTAL_SRC=0
+TOTAL_WITH_TEST=0
+BLOCK_LIST=""
+WARN_LIST=""
+
+# Check all changed .dart files in lib/
+git diff --cached --name-only | grep "^lib/.*\.dart$" | grep -v "generated/" | while read -r src; do
+  TOTAL_SRC=$((TOTAL_SRC + 1))
+
+  # Map: lib/foo/bar.dart → test/foo/bar_test.dart
+  test_file=$(echo "$src" | sed 's|^lib/|test/|;s|\.dart$|_test.dart|')
+
+  # Also check alternative patterns: test/foo/bar_widget_test.dart
+  test_alt=$(echo "$src" | sed 's|^lib/|test/|;s|\.dart$|_widget_test.dart|')
+
+  if [ -f "$test_file" ] || [ -f "$test_alt" ]; then
+    TOTAL_WITH_TEST=$((TOTAL_WITH_TEST + 1))
+  else
+    # Classify: logic file (BLOCK) vs widget file (WARN)
+    if echo "$src" | grep -qE "(model|provider|controller|service|util|helper|repository|notifier|extension)"; then
+      BLOCK_LIST="$BLOCK_LIST\n🔴 BLOCK — no test: $src → expected: $test_file"
+    elif echo "$src" | grep -qE "(theme|token|color|style|spacing|animation|shadow|button)"; then
+      WARN_LIST="$WARN_LIST\n⚠️ WARN — no test: $src (token/theme file nên có test)"
+    else
+      WARN_LIST="$WARN_LIST\n⚠️ WARN — no test: $src (widget/screen — nên có widget test)"
+    fi
+  fi
+done
+
+# Report coverage
+if [ "$TOTAL_SRC" -gt 0 ]; then
+  PCT=$((TOTAL_WITH_TEST * 100 / TOTAL_SRC))
+  echo "🧪 Test coverage: $TOTAL_WITH_TEST/$TOTAL_SRC files have tests ($PCT%)"
+else
+  echo "🧪 No source files changed"
+fi
+
+# Show blockers and warnings
+[ -n "$BLOCK_LIST" ] && echo -e "$BLOCK_LIST"
+[ -n "$WARN_LIST" ] && echo -e "$WARN_LIST"
+```
+
+### Mapping Rules
+| Source pattern | Test expected | Severity nếu thiếu |
+|----------------|--------------|---------------------|
+| `lib/**/model*.dart` | `test/**/model*_test.dart` | 🔴 BLOCK |
+| `lib/**/provider*.dart` | `test/**/provider*_test.dart` | 🔴 BLOCK |
+| `lib/**/controller*.dart` | `test/**/controller*_test.dart` | 🔴 BLOCK |
+| `lib/**/service*.dart` | `test/**/service*_test.dart` | 🔴 BLOCK |
+| `lib/**/util*.dart`, `helper*.dart` | `test/**/*_test.dart` | 🔴 BLOCK |
+| `lib/**/repository*.dart` | `test/**/repository*_test.dart` | 🔴 BLOCK |
+| `lib/**/notifier*.dart` | `test/**/notifier*_test.dart` | 🔴 BLOCK |
+| `lib/**/*_screen.dart`, `*_page.dart` | `test/**/*_test.dart` | ⚠️ WARN |
+| `lib/**/*_widget.dart`, `*_card.dart` | `test/**/*_test.dart` | ⚠️ WARN |
+| `lib/**/theme*.dart`, `*_colors.dart` | `test/**/*_test.dart` | ⚠️ WARN |
+| `lib/generated/`, `lib/l10n/` | — | ✅ SKIP |
+
+**Rule:** Mọi feature/widget mới PHẢI có unit test. Agent KHÔNG ĐƯỢC commit code mà chưa có test tương ứng. Logic files (models, utils, providers) BLOCK commit nếu thiếu test.
+
+## CHECK 12: 🧪 Flutter Test Pass (2026-03-20+)
+
+**Gate:** 🔴 **BLOCK** — commit KHÔNG ĐƯỢC thực hiện nếu có test FAIL.
 
 ```bash
-# Check: modified source files have matching test files
-git diff --cached --name-only | grep "lib/.*\.dart$" | while read -r src; do
-  test_file=$(echo "$src" | sed 's|lib/|test/|;s|\.dart$|_test.dart|')
-  if [ ! -f "$test_file" ]; then
-    echo "⚠️ No test for: $src"
+echo "🧪 Running flutter test..."
+
+# Run flutter test (--no-pub for speed if packages already resolved)
+TEST_OUTPUT=$(flutter test --no-pub 2>&1)
+TEST_EXIT=$?
+
+if [ $TEST_EXIT -eq 0 ]; then
+  # Parse results
+  PASSED=$(echo "$TEST_OUTPUT" | grep -oE "[0-9]+ tests? passed" | head -1)
+  SKIPPED=$(echo "$TEST_OUTPUT" | grep -oE "[0-9]+ skipped" | head -1)
+  echo "✅ Flutter test PASS — $PASSED, $SKIPPED"
+else
+  FAILED=$(echo "$TEST_OUTPUT" | grep -oE "[0-9]+ tests? failed" | head -1)
+  PASSED=$(echo "$TEST_OUTPUT" | grep -oE "[0-9]+ tests? passed" | head -1)
+  echo "🔴 BLOCK — Flutter test FAIL: $FAILED, $PASSED"
+  echo ""
+  echo "Failed tests:"
+  echo "$TEST_OUTPUT" | grep -A2 "FAILED\|══.*Exception\|Expected:\|Actual:" | head -30
+fi
+```
+
+**Rule:**
+- `flutter test` PHẢI pass 100% trước khi commit
+- Nếu có test fail → fix test HOẶC fix code → chạy lại → pass → mới commit
+- Cho phép `--no-pub` để tăng tốc nếu packages đã resolved
+- Report format: `X tests passed, Y failed, Z skipped`
+
+**Severity:** 🔴 BLOCK — KHÔNG commit khi có test fail.
+
+## CHECK 13: 🧪 Test-Code Ratio (2026-03-20+)
+
+**Gate:** ⚠️ Warning — báo cáo tỷ lệ test/code, khuyến nghị cải thiện.
+
+```bash
+# Count lines in lib/ (excluding generated)
+LIB_LINES=$(find lib/ -name "*.dart" ! -path "*/generated/*" ! -path "*/l10n/*" -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+# Count lines in test/
+TEST_LINES=$(find test/ -name "*.dart" -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+
+# Calculate ratio
+if [ "$LIB_LINES" -gt 0 ]; then
+  # Use awk for float division
+  RATIO=$(awk "BEGIN {printf \"%.2f\", $TEST_LINES / $LIB_LINES}")
+  echo "🧪 Test-code ratio: $TEST_LINES test LOC / $LIB_LINES lib LOC = $RATIO"
+
+  # Evaluate
+  RATIO_INT=$(awk "BEGIN {printf \"%d\", $TEST_LINES * 100 / $LIB_LINES}")
+  if [ "$RATIO_INT" -lt 10 ]; then
+    echo "⚠️ Ratio < 0.10 — cần viết thêm test đáng kể"
+  elif [ "$RATIO_INT" -lt 30 ]; then
+    echo "⚠️ Ratio < 0.30 — chưa đạt target cho logic files"
+  else
+    echo "✅ Ratio ≥ 0.30 — đạt target"
   fi
+else
+  echo "🧪 No source files found in lib/"
+fi
+
+# Breakdown by folder (top-level)
+echo ""
+echo "📊 Test coverage by folder:"
+for dir in $(find lib/ -mindepth 1 -maxdepth 1 -type d ! -name "generated" ! -name "l10n"); do
+  DIR_NAME=$(basename "$dir")
+  DIR_LINES=$(find "$dir" -name "*.dart" -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+  TEST_DIR="test/$DIR_NAME"
+  if [ -d "$TEST_DIR" ]; then
+    TEST_DIR_LINES=$(find "$TEST_DIR" -name "*.dart" -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+    DIR_RATIO=$(awk "BEGIN {printf \"%.2f\", $TEST_DIR_LINES / ($DIR_LINES > 0 ? $DIR_LINES : 1)}")
+  else
+    TEST_DIR_LINES=0
+    DIR_RATIO="0.00"
+  fi
+  echo "  $DIR_NAME: $TEST_DIR_LINES/$DIR_LINES LOC (ratio: $DIR_RATIO)"
 done
 ```
 
-**Rule:** Mọi feature/widget mới PHẢI có unit test. Agent KHÔNG ĐƯỢC commit code mà chưa có test tương ứng.
+**Targets:**
+| Loại file | Target ratio | Lý do |
+|-----------|-------------|-------|
+| Logic (models, providers, utils) | ≥ 0.5 | Business-critical, dễ test |
+| Widgets/screens | ≥ 0.2 | Widget test phức tạp hơn |
+| Overall project | ≥ 0.3 | Balanced coverage |
+
+**Severity:** ⚠️ Warning — không block commit nhưng báo cáo rõ ràng cho PM thấy trạng thái test coverage.
 
 ## CHECK 10: 📦 Deliverable Check (2026-03-19+)
 
