@@ -17,8 +17,43 @@ Chạy trước mỗi commit để đảm bảo:
 3. File size hợp lý (không commit file quá lớn)
 4. Không commit secrets/credentials
 5. Code conventions tuân thủ project patterns
+6. Changelog so với preprod baseline (nếu có)
 
 **Gate:** PASS/FAIL. Nếu FAIL → liệt kê violations cần fix trước khi commit.
+
+## ⚠️ Checklist Protocol (BẮT BUỘC — 2026-03-20)
+
+Agent PHẢI thực hiện 2 bước khi chạy pre-commit:
+
+### Bước 1 — TRƯỚC KHI chạy: Gửi Thanh bảng checklist + expected results
+```
+📋 Pre-commit Checklist — [mô tả commit]
+| # | Hạng mục | Expected | Files cần check |
+|---|----------|----------|-----------------|
+| 1 | 🎨 Hardcoded colors MỚI | 0 | file1.dart, file2.dart |
+| 2 | 🎨 Hardcoded fontSize MỚI | 0 | ... |
+| 3 | 🎨 Hardcoded spacing MỚI | 0 | ... |
+| 4 | 🎨 Component convention | PASS | ... |
+| 5 | 🔒 Secrets | 0 | ... |
+| 6 | 📏 File size < 500 lines | PASS | ... |
+| 7 | 📦 Import validation | PASS | ... |
+| 8 | 🇻🇳 Vietnamese diacritics | PASS | ... |
+| 9 | 🔢 Number formatting | PASS | ... |
+| 10 | 📝 Changelog vs preprod | Generated | ... |
+```
+
+### Bước 2 — SAU KHI chạy: Lôi lại bảng + điền kết quả thực tế
+```
+✅/❌ Pre-commit Results — [mô tả commit]
+| # | Hạng mục | Expected | Actual | Status |
+|---|----------|----------|--------|--------|
+| 1 | 🎨 Hardcoded colors MỚI | 0 | 0 | ✅ PASS |
+| 2 | 🎨 Hardcoded fontSize MỚI | 0 | 2 | ❌ FAIL |
+| ... |
+→ Tổng: X/10 PASS, Y FAIL → cần fix / OK to commit
+```
+
+Agent KHÔNG ĐƯỢC bỏ qua bước 1 hoặc bước 2. PM cần thấy CẢ HAI bảng.
 </objective>
 
 <instructions>
@@ -351,4 +386,76 @@ done
 Agent PHẢI đảm bảo trước khi commit:
 - Đã có deliverable rõ ràng cho PM (bảng thay đổi, screenshots, cần test gì)
 - KHÔNG commit "work in progress" mà chưa giao deliverable
+
+## CHECK 11: 📋 Changelog vs Preprod Baseline (2026-03-20+)
+
+So sánh branch hiện tại với preprod để tạo changelog.
+
+### Khi nào chạy:
+- Trước MỌI commit trên branch `thanh_sg` (hoặc feature branch)
+- Sau khi merge preprod vào branch hiện tại
+- Khi chuẩn bị giao deliverable cho PM
+
+### Cách thực hiện:
+```bash
+# 1. Xác định base branch (preprod hoặc main)
+BASE_BRANCH="preprod"
+git rev-parse --verify "$BASE_BRANCH" 2>/dev/null || BASE_BRANCH="main"
+
+# 2. Liệt kê tất cả commits từ base đến HEAD
+echo "📋 Changelog (${BASE_BRANCH}..HEAD):"
+git log ${BASE_BRANCH}..HEAD --oneline --no-merges
+
+# 3. Liệt kê files changed
+echo ""
+echo "📁 Files changed (${BASE_BRANCH}..HEAD):"
+git diff ${BASE_BRANCH}..HEAD --stat
+
+# 4. Phân loại thay đổi
+echo ""
+echo "📊 Breakdown:"
+ADDED=$(git diff ${BASE_BRANCH}..HEAD --diff-filter=A --name-only | wc -l | tr -d ' ')
+MODIFIED=$(git diff ${BASE_BRANCH}..HEAD --diff-filter=M --name-only | wc -l | tr -d ' ')
+DELETED=$(git diff ${BASE_BRANCH}..HEAD --diff-filter=D --name-only | wc -l | tr -d ' ')
+echo "  Added: $ADDED files"
+echo "  Modified: $MODIFIED files"
+echo "  Deleted: $DELETED files"
+
+# 5. Convention check trên TẤT CẢ files changed từ base
+CHANGED_DART=$(git diff ${BASE_BRANCH}..HEAD --name-only -- '*.dart' | grep -E "^lib/(screens|common|features|widgets)/")
+if [ -n "$CHANGED_DART" ]; then
+  echo ""
+  echo "🎨 Design System violations in changed files:"
+  for f in $CHANGED_DART; do
+    HC=$(grep -c "Color(0x" "$f" 2>/dev/null || echo "0")
+    MC=$(grep "Colors\." "$f" 2>/dev/null | grep -vc "Colors\.transparent" || echo "0")
+    FS=$(grep -c "fontSize:" "$f" 2>/dev/null || echo "0")
+    [ "$HC" -gt 0 ] && echo "  ⚠️ $f — $HC Color(0x..."
+    [ "$MC" -gt 0 ] && echo "  ⚠️ $f — $MC Colors.*"
+    [ "$FS" -gt 0 ] && echo "  ⚠️ $f — $FS fontSize:"
+  done
+fi
+```
+
+### Output cho Thanh:
+```markdown
+## 📋 Changelog vs Preprod
+
+### Commits (N total):
+- abc1234 — feat: thêm foreign chart timeline
+- def5678 — fix: stock code color to purple
+- ...
+
+### Files: +A added, ~M modified, -D deleted
+
+### Design System Status:
+| File | Violations | Type |
+|------|-----------|------|
+| screens/market/... | 3 | Color(0x — legacy |
+| screens/auth/... | 5 | Colors.* — legacy |
+→ Tổng: X violations (N legacy, M mới)
+```
+
+**Severity:** ℹ️ Info — không block, nhưng PM cần thấy changelog trước khi approve.
+**Khi merge preprod:** PHẢI chạy convention check trên TẤT CẢ files từ dev khác → báo cáo violations → đề xuất fix plan.
 </instructions>
