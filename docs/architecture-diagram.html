@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFSP Skill Set — PM/PO Onboarding Guide</title>
+<style>
+:root{--p:#7B3AEC;--pl:#9B6AF0;--pbg:#F3EEFF;--g:#09DA64;--gbg:#E6FBF0;--r:#F23468;--rbg:#FDE8EE;--o:#FF763D;--obg:#FFF0E8;--b:#3B82F6;--bbg:#EBF2FF;--i:#6366F1;--ibg:#EEF2FF;--gr:#7E839E;--grl:#F4F4F6;--bg:#FAFAFE;--c:#FFF;--tx:#1A1A2E;--ts:#6B7194;--bd:#E8E8F0;--sh:0 2px 12px rgba(123,58,236,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:var(--c);border-bottom:1px solid var(--bd);padding:0 20px;display:flex;align-items:center;gap:0;overflow-x:auto}
+.nav-brand{font-weight:700;font-size:14px;padding:10px 16px 10px 0;border-right:1px solid var(--bd);margin-right:4px;white-space:nowrap;color:var(--p)}
+.nav a{padding:10px 14px;font-size:12px;color:var(--ts);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+.nav a:hover{color:var(--p)}
+.nav a.on{color:var(--p);border-bottom-color:var(--p);font-weight:600}
+
+/* SECTIONS */
+.sec{display:none;padding:24px 20px;max-width:1200px;margin:0 auto;animation:fi .3s}
+.sec.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+h2{font-size:20px;font-weight:700;margin-bottom:4px}
+h3{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--p)}
+.desc{font-size:13px;color:var(--ts);margin-bottom:20px}
+
+/* CARDS */
+.card{background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:12px;transition:.2s}
+.card:hover{box-shadow:var(--sh)}
+.card-t{font-size:14px;font-weight:700;margin-bottom:4px}
+.card-d{font-size:12px;color:var(--ts)}
+
+/* FLOW NODES */
+.flow-h{display:flex;gap:8px;overflow-x:auto;padding:8px 0}
+.fn{min-width:160px;flex:1;border-radius:10px;overflow:hidden;border:1px solid var(--bd);background:var(--c);cursor:pointer;transition:.2s}
+.fn:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.fn.expanded{box-shadow:0 4px 20px rgba(123,58,236,.15)}
+.fn-h{padding:8px 10px;font-size:11px;font-weight:700;text-align:center;color:#fff}
+.fn-b{padding:10px;font-size:11px;color:var(--ts)}
+.fn-arrow{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--pl);min-width:24px}
+
+/* DRILL panel */
+.drill{margin-top:12px;background:var(--c);border:1px solid var(--p);border-radius:10px;padding:20px;display:none;animation:su .3s}
+.drill.on{display:block}
+@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.drill-close{float:right;background:none;border:1px solid var(--bd);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12px;color:var(--ts)}
+.drill-close:hover{background:var(--grl)}
+
+/* SKILL CHIP */
+.sk{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;margin:2px;border-radius:6px;font-size:11px;cursor:pointer;transition:.2s;border:1px solid transparent}
+.sk:hover{border-color:var(--pl);box-shadow:var(--sh)}
+.sk .e{font-size:13px} .sk .n{font-weight:600}
+.tier-badge{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700}
+.tb1{background:#FEE2E2;color:#991B1B} .tb2{background:#FEF3C7;color:#92400E}
+.tb3{background:#D1FAE5;color:#065F46} .tb4{background:#DBEAFE;color:#1E40AF} .tb5{background:#EDE9FE;color:#5B21B6}
+
+/* LOOP */
+.loop{margin:12px 0;padding:12px;background:var(--rbg);border:1px dashed var(--r);border-radius:8px;font-size:12px}
+
+/* SKILL DETAIL */
+.sd{margin-top:10px;padding:14px;background:var(--grl);border-radius:8px;font-size:12px;display:none;animation:su .2s}
+.sd.on{display:block}
+.sd-row{display:grid;grid-template-columns:90px 1fr;gap:4px;margin-bottom:6px}
+.sd-l{font-weight:600;color:var(--ts);font-size:11px}
+.dom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
+.dom-cell{padding:6px 8px;border-radius:6px;font-size:11px}
+.dom-cell strong{display:block;font-size:10px;color:var(--ts);margin-bottom:2px}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:24px}
+.tl::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(var(--b),var(--i),var(--p),var(--g),var(--r),var(--g),var(--o))}
+.ti{position:relative;padding:6px 0 6px 12px;font-size:12px}
+.ti::before{content:'';position:absolute;left:-19px;top:10px;width:8px;height:8px;border-radius:50%;border:2px solid}
+.ti-b::before{border-color:var(--b);background:var(--bbg)}
+.ti-i::before{border-color:var(--i);background:var(--ibg)}
+.ti-p::before{border-color:var(--p);background:var(--pbg)}
+.ti-g::before{border-color:var(--g);background:var(--gbg)}
+.ti-r::before{border-color:var(--r);background:var(--rbg)}
+.ti-o::before{border-color:var(--o);background:var(--obg)}
+.tm{font-weight:600;color:var(--ts);min-width:36px;display:inline-block;font-size:11px}
+.ts-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin:0 1px}
+.tg-b{background:var(--bbg);color:var(--b)} .tg-i{background:var(--ibg);color:var(--i)}
+.tg-p{background:var(--pbg);color:var(--p)} .tg-g{background:var(--gbg);color:#059669}
+.tg-o{background:var(--obg);color:#C2410C} .tg-r{background:var(--rbg);color:var(--r)}
+.note{font-size:11px;color:var(--ts);margin-top:1px;padding-left:48px;line-height:1.5}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+th{background:var(--grl);text-align:left;padding:6px 8px;font-weight:600;border-bottom:2px solid var(--bd)}
+td{padding:6px 8px;border-bottom:1px solid var(--bd)}
+tr:hover{background:var(--grl)}
+
+.ft{margin-top:28px;text-align:center;font-size:11px;color:var(--ts);padding:16px 20px;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <div class="nav-brand">🥋 KFSP Skill Set</div>
+  <a href="#" class="on" onclick="go('welcome')">Giới thiệu</a>
+  <a href="#" onclick="go('arch')">Kiến trúc dự án</a>
+  <a href="#" onclick="go('test')">Kiến trúc Test/QA</a>
+  <a href="#" onclick="go('flow')">Flow dự án (Drilldown)</a>
+  <a href="#" onclick="go('skills')">20 Skills</a>
+  <a href="#" onclick="go('case')">Case Study</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 1. WELCOME -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-welcome" class="sec on">
+<h2>Chào mừng bạn đến với KFSP Skill Set</h2>
+<p class="desc">Tài liệu onboarding cho Product Owner / Product Manager / Project Manager mới. Đọc xong bạn sẽ hiểu cách team vận hành dự án từ ý tưởng đến release.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+  <div class="card">
+    <div class="card-t">🤔 Skill Set là gì?</div>
+    <div class="card-d">Bộ 20 công cụ (skills) giúp team (người + AI) chạy dự án có kiểm soát. Mỗi skill giải quyết 1 vấn đề cụ thể: từ dự báo rủi ro trước khi làm, đến kiểm tra chất lượng sau khi build, đến đóng phase sạch sẽ.</div>
+  </div>
+  <div class="card">
+    <div class="card-t">👤 Ai dùng?</div>
+    <div class="card-d">PM/PO ra lệnh, AI (Claude) thực thi skills tự động. PM chỉ cần: approve plan, test trên device (5-10 phút/build), bấm Đạt/Lỗi. AI lo phần còn lại (85% effort).</div>
+  </div>
+  <div class="card">
+    <div class="card-t">🌐 Dùng cho ngành nào?</div>
+    <div class="card-d">Thiết kế domain-agnostic. Đang dùng cho app development (Flutter) nhưng framework áp dụng được cho marketing campaigns, event management, content production — bất kỳ dự án có spec → execute → verify.</div>
+  </div>
+  <div class="card">
+    <div class="card-t">📐 Triết lý cốt lõi</div>
+    <div class="card-d"><strong>Mọi thứ là dự án.</strong> Roadmap = dự án. Phase = dự án con. Task = dự án nhỏ hơn. Ở MỌI cấp đều cần: Goals → Plan → Execute → Verify → Close. Skills bảo vệ ở mọi cấp.</div>
+  </div>
+</div>
+
+<h3>5 tầng bảo vệ — đọc từ dưới lên</h3>
+<p class="desc">Nếu tầng dưới fail, tầng trên vô nghĩa. T1 (Safety) là nền tảng.</p>
+
+<div style="max-width:500px;margin:0 auto">
+  <div style="padding:10px 16px;background:var(--pbg);border-radius:8px 8px 0 0;text-align:center;border:1px solid #D8B4FE">
+    <strong style="color:#5B21B6">T5 🎯 Business</strong> — Có tạo giá trị không?
+    <div style="font-size:11px;color:var(--ts)">pre-mortem · doc-pilot · product-health</div>
+  </div>
+  <div style="padding:10px 16px;background:var(--bbg);text-align:center;border-left:1px solid #93C5FD;border-right:1px solid #93C5FD">
+    <strong style="color:#1E40AF">T4 👤 UX</strong> — Người dùng có dùng được không?
+    <div style="font-size:11px;color:var(--ts)">ux-parity · ux-audit</div>
+  </div>
+  <div style="padding:10px 16px;background:var(--gbg);text-align:center;border-left:1px solid #6EE7B7;border-right:1px solid #6EE7B7">
+    <strong style="color:#065F46">T3 🧪 Verification</strong> — Deliverable có đúng spec không?
+    <div style="font-size:11px;color:var(--ts)">build-verify · test-brief · bug-log · sentinel · surface-test · release-gate</div>
+  </div>
+  <div style="padding:10px 16px;background:#FEF3C7;text-align:center;border-left:1px solid #FCD34D;border-right:1px solid #FCD34D">
+    <strong style="color:#92400E">T2 🔧 Integrity</strong> — Code/asset có nguyên vẹn không?
+    <div style="font-size:11px;color:var(--ts)">sweep · pre-commit · sync-check · post-phase</div>
+  </div>
+  <div style="padding:10px 16px;background:#FEE2E2;border-radius:0 0 8px 8px;text-align:center;border:1px solid #FCA5A5;border-top:none">
+    <strong style="color:#991B1B">T1 🛡️ Safety</strong> — Có đang kiểm soát không?
+    <div style="font-size:11px;color:var(--ts)">guard · session-start · dev-journal · incident-review</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 2. PROJECT ARCHITECTURE -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-arch" class="sec">
+<h2>Kiến trúc dự án</h2>
+<p class="desc">Mọi dự án đi qua 6 giai đoạn. Mỗi giai đoạn có skills bảo vệ. Bấm vào giai đoạn để xem chi tiết.</p>
+
+<div style="display:flex;align-items:flex-start;gap:4px;overflow-x:auto;padding:8px 0" id="arch-flow">
+  <div class="fn" onclick="drillArch('start')"><div class="fn-h" style="background:var(--b)">🚀 1. BẮT ĐẦU</div><div class="fn-b">Mở session<br>Check trạng thái<br><span class="tier-badge tb1">T1</span> session-start</div></div>
+  <div class="fn-arrow">→</div>
+  <div class="fn" onclick="drillArch('plan')"><div class="fn-h" style="background:var(--i)">📐 2. PLAN</div><div class="fn-b">Spec / Brief<br>Sinh test dự kiến<br><span class="tier-badge tb5">T5</span> pre-mortem<br><span class="tier-badge tb1">T1</span> dev-journal</div></div>
+  <div class="fn-arrow">→</div>
+  <div class="fn" onclick="drillArch('dev')"><div class="fn-h" style="background:var(--p)">🔨 3. DEV</div><div class="fn-b">Code → Check → Commit<br><span class="tier-badge tb2">T2</span> sweep<br><span class="tier-badge tb4">T4</span> ux-parity<br><span class="tier-badge tb2">T2</span> pre-commit</div></div>
+  <div class="fn-arrow">⇄</div>
+  <div class="fn" onclick="drillArch('build')"><div class="fn-h" style="background:var(--g)">📦 4. BUILD & TEST</div><div class="fn-b">AI check → PM verify<br><span class="tier-badge tb3">T3</span> build-verify<br><span class="tier-badge tb3">T3</span> test-brief<br><span class="tier-badge tb3">T3</span> bug-log</div></div>
+  <div class="fn-arrow">→</div>
+  <div class="fn" onclick="drillArch('close')"><div class="fn-h" style="background:var(--o)">🏁 5. ĐÓNG</div><div class="fn-b">Docs · Sync · Gate<br><span class="tier-badge tb2">T2</span> post-phase<br><span class="tier-badge tb3">T3</span> release-gate<br><span class="tier-badge tb5">T5</span> product-health</div></div>
+  <div class="fn-arrow">→</div>
+  <div style="min-width:60px;display:flex;align-items:center;justify-content:center;font-size:28px">✅</div>
+</div>
+
+<div class="loop">
+  <strong style="color:var(--r)">🔄 Vòng lặp Build ⇄ Dev:</strong>
+  Build-verify FAIL hoặc PM tìm bug → quay Dev Loop. Mỗi lần quay lại phải có bug ID hoặc fail reason. Re-build chỉ test items đã fix. Loop > 3 lần cùng issue → <strong>incident-review</strong> bắt buộc.
+</div>
+
+<!-- Drilldown panels -->
+<div id="drill-start" class="drill">
+  <button class="drill-close" onclick="closeDrill()">✕ Đóng</button>
+  <h3 style="margin-top:0">🚀 Giai đoạn 1: Bắt đầu</h3>
+  <p style="font-size:12px;margin-bottom:10px"><strong>Mục đích:</strong> Đảm bảo team có context chính xác TRƯỚC khi làm bất kỳ task nào.</p>
+  <table>
+    <tr><th>Bước</th><th>Skill</th><th>Input</th><th>Output</th><th>Ai làm</th></tr>
+    <tr><td>1</td><td><span class="tier-badge tb1">T1</span> session-start</td><td>Git repo, memory files</td><td>Report: git status, drift detected, tools available</td><td>AI tự động</td></tr>
+  </table>
+  <div style="font-size:12px;margin-top:8px;padding:8px;background:var(--bbg);border-radius:6px">
+    <strong>Ví dụ Flutter Migration:</strong> Check branch <code>thanh_sg</code>, phát hiện <code>08_HANDOFF_STATUS.md</code> ghi P2 95% nhưng code có thêm 39 files từ dev team → drift → fix trước khi dev.
+  </div>
+</div>
+
+<div id="drill-plan" class="drill">
+  <button class="drill-close" onclick="closeDrill()">✕ Đóng</button>
+  <h3 style="margin-top:0">📐 Giai đoạn 2: Plan / Spec</h3>
+  <p style="font-size:12px;margin-bottom:10px"><strong>Mục đích:</strong> Dự báo rủi ro + sinh ra test cases + expected changelog TRƯỚC khi code. Đây là nơi đảm bảo "build sẽ match spec".</p>
+  <table>
+    <tr><th>Bước</th><th>Skill</th><th>Input</th><th>Output</th><th>Ai làm</th></tr>
+    <tr><td>1</td><td><span class="tier-badge tb5">T5</span> pre-mortem</td><td>Mô tả task/feature</td><td>Risk matrix + mitigation plan + Go/No-Go</td><td>AI</td></tr>
+    <tr><td>2</td><td><span class="tier-badge tb1">T1</span> dev-journal</td><td>Quyết định từ pre-mortem</td><td>Journal entry: decision + context + reasoning</td><td>AI</td></tr>
+    <tr><td>3</td><td>(TDD)</td><td>Spec/acceptance criteria</td><td><strong>Test cases (.dart) + Expected changelog</strong></td><td>AI</td></tr>
+  </table>
+  <div style="font-size:12px;margin-top:8px;padding:8px;background:var(--ibg);border-radius:6px">
+    <strong>Tại sao quan trọng:</strong> Nếu bỏ qua bước này, khi build xong không có gì để SO SÁNH → PM phải tự đoán "cái gì đúng, cái gì sai". Sinh test + changelog dự kiến từ spec = có baseline để verify.
+  </div>
+</div>
+
+<div id="drill-dev" class="drill">
+  <button class="drill-close" onclick="closeDrill()">✕ Đóng</button>
+  <h3 style="margin-top:0">🔨 Giai đoạn 3: Dev Loop</h3>
+  <p style="font-size:12px;margin-bottom:10px"><strong>Mục đích:</strong> Code + kiểm tra tự động + commit. Vòng lặp: code → check → fix → commit.</p>
+  <table>
+    <tr><th>Bước</th><th>Skill</th><th>Input</th><th>Output</th><th>Ai làm</th></tr>
+    <tr><td>1</td><td>TDD</td><td>Test cases (từ Plan)</td><td>Code implement → tests PASS</td><td>AI</td></tr>
+    <tr><td>2</td><td><span class="tier-badge tb2">T2</span> sweep</td><td>Files đã sửa</td><td>"Bán kính vụ nổ": files bị ảnh hưởng</td><td>AI tự động</td></tr>
+    <tr><td>3</td><td><span class="tier-badge tb4">T4</span> ux-parity</td><td>UI code</td><td>Parity score % so với Figma/design</td><td>AI tự động</td></tr>
+    <tr><td>4</td><td><span class="tier-badge tb2">T2</span> pre-commit</td><td>Staged changes</td><td>PASS/FAIL gate (no hardcode, no secrets)</td><td>AI tự động</td></tr>
+    <tr><td>5</td><td>git commit</td><td>—</td><td>Commit message + SHA</td><td>AI</td></tr>
+  </table>
+</div>
+
+<div id="drill-build" class="drill">
+  <button class="drill-close" onclick="closeDrill()">✕ Đóng</button>
+  <h3 style="margin-top:0">📦 Giai đoạn 4: Build & Test</h3>
+  <p style="font-size:12px;margin-bottom:10px"><strong>Mục đích:</strong> AI kiểm tra tự động → so sánh với spec → tạo checklist cho PM → PM verify trên device → log bug nếu có.</p>
+  <table>
+    <tr><th>Bước</th><th>Skill</th><th>Input</th><th>Output</th><th>Ai làm</th></tr>
+    <tr><td>1</td><td>Build</td><td>Source code</td><td>App trên Simulator</td><td>AI</td></tr>
+    <tr><td>2</td><td><span class="tier-badge tb3">T3</span> build-verify</td><td>Build artifact</td><td>16 gates + <strong>Spec Compliance</strong> (actual vs expected changelog)</td><td>AI tự động</td></tr>
+    <tr><td>3</td><td><span class="tier-badge tb3">T3</span> test-brief</td><td>Spec + compliance report</td><td>File HTML tương tác cho PM (sinh từ SPEC, không từ trí nhớ)</td><td>AI tạo</td></tr>
+    <tr><td>4</td><td>PM Test</td><td>Test brief HTML + device</td><td>Pass/Fail per item (5-10 phút)</td><td><strong>PM</strong></td></tr>
+    <tr><td>5</td><td><span class="tier-badge tb3">T3</span> bug-log</td><td>PM bấm "Lỗi"</td><td>BUG-YYYYMMDD-NN → trigger loop về Dev</td><td>PM log, AI fix</td></tr>
+  </table>
+  <div style="font-size:12px;margin-top:8px;padding:8px;background:var(--rbg);border-radius:6px">
+    <strong>Vòng lặp:</strong> Bug → Dev fix → Re-build → Test brief chỉ hiện items FIXED → PM re-test targeted → PASS → Close bug. Giới hạn 3 loops/issue.
+  </div>
+</div>
+
+<div id="drill-close" class="drill">
+  <button class="drill-close" onclick="closeDrill()">✕ Đóng</button>
+  <h3 style="margin-top:0">🏁 Giai đoạn 5: Đóng & Release</h3>
+  <p style="font-size:12px;margin-bottom:10px"><strong>Mục đích:</strong> Đảm bảo mọi thứ hoàn chỉnh trước khi ship. Docs, sync, contracts, gate.</p>
+  <table>
+    <tr><th>Bước</th><th>Skill</th><th>Input</th><th>Output</th><th>Khi nào</th></tr>
+    <tr><td>1</td><td><span class="tier-badge tb2">T2</span> post-phase</td><td>Phase deliverables</td><td>Checklist 6 bước: verify, regression, docs, sync, sweep, archive</td><td>Cuối phase</td></tr>
+    <tr><td>2</td><td><span class="tier-badge tb2">T2</span> sync-check</td><td>Source copies</td><td>Drift list + fix commands</td><td>Cuối phase</td></tr>
+    <tr><td>3</td><td><span class="tier-badge tb5">T5</span> doc-pilot</td><td>Code changes</td><td>Docs cần update + HDSD gap</td><td>Cuối phase</td></tr>
+    <tr><td>4</td><td><span class="tier-badge tb3">T3</span> release-gate</td><td>Toàn bộ project</td><td>Score /100 + Go/No-Go</td><td>Trước release</td></tr>
+    <tr><td>5</td><td><span class="tier-badge tb3">T3</span> surface-test</td><td>4 bề mặt</td><td>Contract violations + health</td><td>Trước release</td></tr>
+    <tr><td>6</td><td><span class="tier-badge tb5">T5</span> product-health</td><td>8 chiều</td><td>Dashboard /80 + gaps</td><td>Trước milestone</td></tr>
+  </table>
+</div>
+
+<h3>Skills chạy xuyên suốt (triggered bởi sự kiện)</h3>
+<table>
+  <tr><th>Skill</th><th>Tier</th><th>Triggered khi</th><th>Output</th></tr>
+  <tr><td>🛡️ guard</td><td><span class="tier-badge tb1">T1</span></td><td>Sau mỗi task, định kỳ, sau thay đổi lớn</td><td>Health score /100. < 70 → dừng, tìm nguyên nhân</td></tr>
+  <tr><td>📔 dev-journal</td><td><span class="tier-badge tb1">T1</span></td><td>Mỗi quyết định, sự cố, bài học</td><td>Journal entries (tra cứu khi gặp tình huống tương tự)</td></tr>
+  <tr><td>📸 sentinel</td><td><span class="tier-badge tb3">T3</span></td><td>Trước/sau refactor lớn</td><td>Baseline vs Current → phát hiện hồi quy</td></tr>
+  <tr><td>🚨 incident-review</td><td><span class="tier-badge tb1">T1</span></td><td>Sự cố nghiêm trọng, loop > 3 lần</td><td>5 Whys + root cause + prevention plan</td></tr>
+  <tr><td>👤 ux-audit</td><td><span class="tier-badge tb4">T4</span></td><td>Định kỳ, trước release, redesign</td><td>10 heuristic scores /30 + accessibility</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 3. TEST / QA ARCHITECTURE -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-test" class="sec">
+<h2>Kiến trúc Test / QA</h2>
+<p class="desc">Spec là nguồn sự thật. Test sinh từ spec. Build so với spec. PM verify theo spec. Không có spec → không biết đúng sai.</p>
+
+<h3>Dòng chảy verification: Spec → Test → Build → So sánh</h3>
+
+<div style="display:grid;grid-template-columns:1fr 30px 1fr 30px 1fr;gap:0;align-items:center;margin:16px 0">
+  <div class="card" style="text-align:center;border-color:var(--i)">
+    <div style="font-size:24px;margin-bottom:4px">📐</div>
+    <div class="card-t">Spec / Plan</div>
+    <div class="card-d">Deliverables + Acceptance criteria + Expected changelog</div>
+    <div style="margin-top:8px;font-size:11px;background:var(--ibg);padding:4px 8px;border-radius:4px">
+      → Sinh ra: <strong>Test cases</strong> (trước code)<br>
+      → Sinh ra: <strong>Expected changelog</strong>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:20px;color:var(--pl)">→</div>
+  <div class="card" style="text-align:center;border-color:var(--g)">
+    <div style="font-size:24px;margin-bottom:4px">📦</div>
+    <div class="card-t">Build / Deliverable</div>
+    <div class="card-d">Code + Actual changelog (từ git diff)</div>
+    <div style="margin-top:8px;font-size:11px;background:var(--gbg);padding:4px 8px;border-radius:4px">
+      → <strong>build-verify</strong>: AI kiểm tra 16 mục<br>
+      → <strong>Spec compliance</strong>: actual vs expected
+    </div>
+  </div>
+  <div style="text-align:center;font-size:20px;color:var(--pl)">→</div>
+  <div class="card" style="text-align:center;border-color:var(--o)">
+    <div style="font-size:24px;margin-bottom:4px">👤</div>
+    <div class="card-t">PM Verify</div>
+    <div class="card-d">Test brief HTML (sinh từ spec) → Đạt/Lỗi</div>
+    <div style="margin-top:8px;font-size:11px;background:var(--obg);padding:4px 8px;border-radius:4px">
+      → <strong>test-brief</strong>: items từ SPEC<br>
+      → <strong>bug-log</strong>: nếu lỗi → loop
+    </div>
+  </div>
+</div>
+
+<h3>Ai kiểm tra gì? (Phân công AI vs PM)</h3>
+<table>
+  <tr><th>Loại kiểm tra</th><th>AI tự động</th><th>PM thủ công</th><th>Khi nào</th></tr>
+  <tr><td><strong>Unit test</strong> (logic, parser, format)</td><td>✅ Viết + chạy</td><td>—</td><td>Trước code (TDD)</td></tr>
+  <tr><td><strong>Static analysis</strong> (compile, imports)</td><td>✅ flutter analyze</td><td>—</td><td>Trước commit</td></tr>
+  <tr><td><strong>Design token compliance</strong></td><td>✅ Scan hardcoded colors</td><td>—</td><td>build-verify</td></tr>
+  <tr><td><strong>Dark mode check</strong></td><td>⚠️ Scan code patterns</td><td>✅ Visual verify trên device</td><td>build-verify + PM test</td></tr>
+  <tr><td><strong>Vietnamese diacritics</strong></td><td>✅ Scan strings</td><td>✅ Đọc text trên device</td><td>build-verify + PM test</td></tr>
+  <tr><td><strong>Number formatting</strong></td><td>✅ Scan toStringAsFixed</td><td>✅ Xem số trên device</td><td>build-verify + PM test</td></tr>
+  <tr><td><strong>Spec compliance</strong></td><td>✅ Actual vs expected changelog</td><td>—</td><td>build-verify</td></tr>
+  <tr><td><strong>UI layout / visual</strong></td><td>⚠️ ux-parity (code scan)</td><td>✅ So sánh với Figma/web</td><td>PM test</td></tr>
+  <tr><td><strong>Navigation / flow</strong></td><td>❌ Không tap được Simulator</td><td>✅ Bấm qua các màn</td><td>PM test</td></tr>
+  <tr><td><strong>Real data / socket</strong></td><td>⚠️ Check lifecycle code</td><td>✅ Xem data thật (giờ GD)</td><td>PM test</td></tr>
+  <tr><td><strong>Regression</strong></td><td>✅ sentinel (code-level)</td><td>✅ Regression items trong test-brief</td><td>Sau refactor</td></tr>
+  <tr><td><strong>Performance</strong></td><td>⚠️ Build time check</td><td>✅ Scroll smooth, load time</td><td>Trước release</td></tr>
+</table>
+
+<h3>3 tầng test brief</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+  <div class="card" style="border-left:3px solid var(--g)">
+    <div class="card-t">📋 Build Test</div>
+    <div class="card-d"><strong>5-10 items</strong> — chỉ phần thay đổi trong build này. PM test 5-10 phút. Mỗi task 1 build test.</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--o)">
+    <div class="card-t">📋 Phase Test</div>
+    <div class="card-d"><strong>20-30 items</strong> — tổng hợp cả phase. Items đã pass → skip. Focus items mới + regression. 30-60 phút.</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--r)">
+    <div class="card-t">📋 Release Test</div>
+    <div class="card-d"><strong>100+ items</strong> — full regression 22 features. Performance, accessibility, store compliance. 2-4 giờ (có progress tracking).</div>
+  </div>
+</div>
+
+<h3>Bug flow</h3>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;padding:12px;background:var(--grl);border-radius:8px">
+  <span style="background:var(--rbg);padding:4px 10px;border-radius:6px">PM bấm "Lỗi"</span>
+  →
+  <span style="background:var(--gbg);padding:4px 10px;border-radius:6px">bug-log: BUG-YYYYMMDD-NN</span>
+  →
+  <span style="background:var(--pbg);padding:4px 10px;border-radius:6px">AI fix + regression test</span>
+  →
+  <span style="background:var(--gbg);padding:4px 10px;border-radius:6px">Re-build (chỉ items fixed)</span>
+  →
+  <span style="background:var(--obg);padding:4px 10px;border-radius:6px">PM re-test 1-2 items</span>
+  →
+  <span style="background:var(--gbg);padding:4px 10px;border-radius:6px">Pass → Close bug</span>
+</div>
+
+<h3>Docs / Changelog tự động</h3>
+<table>
+  <tr><th>Document</th><th>Tự động từ đâu</th><th>Khi nào</th></tr>
+  <tr><td>Changelog per build</td><td>Git diff → parse → map về spec items</td><td>Mỗi build</td></tr>
+  <tr><td>Test brief HTML</td><td>Spec deliverables + git changes + previous results</td><td>Mỗi build</td></tr>
+  <tr><td>Spec compliance</td><td>Expected (plan) vs Actual (git diff)</td><td>Mỗi build</td></tr>
+  <tr><td>Feature specs</td><td>Plan + actual implementation</td><td>Cuối phase</td></tr>
+  <tr><td>Build report</td><td>Template auto-fill: git + tests + compliance</td><td>Mỗi build</td></tr>
+  <tr><td>Handoff status</td><td>Compliance % per phase</td><td>Mỗi build</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 4. FLOW WITH DRILLDOWN -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-flow" class="sec">
+<h2>Flow dự án — Drilldown từng điểm</h2>
+<p class="desc">Bấm vào bất kỳ giai đoạn nào để xem skill nào chạy, input/output gì, ai làm gì.</p>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+  <div class="fn" onclick="drillFlow('roadmap')"><div class="fn-h" style="background:var(--tx)">🗺️ CẤP DỰ ÁN</div><div class="fn-b">Roadmap → Phases → Milestones<br>Charter 6 chiều cho toàn dự án</div></div>
+  <div class="fn" onclick="drillFlow('phase')"><div class="fn-h" style="background:var(--p)">📐 CẤP PHASE</div><div class="fn-b">Plan → Tasks → Deliverables<br>Charter 6 chiều cho phase</div></div>
+  <div class="fn" onclick="drillFlow('task')"><div class="fn-h" style="background:var(--g)">🔧 CẤP TASK</div><div class="fn-b">Spec → TDD → Code → Verify<br>Test cases + expected changelog</div></div>
+</div>
+
+<div id="drill-roadmap" class="drill">
+  <button class="drill-close" onclick="closeDrillFlow()">✕</button>
+  <h3 style="margin-top:0">🗺️ Cấp dự án: Roadmap</h3>
+  <div style="font-size:12px">
+    <p><strong>Ví dụ:</strong> KFSP Flutter Migration — Migrate app từ React Native sang Flutter</p>
+    <table>
+      <tr><th>Chiều</th><th>Nội dung</th></tr>
+      <tr><td>Goals</td><td>Migrate 22 features, 100% parity với RN, dark/light mode, real-time data</td></tr>
+      <tr><td>Scope</td><td>P0 (Foundation) → P1 (Dashboard) → P2 (Market) → P3 (Filter) → ... → P22</td></tr>
+      <tr><td>Deliverables</td><td>Flutter app trên iOS/Android, 16 tài liệu kỹ thuật, 157 test cases</td></tr>
+      <tr><td>Success</td><td>Build pass, 22/22 features work, PM approve UX, store submission</td></tr>
+      <tr><td>Stakeholders</td><td>PM (Thanh), AI Dev (Claude), Backend (phudh3), Users (NĐT VN)</td></tr>
+      <tr><td>Resources</td><td>GitLab repo, Figma design, RN source (reference), iOS Simulator</td></tr>
+    </table>
+    <p style="margin-top:8px"><strong>Skills ở cấp này:</strong> session-start (đầu session), product-health (định kỳ), release-gate (trước release)</p>
+  </div>
+</div>
+
+<div id="drill-phase" class="drill">
+  <button class="drill-close" onclick="closeDrillFlow()">✕</button>
+  <h3 style="margin-top:0">📐 Cấp phase: P2.5 Market Restructure</h3>
+  <div style="font-size:12px">
+    <p><strong>Ví dụ:</strong> Phase P2.5 — Restructure Market screen (7 tasks)</p>
+    <table>
+      <tr><th>Chiều</th><th>Nội dung</th></tr>
+      <tr><td>Goals</td><td>Tab "Tổng quan" có đủ sections (biểu đồ, ảnh hưởng, stock lists), IBD 3 sub-tabs real data</td></tr>
+      <tr><td>Scope</td><td>Task 3-9: polish charts, new widgets, IBD rebuild, dark mode, navigation</td></tr>
+      <tr><td>Deliverables</td><td>6 widget files mới, 3 IBD sub-tabs, navigation wired, dark/light polished</td></tr>
+      <tr><td>Success</td><td>Build pass, 9 deliverables match spec, PM approve visual, guard ≥ 80</td></tr>
+      <tr><td>Stakeholders</td><td>PM test 30-40 items (phase test brief)</td></tr>
+      <tr><td>Resources</td><td>RN source (reference), web KFSP (design reference), socket events documented</td></tr>
+    </table>
+    <p style="margin-top:8px"><strong>Skills:</strong> pre-mortem (đầu phase), post-phase (cuối phase), doc-pilot, sync-check, guard</p>
+  </div>
+</div>
+
+<div id="drill-task" class="drill">
+  <button class="drill-close" onclick="closeDrillFlow()">✕</button>
+  <h3 style="margin-top:0">🔧 Cấp task: Task 3 — Polish biểu đồ + thanh khoản</h3>
+  <div style="font-size:12px">
+    <table>
+      <tr><th>Chiều</th><th>Nội dung</th></tr>
+      <tr><td>Goals</td><td>Gradient đậm sát line giá, tooltip có %, dark mode thanh khoản</td></tr>
+      <tr><td>Scope</td><td>4 files: ta_chart.dart, liquid_chart.dart, market_ohlc.dart, thi_truong_tab.dart</td></tr>
+      <tr><td>Deliverables</td><td>9 items (D1-D9): gradient, tooltip, dark bg, legend, comments</td></tr>
+      <tr><td>Success</td><td>5 unit tests pass, 9/9 deliverables done, PM pass 8 items on device</td></tr>
+      <tr><td>Test từ spec</td><td>① gradient up ② gradient down ③ tooltip format ④ tooltip sign ⑤ ref=0 guard</td></tr>
+      <tr><td>Expected changelog</td><td>ta_chart: gradient + tooltip | liquid_chart: dark bg + legend | ohlc + tab: comments</td></tr>
+    </table>
+    <p style="margin-top:8px"><strong>Skills:</strong> pre-mortem → dev-journal → sweep → ux-parity → pre-commit → build-verify → test-brief → bug-log</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 5. ALL 20 SKILLS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-skills" class="sec">
+<h2>20 Skills — Bấm để xem chi tiết + ví dụ cross-domain</h2>
+<p class="desc">Mỗi skill có: làm gì (1 câu), sinh ra gì, khi nào dùng, ví dụ Product / Marketing / General.</p>
+
+<div id="skills-list"></div>
+<div id="skill-detail" class="sd"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 6. CASE STUDY -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="s-case" class="sec">
+<h2>Case Study: KFSP Flutter Migration — P2.5 Task 3</h2>
+
+<div class="card" style="border-left:3px solid var(--p);margin-bottom:16px">
+  <div class="card-t">📱 Context</div>
+  <div class="card-d">
+    <strong>Dự án:</strong> Migrate app chứng khoán KFSP từ React Native sang Flutter (22 features, 157 test cases)<br>
+    <strong>Phase:</strong> P2.5 Market Screen Restructure — session 3/n, task 3 của 7 tasks<br>
+    <strong>Task 3:</strong> Polish biểu đồ giá intraday (gradient, tooltip) + thanh khoản (dark mode, legend)<br>
+    <strong>Team:</strong> PM Thanh (test trên iPhone 17 Pro Simulator) + AI Claude (dev + build + skills)<br>
+    <strong>Source:</strong> <code>current_source/flutter_kfsp_app/</code> branch <code>thanh_sg</code> → GitLab <code>phudh3/flutter_kfsp_app</code>
+  </div>
+</div>
+
+<div class="tl">
+  <div class="ti ti-b"><span class="tm">09:00</span> <strong style="color:var(--b)">BẮT ĐẦU</strong> → <span class="ts-tag tg-b">session-start</span></div>
+  <div class="note">→ Branch <code>thanh_sg</code>, 2 commits ahead of preprod. Drift: <code>08_HANDOFF_STATUS.md</code> outdated → fix trước.</div>
+
+  <div class="ti ti-i"><span class="tm">09:10</span> <strong style="color:var(--i)">PLAN</strong> → <span class="ts-tag tg-i">pre-mortem</span> "Polish biểu đồ + thanh khoản"</div>
+  <div class="note">→ Rủi ro: 🔴 ECharts gradient ngược khi giá &lt; ref | 🟡 Tooltip thiếu dấu phẩy nghìn | 🟢 <code>Colors.green</code> hardcode<br>
+  → Test dự kiến: ① gradient up ② gradient down ③ tooltip format ④ sign prefix ⑤ ref=0<br>
+  → Expected changelog: <code>ta_chart.dart</code> (gradient+tooltip), <code>liquid_chart.dart</code> (dark+legend), <code>market_ohlc.dart</code> (comment)</div>
+
+  <div class="ti ti-i"><span class="tm">09:15</span> <span class="ts-tag tg-i">dev-journal</span> — "Gradient đậm sát line giá (giống Dashboard). Thanh xác nhận."</div>
+
+  <div class="ti ti-i"><span class="tm">09:20</span> TDD — Viết <code>test/market/ta_chart_logic_test.dart</code> (5 cases) → <code>flutter test</code> → 5/5 FAIL ✓</div>
+
+  <div class="ti ti-p"><span class="tm">09:25</span> <strong style="color:var(--p)">DEV</strong> — Sửa gradient <code>ta_chart.dart:382</code> + tooltip <code>:270</code> → test 5/5 PASS ✅</div>
+
+  <div class="ti ti-p"><span class="tm">09:40</span> Sửa <code>liquid_chart.dart</code>: <code>backgroundColor</code> dark + legend <code>KfspColors</code></div>
+
+  <div class="ti ti-p"><span class="tm">09:50</span> <span class="ts-tag tg-p">sweep</span> → Blast radius: 1 file (<code>thi_truong_tab.dart</code>), 0 routes, 0 providers → Safe</div>
+
+  <div class="ti ti-p"><span class="tm">09:55</span> <span class="ts-tag tg-p">ux-parity</span> → Gradient match web KFSP ✅ | <span class="ts-tag tg-p">pre-commit</span> → PASS → <strong>commit</strong></div>
+
+  <div class="ti ti-g"><span class="tm">10:05</span> <strong style="color:#059669">BUILD</strong> → rsync → <code>flutter build ios --simulator</code> → install</div>
+
+  <div class="ti ti-g"><span class="tm">10:10</span> <span class="ts-tag tg-g">build-verify</span> — 16/16 gates PASS | Spec compliance: 5/5 match expected changelog ✅</div>
+
+  <div class="ti ti-g"><span class="tm">10:15</span> <span class="ts-tag tg-g">test-brief</span> → HTML 9 items → "Anh mở Market → Tổng quan giúp em. 8 phút, cần test dark mode."</div>
+
+  <div class="ti ti-g" style="background:var(--gbg);border-radius:6px;padding:8px 12px;margin:4px 0">
+    <span class="tm">10:20</span> <strong>PM Thanh test trên Simulator:</strong>
+  </div>
+  <div class="note">✅ #1 Gradient đúng hướng | ⏩ #2 Hẹn lại (cần TT giảm) | ✅ #3 Tooltip giá OK<br>
+  ❌ <strong>#4 Tooltip thiếu dấu "+" ở thay đổi dương</strong> | ✅ #5-#9 Dark mode, legend, card OK</div>
+
+  <div class="ti ti-r"><span class="tm">10:30</span> <span class="ts-tag tg-r">bug-log</span> — <strong>BUG-20260320-01:</strong> "2.43 (0.21%)" → phải "+2.43 (+0.21%)"</div>
+
+  <div class="ti ti-r"><span class="tm">10:35</span> <strong style="color:var(--r)">LOOP 1/3 → DEV</strong> — Fix sign prefix + regression test → <span class="ts-tag tg-p">sweep</span> → <span class="ts-tag tg-p">pre-commit</span></div>
+
+  <div class="ti ti-g"><span class="tm">10:45</span> Re-build → test-brief: item #4 highlight "ĐÃ SỬA" → PM re-test → ✅ "+2.43 (+0.21%)"</div>
+
+  <div class="ti ti-g"><span class="tm">10:50</span> <span class="ts-tag tg-g">bug-log --resolve</span> BUG-20260320-01 ✅ | Task 3: <strong>8/9 PASS, 1 HẸN LẠI</strong></div>
+
+  <div class="ti ti-i" style="border-top:1px dashed var(--bd);margin-top:8px;padding-top:10px"><span class="tm">11:00</span> <strong style="color:var(--i)">PLAN Task 4</strong> "Top ảnh hưởng" → <span class="ts-tag tg-i">pre-mortem</span> → Lặp chu kỳ...</div>
+
+  <div class="ti ti-o" style="border-top:2px solid var(--o);margin-top:10px;padding-top:10px"><span class="tm">17:00</span> <strong style="color:var(--o)">ĐÓNG P2.5</strong> → <span class="ts-tag tg-o">post-phase</span> Charter 6/6 ✅ → <span class="ts-tag tg-o">sync-check</span> → <span class="ts-tag tg-o">doc-pilot</span> → guard 82/100</div>
+</div>
+
+<div class="card" style="margin-top:16px;border-left:3px solid var(--g)">
+  <div class="card-t">📊 Kết quả Task 3</div>
+  <div class="card-d">
+    <strong>PM effort:</strong> ~15 phút (10 phút test + 2 phút re-test + 3 phút log bug)<br>
+    <strong>AI effort:</strong> ~50 phút (plan + TDD + code + build + fix + docs)<br>
+    <strong>Tỷ lệ:</strong> AI 77% / PM 23%<br>
+    <strong>Bugs:</strong> 1 found → 1 fixed → 1 regression test added<br>
+    <strong>Tests:</strong> 5 unit tests mới (18 total) | 9 PM test items (8 pass, 1 deferred)<br>
+    <strong>Spec compliance:</strong> 5/5 expected changelog items matched actual
+  </div>
+</div>
+</div>
+
+<div class="ft">
+  KFSP Skill Set v3.2 · 20 skills · 5 tầng · 6 giai đoạn<br>
+  Created by <a href="https://github.com/nguyenthanhcllhp" style="color:var(--p)">Thanh Nguyen</a> with Claude AI ·
+  <a href="https://github.com/nguyenthanhcllhp/kfsp-skill-set" style="color:var(--p)">GitHub</a>
+</div>
+
+<script>
+// Skills data
+const S={
+'session-start':{e:'🔑',n:'session-start',t:'T1',tl:'Safety',o:'Kiểm tra trạng thái trước khi làm việc',out:'Report: git + drift + tools + next steps',w:'Đầu MỌI session',p:'Git status, code-doc drift, memory update',m:'Campaign status, budget snapshot, pending approvals',g:'Trạng thái + thay đổi từ lần cuối + sẵn sàng chưa',ph:'start'},
+'pre-mortem':{e:'🔮',n:'pre-mortem',t:'T5',tl:'Business',o:'"Nếu thất bại thì vì sao?" — hỏi TRƯỚC khi làm',out:'Risk matrix + test cases dự kiến + expected changelog + Go/No-Go',w:'Trước feature/phase/task mới',p:'User impact, API break, 3rd party, component cascade',m:'Wrong audience, bad timing, weak creative, budget waste',g:'Dự báo rủi ro + sinh test dự kiến + expected changelog',ph:'plan'},
+'dev-journal':{e:'📔',n:'dev-journal',t:'T1',tl:'Safety',o:'Ghi quyết định, sự cố, bài học — bộ nhớ dài hạn',out:'Journal entries (searchable) + digest',w:'Mỗi decision, incident, learning',p:'Technical decisions, postmortems, arch choices',m:'Campaign learnings, A/B results, vendor evaluations',g:'"Án lệ" — tra cứu khi gặp tình huống tương tự',ph:'plan'},
+'sweep':{e:'🔍',n:'sweep',t:'T2',tl:'Integrity',o:'Quét bán kính ảnh hưởng — sửa 1 chỗ → chỗ nào bị ảnh hưởng?',out:'Files impacted + severity + fix suggestions',w:'Sau MỖI thay đổi',p:'Imports, routes, providers, tokens, tests, docs',m:'Đổi brand → website, social, email, print',g:'Phân tích ảnh hưởng lan toả',ph:'dev'},
+'ux-parity':{e:'🎨',n:'ux-parity',t:'T4',tl:'UX',o:'So sản phẩm thực tế vs thiết kế đã duyệt',out:'Parity score % + violations list',w:'Sau thay đổi UI/creative',p:'Flutter code vs Figma — spacing, colors, layout',m:'Final creative vs approved mockup',g:'Đo trung thực giữa deliverable và spec',ph:'dev'},
+'pre-commit':{e:'✅',n:'pre-commit',t:'T2',tl:'Integrity',o:'Gate trước khi chốt — bắt lỗi cơ bản',out:'Pass/fail per check + violations',w:'Trước MỌI commit/submit',p:'No hardcode, no secrets, imports valid',m:'No typos, correct links, UTM tags',g:'Validation gate trước khi chốt',ph:'dev'},
+'build-verify':{e:'🏗️',n:'build-verify',t:'T3',tl:'Verification',o:'AI tự kiểm tra 16 mục + so sánh actual vs expected changelog',out:'16 gates + Spec Compliance report + blockers',w:'Sau MỌI build',p:'analyze, test, tokens, dark mode, Vietnamese, spec match',m:'Spell check, links, brand, tracking, brief match',g:'Kiểm tra tự động + spec compliance',ph:'build'},
+'test-brief':{e:'📋',n:'test-brief',t:'T3',tl:'Verification',o:'Tạo checklist CHO NGƯỜI — SINH TỪ SPEC, không từ trí nhớ',out:'HTML tương tác: items (từ spec) + Đạt/Lỗi/Bỏ qua',w:'Sau build-verify PASS',p:'PM test trên device: tap X → expect Y',m:'Reviewer: creative đúng brief? CTA? Tracking?',g:'Hướng dẫn verify truy nguyên về spec',ph:'build'},
+'bug-log':{e:'🐛',n:'bug-log',t:'T3',tl:'Verification',o:'Ghi lỗi có cấu trúc → track đến khi fix → trigger loop',out:'BUG-YYYYMMDD-NN + severity + status',w:'PM phát hiện vấn đề',p:'Bug: reproduce, severity, screenshots',m:'Creative revision, copy change, targeting fix',g:'Tracking: phát hiện → fix → verify → close',ph:'build'},
+'post-phase':{e:'📋',n:'post-phase',t:'T2',tl:'Integrity',o:'Checklist đóng phase: đủ? docs? sync? bàn giao rõ?',out:'6-step completion + charter check',w:'Cuối mỗi phase/sprint',p:'Code synced, docs updated, regression passed',m:'Results documented, budget reconciled',g:'Đóng giai đoạn sạch sẽ',ph:'close'},
+'sync-check':{e:'🔄',n:'sync-check',t:'T2',tl:'Integrity',o:'Nhiều nơi chứa cùng thông tin — có giống nhau?',out:'Drift list + fix commands',w:'Cuối phase, khi nghi ngờ',p:'Source copies, docs vs code',m:'Messaging cross-channel, brand assets',g:'Phát hiện drift giữa bản sao',ph:'close'},
+'doc-pilot':{e:'📚',n:'doc-pilot',t:'T5',tl:'Business',o:'Docs nào cần update? User guide sẵn sàng chưa?',out:'Outdated docs + coverage + HDSD gap',w:'Cuối phase, trước release',p:'User guide, API docs, feature specs',m:'Campaign report, content calendar',g:'Tài liệu luôn đồng bộ thực tế',ph:'close'},
+'release-gate':{e:'🚦',n:'release-gate',t:'T3',tl:'Verification',o:'Cổng cuối: 12-16 mục, score /100, Go/No-Go',out:'Score /100 + READY/CAUTION/NOT READY',w:'Trước release/launch',p:'Performance, security, store compliance',m:'Legal, brand, tracking, budget, timeline',g:'Kiểm tra toàn diện trước ship',ph:'close'},
+'surface-test':{e:'🧪',n:'surface-test',t:'T3',tl:'Verification',o:'Kiểm tra hợp đồng giữa 4 bề mặt tương tác',out:'4 surfaces health + violations',w:'Trước release, sau đổi API',p:'User↔App, App↔Server, App↔3rd Party',m:'Brand↔Customer, Marketing↔Sales',g:'Các thành phần nói cùng ngôn ngữ',ph:'close'},
+'product-health':{e:'📊',n:'product-health',t:'T5',tl:'Business',o:'Dashboard 8 chiều cho PM, score /80',out:'8 dimensions + overall /80 + gaps',w:'Định kỳ, trước milestone',p:'UX, tech debt, docs, store readiness',m:'Reach, engagement, ROI, sentiment',g:'Nhìn toàn cảnh sức khoẻ dự án',ph:'close'},
+'guard':{e:'🛡️',n:'guard',t:'T1',tl:'Safety',o:'Bác sĩ chấm sức khoẻ /100. < 70 → dừng',out:'Health score /100 + breakdown + trends',w:'Sau task, định kỳ, sau thay đổi lớn',p:'Structure, design system, spec alignment',m:'Brand consistency, channel health',g:'Tình trạng tổng thể hiện tại',ph:'always'},
+'sentinel':{e:'📸',n:'sentinel',t:'T3',tl:'Verification',o:'Ảnh TRƯỚC → thay đổi → ảnh SAU → phát hiện hồi quy',out:'Baseline vs Current diff',w:'Trước/sau refactor',p:'Files, routes, providers, tokens',m:'Metrics baseline → change → compare',g:'Phát hiện hỏng không cố ý',ph:'always'},
+'incident-review':{e:'🚨',n:'incident-review',t:'T1',tl:'Safety',o:'Phân tích sự cố: 5 Whys, blast radius, phòng ngừa',out:'Root cause + fixes + prevention',w:'Sự cố, loop > 3 lần',p:'App crash, wrong calculation',m:'Campaign fail, PR crisis',g:'Hiểu TẠI SAO → ngăn tái phát',ph:'always'},
+'ux-audit':{e:'👤',n:'ux-audit',t:'T4',tl:'UX',o:'Đánh giá UX theo 10 tiêu chí Nielsen + accessibility',out:'10 scores /3 + total /30',w:'Định kỳ, trước release',p:'10 heuristics, WCAG, stock trading UX',m:'Message clarity, CTA, journey friction',g:'Chất lượng trải nghiệm',ph:'always'},
+'help':{e:'❓',n:'help',t:'T1',tl:'Safety',o:'Danh sách skills + workflow guide',out:'Bảng 20 skills + chains',w:'Khi quên',p:'Full guide',m:'Full guide',g:'Tra cứu nhanh',ph:'always'}
+};
+
+// Navigation
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  event.target.classList.add('on');
+  event.preventDefault();
+}
+
+// Arch drilldowns
+function drillArch(id){
+  document.querySelectorAll('[id^="drill-"]').forEach(d=>{if(!d.id.startsWith('drill-flow'))d.classList.remove('on')});
+  const el=document.getElementById('drill-'+id);
+  if(el)el.classList.add('on');
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeDrill(){document.querySelectorAll('[id^="drill-"]').forEach(d=>d.classList.remove('on'))}
+
+// Flow drilldowns
+function drillFlow(id){
+  ['roadmap','phase','task'].forEach(k=>{const e=document.getElementById('drill-'+k);if(e)e.classList.remove('on')});
+  const el=document.getElementById('drill-'+id);
+  if(el){el.classList.add('on');el.scrollIntoView({behavior:'smooth',block:'nearest'})}
+}
+function closeDrillFlow(){['roadmap','phase','task'].forEach(k=>{const e=document.getElementById('drill-'+k);if(e)e.classList.remove('on')})}
+
+// Build skills list
+(function(){
+  const list=document.getElementById('skills-list');
+  if(!list)return;
+  const tc={'T1':'tb1','T2':'tb2','T3':'tb3','T4':'tb4','T5':'tb5'};
+  const phColors={'start':'var(--bbg)','plan':'var(--ibg)','dev':'var(--pbg)','build':'var(--gbg)','close':'var(--obg)','always':'var(--grl)'};
+  const phLabels={'start':'Bắt đầu','plan':'Plan','dev':'Dev Loop','build':'Build & Test','close':'Đóng','always':'Xuyên suốt'};
+  let i=1;
+  for(const[k,s]of Object.entries(S)){
+    const chip=document.createElement('div');
+    chip.className='sk';
+    chip.style.background=phColors[s.ph];
+    chip.onclick=()=>showSkill(k);
+    chip.innerHTML=`<span class="e">${s.e}</span><span class="n">${s.n}</span><span class="tier-badge ${tc[s.t]}">${s.t}</span><span style="font-size:10px;color:var(--ts);margin-left:4px">${s.o.substring(0,40)}...</span>`;
+    list.appendChild(chip);
+    i++;
+  }
+})();
+
+function showSkill(k){
+  const s=S[k];if(!s)return;
+  const tc={'T1':'tb1','T2':'tb2','T3':'tb3','T4':'tb4','T5':'tb5'}[s.t];
+  const d=document.getElementById('skill-detail');
+  d.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:24px">${s.e}</span>
+      <span style="font-size:15px;font-weight:700">/kfsp:${s.n}</span>
+      <span class="tier-badge ${tc}">${s.t} ${s.tl}</span>
+    </div>
+    <div class="sd-row"><span class="sd-l">Làm gì</span><span>${s.o}</span></div>
+    <div class="sd-row"><span class="sd-l">Sinh ra</span><span>${s.out}</span></div>
+    <div class="sd-row"><span class="sd-l">Khi nào</span><span>${s.w}</span></div>
+    <div class="dom-grid">
+      <div class="dom-cell" style="background:var(--pbg)"><strong>🖥️ Product</strong>${s.p}</div>
+      <div class="dom-cell" style="background:var(--obg)"><strong>📢 Marketing</strong>${s.m}</div>
+      <div class="dom-cell" style="background:var(--grl)"><strong>📁 General</strong>${s.g}</div>
+    </div>`;
+  d.classList.add('on');
+  d.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+</script>
+</body>
+</html>
