@@ -30,27 +30,129 @@ Check which source exists:
 
 Use whichever exists. If neither → error.
 
-## Check 1: 🚫 Hardcoded Values
+## Check 1: 🎨 Design System Compliance (GATE — blocks on NEW violations)
 
+### Token Reference Files
+All design tokens MUST be defined in and imported from these files:
+- `kfsp_colors.dart` — all Color values (brand, stock, surface, text)
+- `kfsp_text_styles.dart` — all TextStyle/fontSize/fontFamily/fontWeight
+- `kfsp_spacing.dart` — all EdgeInsets, padding, margin, gap values
+- `kfsp_animations.dart` — all Duration, Curve values
+- `kfsp_shadows.dart` — all BoxShadow, elevation values
+- `kfsp_buttons.dart` — all ButtonStyle values
+
+### Step 1: Get changed files
 ```bash
-# Colors — ONLY allowed in kfsp_colors.dart
-grep -rn "Color(0x" lib/ --include="*.dart" | grep -v "kfsp_colors.dart" | grep -v "_test.dart"
-grep -rn "Colors\." lib/ --include="*.dart" | grep -v "kfsp_colors.dart" | grep -v "_test.dart" | grep -v "Colors.transparent"
-
-# Spacing — ONLY allowed in kfsp_spacing.dart
-grep -rn "EdgeInsets\.all([0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
-grep -rn "SizedBox(height: [0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
-grep -rn "SizedBox(width: [0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart"
-
-# Font sizes — ONLY allowed in kfsp_text_styles.dart
-grep -rn "fontSize:" lib/ --include="*.dart" | grep -v "kfsp_text_styles.dart" | grep -v "_test.dart"
-
-# Font families
-grep -rn "fontFamily:" lib/ --include="*.dart" | grep -v "kfsp_text_styles.dart"
+# Only check files in the current commit (staged changes)
+CHANGED_DART=$(git diff --cached --name-only -- '*.dart' | grep -E "^lib/(screens|common|features|widgets)/" | grep -v "_test.dart")
+if [ -z "$CHANGED_DART" ]; then
+  echo "✅ No Dart files changed in lib/screens/ or lib/common/ — skip design system check"
+  exit 0
+fi
+echo "📋 Changed files to check:"
+echo "$CHANGED_DART"
 ```
 
-**Exceptions:** Test files, generated files, third-party code.
-**Severity:** Each violation = ⚠️ Warning (not blocking, but flagged).
+### Step 2: Count violations BEFORE change (baseline)
+```bash
+for f in $CHANGED_DART; do
+  # Get the BEFORE version from git
+  BEFORE_COLORS=$(git show HEAD:"$f" 2>/dev/null | grep -c "Color(0x" || echo "0")
+  BEFORE_MATCOLORS=$(git show HEAD:"$f" 2>/dev/null | grep -c "Colors\." | grep -v "Colors\.transparent" || echo "0")
+  BEFORE_FONTSIZE=$(git show HEAD:"$f" 2>/dev/null | grep -c "fontSize:" || echo "0")
+  BEFORE_EDGEINSETS=$(git show HEAD:"$f" 2>/dev/null | grep -cE "EdgeInsets\.(all|only|symmetric|fromLTRB)\s*\(" || echo "0")
+
+  # Get the AFTER version (staged)
+  AFTER_COLORS=$(git show :"$f" 2>/dev/null | grep -c "Color(0x" || echo "0")
+  AFTER_MATCOLORS=$(git show :"$f" 2>/dev/null | grep "Colors\." | grep -vc "Colors\.transparent" || echo "0")
+  AFTER_FONTSIZE=$(git show :"$f" 2>/dev/null | grep -c "fontSize:" || echo "0")
+  AFTER_EDGEINSETS=$(git show :"$f" 2>/dev/null | grep -cE "EdgeInsets\.(all|only|symmetric|fromLTRB)\s*\(" || echo "0")
+
+  # Delta = new violations added
+  D_COLORS=$((AFTER_COLORS - BEFORE_COLORS))
+  D_MATCOLORS=$((AFTER_MATCOLORS - BEFORE_MATCOLORS))
+  D_FONTSIZE=$((AFTER_FONTSIZE - BEFORE_FONTSIZE))
+  D_EDGEINSETS=$((AFTER_EDGEINSETS - BEFORE_EDGEINSETS))
+
+  [ "$D_COLORS" -gt 0 ] && echo "🔴 BLOCK: $f — +$D_COLORS new Color(0x... (use KfspColors.*)"
+  [ "$D_MATCOLORS" -gt 0 ] && echo "🔴 BLOCK: $f — +$D_MATCOLORS new Colors.* (use KfspColors.*)"
+  [ "$D_FONTSIZE" -gt 0 ] && echo "🔴 BLOCK: $f — +$D_FONTSIZE new fontSize: raw (use KfspTextStyles.* or KfspColors.font*)"
+  [ "$D_EDGEINSETS" -gt 0 ] && echo "🔴 BLOCK: $f — +$D_EDGEINSETS new EdgeInsets with raw numbers (use KfspSpacing.*)"
+done
+```
+
+### Step 3: Show specific new violations (file:line)
+```bash
+for f in $CHANGED_DART; do
+  # Show only ADDED lines (lines starting with +) that have violations
+  git diff --cached -U0 "$f" | grep "^+" | grep -v "^+++" | grep -n "Color(0x" && echo "  ↳ in $f — use KfspColors.* token instead"
+  git diff --cached -U0 "$f" | grep "^+" | grep -v "^+++" | grep "Colors\." | grep -v "Colors\.transparent" && echo "  ↳ in $f — use KfspColors.* token instead"
+  git diff --cached -U0 "$f" | grep "^+" | grep -v "^+++" | grep "fontSize:" && echo "  ↳ in $f — use KfspTextStyles.* token instead"
+  git diff --cached -U0 "$f" | grep "^+" | grep -v "^+++" | grep -E "EdgeInsets\.(all|only|symmetric|fromLTRB)\s*\([0-9]" && echo "  ↳ in $f — use KfspSpacing.* token instead"
+done
+```
+
+### Blocking vs Warning Rules
+
+| Pattern | Where | Verdict |
+|---------|-------|---------|
+| NEW `Color(0xFF...` | `lib/screens/`, `lib/common/`, `lib/features/`, `lib/widgets/` | 🔴 **BLOCK** |
+| NEW `Colors.*` (except `Colors.transparent`) | Same folders | 🔴 **BLOCK** |
+| NEW `fontSize:` with raw number | Same folders | 🔴 **BLOCK** |
+| NEW `EdgeInsets.*` with raw numbers | Same folders | 🔴 **BLOCK** |
+| EXISTING violations (count unchanged or decreased) | Anywhere | ⚠️ **WARN** (legacy debt, fix later) |
+| Any violation in `lib/theme/`, `lib/constants/` | Token definition files | ✅ **ALLOWED** (that's where tokens live) |
+| Any violation in `_test.dart` | Test files | ✅ **ALLOWED** |
+| Any violation in `generated/`, `l10n/` | Generated code | ✅ **ALLOWED** |
+
+### Examples: WRONG vs RIGHT
+
+```dart
+// ❌ WRONG — hardcoded color
+Container(color: Color(0xFF7B3AEC))
+Container(color: Colors.purple)
+Text('Hello', style: TextStyle(color: Colors.white))
+
+// ✅ RIGHT — use design tokens
+Container(color: context.kfspColors.brandPrimary)
+Container(color: KfspColors.brandPrimary)
+Text('Hello', style: KfspTextStyles.bodyMedium)
+
+// ❌ WRONG — hardcoded fontSize
+Text('Hello', style: TextStyle(fontSize: 14))
+
+// ✅ RIGHT — use text style tokens
+Text('Hello', style: KfspTextStyles.bodyMedium)
+Text('Hello', style: context.kfspColors.font14)
+
+// ❌ WRONG — hardcoded spacing
+Padding(padding: EdgeInsets.all(16))
+SizedBox(height: 8)
+
+// ✅ RIGHT — use spacing tokens
+Padding(padding: KfspSpacing.paddingM)
+SizedBox(height: KfspSpacing.sm)
+
+// ❌ WRONG — hardcoded shadow
+BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+
+// ✅ RIGHT — use shadow tokens
+KfspShadows.cardShadow
+```
+
+### Legacy Violations Report (informational)
+```bash
+# Report total legacy violations (not blocking, just awareness)
+TOTAL_HC_COLORS=$(grep -rn "Color(0x" lib/ --include="*.dart" | grep -v "kfsp_colors.dart\|_test.dart\|theme/\|constants/" | wc -l | tr -d ' ')
+TOTAL_MAT_COLORS=$(grep -rn "Colors\." lib/ --include="*.dart" | grep -v "kfsp_colors.dart\|_test.dart\|theme/\|constants/\|Colors\.transparent" | wc -l | tr -d ' ')
+TOTAL_FONTSIZE=$(grep -rn "fontSize:" lib/ --include="*.dart" | grep -v "kfsp_text_styles.dart\|_test.dart\|theme/\|constants/" | wc -l | tr -d ' ')
+TOTAL_EDGEINSETS=$(grep -rnE "EdgeInsets\.(all|only|symmetric|fromLTRB)\s*\([0-9]" lib/ --include="*.dart" | grep -v "kfsp_spacing.dart\|_test.dart\|theme/\|constants/" | wc -l | tr -d ' ')
+echo "📊 Legacy debt: $TOTAL_HC_COLORS Color(0x, $TOTAL_MAT_COLORS Colors.*, $TOTAL_FONTSIZE fontSize, $TOTAL_EDGEINSETS EdgeInsets"
+```
+
+**Exceptions:** Test files, generated files, theme/constants definition files.
+**Severity for NEW violations:** 🔴 BLOCK — must fix before commit.
+**Severity for EXISTING violations:** ⚠️ Warning (legacy debt, track separately).
 
 ## Check 2: 🔒 Secrets & Credentials
 
@@ -137,19 +239,27 @@ done 2>/dev/null | head -20
 ## Findings
 | # | Check | Status | Violations |
 |---|-------|--------|------------|
-| 1 | Hardcoded Values | ✅/⚠️ | N violations |
-| 2 | Secrets | ✅/🔴 | N violations |
-| 3 | File Size | ✅/⚠️ | N warnings |
-| 4 | Imports | ✅/❌ | N broken |
-| 5 | Conventions | ✅/ℹ️ | N suggestions |
-| 6 | Dead Code | ✅/ℹ️ | N candidates |
+| 1 | 🎨 Design System Compliance | ✅/🔴 | +N new violations (BLOCK) / N legacy (WARN) |
+| 2 | 🔒 Secrets | ✅/🔴 | N violations |
+| 3 | 📏 File Size | ✅/⚠️ | N warnings |
+| 4 | 📦 Imports | ✅/❌ | N broken |
+| 5 | 🏗️ Conventions | ✅/ℹ️ | N suggestions |
+| 6 | 🧹 Dead Code | ✅/ℹ️ | N candidates |
+
+## Design System Compliance Detail
+| File | Color(0x | Colors.* | fontSize | EdgeInsets | Verdict |
+|------|----------|----------|----------|------------|---------|
+| path/file.dart | +2 new | 0 | +1 new | 0 | 🔴 BLOCK |
+| path/other.dart | 0 | 0 | 0 | 0 | ✅ PASS |
+
+**Legacy debt (not blocking):** X Color(0x, Y Colors.*, Z fontSize, W EdgeInsets
 
 ## Violations Detail
 [grouped by severity: 🔴 Critical → ⚠️ Warning → ℹ️ Info]
 
 ## Verdict
-- 🔴 Critical found → **FAIL — fix before commit**
-- ⚠️ Warnings only → **PASS with warnings — commit OK, fix soon**
+- 🔴 Critical found (secrets, NEW design system violations) → **FAIL — fix before commit**
+- ⚠️ Warnings only (legacy debt, file size) → **PASS with warnings — commit OK, fix soon**
 - ℹ️ Info only → **PASS — clean commit**
 ```
 
