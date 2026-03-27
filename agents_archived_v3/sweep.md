@@ -133,8 +133,8 @@ done
 | Hardcoded | Token |
 |-----------|-------|
 | `Color(0xFF7B3AEC)` | `KfspColors.brandPrimary` |
-| `Color(0xFF09DA64)` | `KfspColors.stockUp` |
-| `Color(0xFFF23468)` | `KfspColors.stockDown` |
+| `Color(0xFF0DBE55)` | `KfspColors.stockUp` |
+| `Color(0xFFFF3B30)` | `KfspColors.stockDown` |
 | `Color(0xFFFF763D)` | `KfspColors.stockRef` |
 | `Color(0xFF000000)` | `KfspColors.textPrimary` |
 | `Color(0xFF7E839E)` | `KfspColors.textSecondary` |

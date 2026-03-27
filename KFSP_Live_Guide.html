@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFSP Live Guide</title>
+<style>
+:root{--p:#7B3AEC;--p-bg:#F3EEFA;--pass:#0DBE55;--fail:#FF3B30;--warn:#FFB020;--info:#4A91FD;--bg:#F7F7FA;--card:#fff;--text:#1A1A2E;--text2:#6B7280;--border:#E5E7EB}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+
+/* Header */
+.header{background:linear-gradient(135deg,#7B3AEC,#5a1fb8);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-right{display:flex;gap:8px;align-items:center}
+.header-right select,.header-right input{padding:5px 10px;border:none;border-radius:6px;font-size:12px;background:rgba(255,255,255,.9);color:#333}
+.hdr-btn{padding:5px 12px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);transition:.2s}
+.hdr-btn:hover{background:rgba(255,255,255,.35)}
+.hdr-btn.active{background:#fff;color:var(--p)}
+
+/* Progress bar */
+.progress-strip{height:4px;background:#e0e0e0;position:sticky;top:52px;z-index:99}
+.progress-fill{height:100%;background:var(--pass);transition:width .5s ease}
+
+/* Main layout */
+.main{display:flex;min-height:calc(100vh - 56px)}
+
+/* Steps sidebar */
+.steps-col{width:320px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px)}
+.step-item{padding:12px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:.15s;display:flex;gap:10px;align-items:flex-start;position:relative}
+.step-item:hover{background:#faf7ff}
+.step-item.active{background:var(--p-bg);border-left:4px solid var(--p)}
+.step-item.done{opacity:.6}
+.step-item.done::after{content:'✓';position:absolute;right:12px;top:12px;color:var(--pass);font-weight:700;font-size:14px}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff}
+.step-item.active .step-num{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(123,58,236,.4)}50%{box-shadow:0 0 0 8px rgba(123,58,236,0)}}
+.step-info{flex:1;min-width:0}
+.step-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.step-sub{font-size:11px;color:var(--text2);line-height:1.4}
+.step-workspace{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:4px}
+.ws-desktop{background:var(--p-bg);color:var(--p)}
+.ws-terminal{background:#E3F2FD;color:var(--info)}
+.ws-both{background:#E8F9EF;color:var(--pass)}
+
+/* Detail panel */
+.detail-col{flex:1;padding:20px;overflow-y:auto}
+.detail-card{background:var(--card);border-radius:12px;padding:24px;border:1px solid var(--border);margin-bottom:16px}
+.detail-card h2{font-size:18px;font-weight:700;color:var(--p);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.detail-card .phase-label{font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:12px}
+
+/* Command box */
+.cmd-box{background:#1a1a2e;color:#e0e0e0;border-radius:10px;padding:16px;margin:12px 0;font-family:'SF Mono',Consolas,monospace;font-size:13px;position:relative;line-height:1.6}
+.cmd-box .cmd-line{color:#0DBE55;font-weight:600}
+.cmd-box .cmd-comment{color:#6B7280;font-style:italic}
+.cmd-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:none;color:#aaa;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px}
+.cmd-copy:hover{background:rgba(255,255,255,.2);color:#fff}
+
+/* Checklist */
+.checklist{list-style:none;margin:12px 0}
+.checklist li{padding:8px 12px;border-radius:8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;transition:.15s}
+.checklist li:hover{background:#f9f9fb}
+.checklist li .chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;transition:.2s}
+.checklist li.checked .chk{background:var(--pass);border-color:var(--pass);color:#fff}
+.checklist li.checked{color:var(--text2);text-decoration:line-through}
+
+/* Next action highlight */
+.next-action{background:linear-gradient(135deg,var(--p-bg),#e8d8ff);border:2px solid var(--p);border-radius:12px;padding:16px;margin:16px 0}
+.next-action h3{font-size:14px;font-weight:700;color:var(--p);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.next-action .na-cmd{font-family:'SF Mono',Consolas,monospace;font-size:14px;font-weight:700;color:var(--p);background:#fff;padding:8px 14px;border-radius:8px;display:inline-block;margin:4px 0;cursor:pointer;border:1px solid var(--p)}
+.next-action .na-cmd:hover{background:var(--p);color:#fff}
+.next-action .na-desc{font-size:12px;color:var(--text2);margin-top:6px}
+
+/* Workspace indicator */
+.ws-indicator{display:flex;gap:12px;margin:16px 0;padding:12px;background:#f9f9fb;border-radius:10px}
+.ws-box{flex:1;padding:10px 14px;border-radius:8px;text-align:center;font-size:12px;font-weight:600;border:2px solid transparent}
+.ws-box.active-ws{border-style:solid}
+.ws-box.desktop-ws{background:var(--p-bg);color:var(--p)}
+.ws-box.desktop-ws.active-ws{border-color:var(--p)}
+.ws-box.terminal-ws{background:#E3F2FD;color:var(--info)}
+.ws-box.terminal-ws.active-ws{border-color:var(--info)}
+.ws-box .ws-status{font-size:10px;font-weight:400;color:var(--text2);margin-top:2px}
+
+/* File zones */
+.file-zones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.fz{padding:10px 12px;border-radius:8px;font-size:11px;font-family:'SF Mono',Consolas,monospace}
+.fz-write{background:#FFF7E6;color:#CC5500;border:1px solid #ffe0b0}
+.fz-read{background:#f0f0f0;color:var(--text2);border:1px solid var(--border)}
+.fz-blocked{background:#FFECEB;color:var(--fail);border:1px solid #ffcccc;text-decoration:line-through}
+
+/* Timer */
+.timer{font-size:11px;color:var(--text2);text-align:center;padding:8px;background:#f9f9fb;border-radius:8px;margin-top:12px}
+.timer strong{color:var(--text);font-size:14px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;z-index:600;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .main{flex-direction:column}
+  .steps-col{width:100%;height:auto;position:static;display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .step-item{min-width:140px;flex-direction:column;align-items:center;text-align:center;border-bottom:none;border-right:1px solid #f5f5f5}
+  .file-zones{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🥋 KFSP Live Guide</h1>
+  <div class="header-right">
+    <input id="phaseInput" type="text" placeholder="Phase: VD 4.11" style="width:100px" oninput="saveGuideState()">
+    <select id="sessionType" onchange="saveGuideState()">
+      <option value="dev">Code session</option>
+      <option value="review">Review session</option>
+      <option value="release">Release session</option>
+    </select>
+    <button class="hdr-btn" onclick="resetGuide()">Làm mới</button>
+    <button class="hdr-btn" onclick="saveHTML()">💾 Lưu</button>
+  </div>
+</div>
+
+<div class="progress-strip"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="main">
+  <div class="steps-col" id="stepsCol"></div>
+  <div class="detail-col" id="detailCol"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =============================================
+// LIFECYCLE STEPS
+// =============================================
+const STEPS = [
+  {
+    id: 'start',
+    num: 1,
+    name: 'Mở phiên',
+    sub: 'Git check, drift detect, nhắc dual-session',
+    workspace: 'both',
+    color: '#FFB020',
+    commands: ['/kfsp:start'],
+    checklist: [
+      'Kiểm tra git status — có uncommitted changes?',
+      'Phát hiện drift code-docs',
+      'Nhắc bật Terminal cho rà soát docs',
+      'Đọc plan file hiện tại (docs/plans/)',
+      'Kiểm tra memory + CLAUDE.md'
+    ],
+    desktopDo: ['Chạy /kfsp:start', 'Đọc git status', 'Review plan file'],
+    terminalDo: ['Mở Terminal mới', 'cd vào project', 'Sẵn sàng rà soát docs'],
+    desktopFiles: { write: [], read: ['git log', 'CLAUDE.md', 'docs/plans/'] },
+    terminalFiles: { write: [], read: ['CLAUDE.md', 'docs/'] },
+    nextHint: 'Bắt đầu lên kế hoạch hoặc code trực tiếp',
+    nextCmd: '/kfsp:risk --before'
+  },
+  {
+    id: 'plan',
+    num: 2,
+    name: 'Lên kế hoạch',
+    sub: 'Risk analysis + GSD plan',
+    workspace: 'desktop',
+    color: '#4A91FD',
+    commands: ['/kfsp:risk --before', '/gsd:plan-phase N'],
+    checklist: [
+      'Chạy pre-mortem nếu feature mới',
+      'Tạo plan file docs/plans/P{N}.md',
+      'Xác nhận scope + deliverables',
+      'Ước lượng effort + risks'
+    ],
+    desktopDo: ['/kfsp:risk --before — dự đoán rủi ro', '/gsd:plan-phase — tạo plan chi tiết', 'Lưu plan vào docs/plans/'],
+    terminalDo: ['/kfsp:docs --status — docs nào cần update', 'Bắt đầu rà soát specs lỗi thời', 'Chuẩn bị test cases cho features mới'],
+    desktopFiles: { write: ['docs/plans/P{N}.md'], read: ['lib/', 'docs/'] },
+    terminalFiles: { write: ['docs/*.md (cập nhật specs)'], read: ['docs/', 'lib/ (chỉ đọc)'] },
+    nextHint: 'Plan xong → bắt đầu code',
+    nextCmd: 'Code Flutter (lib/)'
+  },
+  {
+    id: 'code',
+    num: 3,
+    name: 'Code',
+    sub: 'Viết code + unit test (TDD)',
+    workspace: 'desktop',
+    color: '#7B3AEC',
+    commands: ['flutter test', '/kfsp:check --quick'],
+    checklist: [
+      'Viết unit test TRƯỚC (TDD)',
+      'Code feature trong lib/',
+      'Test pass trên local',
+      'Chạy /kfsp:check --quick',
+      'Fix hardcoded colors/spacing nếu có'
+    ],
+    desktopDo: ['Viết test → code → test pass', '/kfsp:check --quick — health + tokens', 'Fix issues từ check'],
+    terminalDo: ['/kfsp:docs --update — cập nhật specs', '/kfsp:review --parity — so sánh vs Figma', 'Cập nhật test_cases/ nếu cần'],
+    desktopFiles: { write: ['lib/screens/', 'lib/core/', 'test/'], read: [] },
+    terminalFiles: { write: ['docs/*.md', 'docs/test_cases/'], read: ['lib/ (chỉ đọc)', 'Design/'] },
+    nextHint: 'Code xong → pre-commit gate',
+    nextCmd: '/kfsp:gate --commit'
+  },
+  {
+    id: 'commit',
+    num: 4,
+    name: 'Commit',
+    sub: '23 checks pre-commit gate',
+    workspace: 'desktop',
+    color: '#FF3B30',
+    commands: ['/kfsp:gate --commit', 'git commit'],
+    checklist: [
+      'Chạy /kfsp:gate --commit',
+      '23 checks PHẢI pass',
+      'Fix nếu có BLOCK',
+      'git commit với message rõ ràng',
+      'Không push remote (chờ Thanh cho phép)'
+    ],
+    desktopDo: ['/kfsp:gate --commit — 23 checks', 'git add + git commit', 'KHÔNG push (Rule 14)'],
+    terminalDo: ['Tiếp tục cập nhật docs', 'Hoặc chờ nếu cần sync'],
+    desktopFiles: { write: ['git history'], read: ['lib/', 'test/'] },
+    terminalFiles: { write: ['docs/'], read: [] },
+    nextHint: 'Commit xong → tiếp tục code hoặc build',
+    nextCmd: 'Quay lại Code hoặc Build'
+  },
+  {
+    id: 'build',
+    num: 5,
+    name: 'Build & Verify',
+    sub: 'Build APK/IPA + tự verify',
+    workspace: 'both',
+    color: '#0DBE55',
+    commands: ['/kfsp:test --verify', '/kfsp:test --brief'],
+    checklist: [
+      'rsync source → build copy',
+      'flutter build apk/ios',
+      '/kfsp:test --verify — analyze + test + runtime',
+      '/kfsp:test --brief — tạo checklist cho PM',
+      'Gửi build + brief cho Thanh'
+    ],
+    desktopDo: ['rsync → build copy', 'flutter build', '/kfsp:test --verify'],
+    terminalDo: ['/kfsp:test --brief — tạo PM checklist', 'Gửi brief kèm build'],
+    desktopFiles: { write: ['~/Desktop/kfsp_flutter_dev/'], read: ['lib/', 'test/'] },
+    terminalFiles: { write: ['docs/logs/'], read: ['lib/ (chỉ đọc)'] },
+    nextHint: 'Build xong → gửi PM test',
+    nextCmd: 'Gửi build cho Thanh'
+  },
+  {
+    id: 'pm-test',
+    num: 6,
+    name: 'PM kiểm thử',
+    sub: 'Thanh test + log bugs',
+    workspace: 'terminal',
+    color: '#FFB020',
+    commands: ['/kfsp:test --bug'],
+    checklist: [
+      'Thanh test trên Simulator/thiết bị',
+      'Ghi nhận feedback',
+      '/kfsp:test --bug — log bugs',
+      'Phân loại severity',
+      'Nếu có bug → quay lại Code (bước 3)'
+    ],
+    desktopDo: ['Chờ PM feedback', 'Fix bugs nếu có → quay bước 3'],
+    terminalDo: ['/kfsp:test --bug — ghi bugs', '/kfsp:log --incident (nếu bug nghiêm trọng)', 'Cập nhật test registry'],
+    desktopFiles: { write: ['lib/ (fix bugs)'], read: [] },
+    terminalFiles: { write: ['docs/logs/bugs/', 'docs/test_cases/'], read: [] },
+    nextHint: 'Hết bug → đóng phase. Còn bug → quay lại Code.',
+    nextCmd: '/kfsp:check --full'
+  },
+  {
+    id: 'close',
+    num: 7,
+    name: 'Đóng phase',
+    sub: 'Health check + docs + log',
+    workspace: 'both',
+    color: '#7B3AEC',
+    commands: ['/kfsp:check --full', '/kfsp:docs --close-phase', '/kfsp:log --log'],
+    checklist: [
+      '/kfsp:check --full — health 10 chiều',
+      '/kfsp:docs --close-phase — archive phase',
+      '/kfsp:log --log — ghi decisions/lessons',
+      'Verify 6/6 chiều feature (Rule 9)',
+      '/gsd:verify-work — UAT check'
+    ],
+    desktopDo: ['/kfsp:check --full — score /100', '/gsd:verify-work'],
+    terminalDo: ['/kfsp:docs --close-phase', '/kfsp:log --log — ghi bài học', 'Update plan status → DONE'],
+    desktopFiles: { write: [], read: ['lib/', 'test/'] },
+    terminalFiles: { write: ['docs/plans/', 'docs/logs/'], read: ['docs/'] },
+    nextHint: 'Phase xong → release hoặc phase tiếp',
+    nextCmd: '/kfsp:gate --release'
+  },
+  {
+    id: 'release',
+    num: 8,
+    name: 'Release',
+    sub: 'Final gates + submit store',
+    workspace: 'both',
+    color: '#0DBE55',
+    commands: ['/kfsp:risk --contracts', '/kfsp:risk --regression', '/kfsp:review --audit', '/kfsp:gate --release'],
+    checklist: [
+      '/kfsp:risk --contracts — 4 bề mặt',
+      '/kfsp:risk --regression — so sánh trước/sau',
+      '/kfsp:review --audit — Nielsen heuristics',
+      '/kfsp:gate --release — 12 gates, score /100',
+      'Score ≥ 80 → PASS → submit store'
+    ],
+    desktopDo: ['/kfsp:risk --regression', '/kfsp:gate --release — final gate'],
+    terminalDo: ['/kfsp:risk --contracts', '/kfsp:review --audit', 'Final docs review'],
+    desktopFiles: { write: [], read: ['toàn bộ project'] },
+    terminalFiles: { write: ['docs/ (final update)'], read: ['toàn bộ project'] },
+    nextHint: 'Release xong! 🎉',
+    nextCmd: '/kfsp:start (phiên mới)'
+  }
+];
+
+// =============================================
+// STATE
+// =============================================
+const LS_KEY = 'kfsp_live_guide_state';
+let STATE = {
+  currentStep: 0,
+  checklistState: {},
+  phase: '',
+  sessionType: 'dev',
+  startTime: null,
+  stepTimes: {}
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) STATE = { ...STATE, ...JSON.parse(raw) };
+  } catch(e) {}
+  document.getElementById('phaseInput').value = STATE.phase || '';
+  document.getElementById('sessionType').value = STATE.sessionType || 'dev';
+  if (!STATE.startTime) STATE.startTime = Date.now();
+}
+
+function saveGuideState() {
+  STATE.phase = document.getElementById('phaseInput').value;
+  STATE.sessionType = document.getElementById('sessionType').value;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(STATE)); } catch(e) {}
+}
+
+// =============================================
+// RENDER
+// =============================================
+function render() {
+  renderSteps();
+  renderDetail();
+  updateProgress();
+  saveGuideState();
+}
+
+function renderSteps() {
+  const col = document.getElementById('stepsCol');
+  let html = '';
+  STEPS.forEach((s, i) => {
+    const cls = i === STATE.currentStep ? 'active' : (i < STATE.currentStep ? 'done' : '');
+    html += `<div class="step-item ${cls}" onclick="goToStep(${i})">
+      <div class="step-num" style="background:${s.color}">${s.num}</div>
+      <div class="step-info">
+        <div class="step-name">${s.name}</div>
+        <div class="step-sub">${s.sub}</div>
+        <span class="step-workspace ws-${s.workspace}">${{desktop:'💻 Desktop',terminal:'🖥️ Terminal',both:'💻+🖥️ Cả hai'}[s.workspace]}</span>
+      </div>
+    </div>`;
+  });
+  col.innerHTML = html;
+}
+
+function renderDetail() {
+  const col = document.getElementById('detailCol');
+  const s = STEPS[STATE.currentStep];
+  const prev = STATE.currentStep > 0 ? STEPS[STATE.currentStep - 1] : null;
+  const next = STATE.currentStep < STEPS.length - 1 ? STEPS[STATE.currentStep + 1] : null;
+
+  let checklistHtml = '';
+  s.checklist.forEach((item, i) => {
+    const key = s.id + '-' + i;
+    const checked = STATE.checklistState[key] ? 'checked' : '';
+    checklistHtml += `<li class="${checked}" onclick="toggleCheck('${key}')"><span class="chk">${checked ? '✓' : ''}</span>${item}</li>`;
+  });
+
+  const allChecked = s.checklist.every((_, i) => STATE.checklistState[s.id + '-' + i]);
+
+  col.innerHTML = `
+    <!-- Current step -->
+    <div class="detail-card">
+      <div class="phase-label" style="background:${s.color}20;color:${s.color}">Bước ${s.num} / ${STEPS.length} ${STATE.phase ? '— Phase ' + STATE.phase : ''}</div>
+      <h2><span style="display:inline-flex;width:32px;height:32px;border-radius:50%;background:${s.color};color:#fff;align-items:center;justify-content:center;font-size:14px">${s.num}</span> ${s.name}</h2>
+      <p style="color:var(--text2);margin-top:4px">${s.sub}</p>
+
+      <!-- Workspace indicator -->
+      <div class="ws-indicator">
+        <div class="ws-box desktop-ws ${s.workspace === 'desktop' || s.workspace === 'both' ? 'active-ws' : ''}">
+          💻 Desktop
+          <div class="ws-status">${s.workspace === 'desktop' || s.workspace === 'both' ? '🟢 Đang dùng' : '⚫ Không dùng'}</div>
+        </div>
+        <div class="ws-box terminal-ws ${s.workspace === 'terminal' || s.workspace === 'both' ? 'active-ws' : ''}">
+          🖥️ Terminal
+          <div class="ws-status">${s.workspace === 'terminal' || s.workspace === 'both' ? '🟢 Đang dùng' : '⚫ Không dùng'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commands -->
+    <div class="detail-card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:8px">Lệnh cần chạy</h3>
+      <div class="cmd-box">
+        <button class="cmd-copy" onclick="copyCommands(${STATE.currentStep})">Copy</button>
+        ${s.commands.map(c => `<div class="cmd-line">${c}</div>`).join('')}
+        ${s.commands.length > 1 ? '<div class="cmd-comment"># Chạy theo thứ tự trên</div>' : ''}
+      </div>
+    </div>
+
+    <!-- What each workspace does -->
+    <div class="detail-card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Ai làm gì?</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:12px;border-radius:10px;background:var(--p-bg)">
+          <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px">💻 Desktop</div>
+          ${s.desktopDo.map(d => `<div style="font-size:12px;padding:3px 0;color:var(--text)">• ${d}</div>`).join('')}
+          <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--text2)">Files:</div>
+          <div class="file-zones" style="grid-template-columns:1fr;gap:4px;margin:4px 0">
+            ${s.desktopFiles.write.map(f => `<div class="fz fz-write">✏️ ${f}</div>`).join('')}
+            ${s.desktopFiles.read.map(f => `<div class="fz fz-read">👁️ ${f}</div>`).join('')}
+          </div>
+        </div>
+        <div style="padding:12px;border-radius:10px;background:#E3F2FD">
+          <div style="font-size:12px;font-weight:700;color:var(--info);margin-bottom:8px">🖥️ Terminal</div>
+          ${s.terminalDo.map(d => `<div style="font-size:12px;padding:3px 0;color:var(--text)">• ${d}</div>`).join('')}
+          <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--text2)">Files:</div>
+          <div class="file-zones" style="grid-template-columns:1fr;gap:4px;margin:4px 0">
+            ${s.terminalFiles.write.map(f => `<div class="fz fz-write">✏️ ${f}</div>`).join('')}
+            ${s.terminalFiles.read.map(f => `<div class="fz fz-read">👁️ ${f}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="detail-card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:8px">Checklist <span style="font-size:12px;font-weight:400;color:var(--text2)">(bấm để đánh dấu)</span></h3>
+      <ul class="checklist">${checklistHtml}</ul>
+    </div>
+
+    <!-- Next action -->
+    ${!allChecked ? `
+    <div class="next-action">
+      <h3>⏭️ Tiếp theo</h3>
+      <div style="font-size:13px;color:var(--text)">${s.nextHint}</div>
+      <div class="na-cmd" onclick="copyText('${s.nextCmd}')">${s.nextCmd}</div>
+      <div class="na-desc">Bấm để copy lệnh</div>
+    </div>` : `
+    <div class="next-action" style="border-color:var(--pass);background:linear-gradient(135deg,#E8F9EF,#d0f5e0)">
+      <h3 style="color:var(--pass)">✅ Checklist hoàn tất!</h3>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px">Sẵn sàng chuyển sang bước tiếp theo</div>
+      ${next ? `<button onclick="goToStep(${STATE.currentStep + 1})" style="background:var(--pass);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">→ ${next.name}</button>` : '<div style="font-size:16px;font-weight:700;color:var(--pass)">🎉 Hoàn thành!</div>'}
+    </div>`}
+
+    <!-- Timer -->
+    <div class="timer">
+      Phiên bắt đầu lúc <strong>${new Date(STATE.startTime).toLocaleTimeString('vi-VN')}</strong> · Đã <strong id="elapsed">0 phút</strong>
+    </div>
+
+    <!-- Navigation -->
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:space-between">
+      ${prev ? `<button onclick="goToStep(${STATE.currentStep - 1})" style="padding:10px 20px;border:1px solid var(--border);background:var(--card);border-radius:8px;font-size:13px;cursor:pointer">← ${prev.name}</button>` : '<div></div>'}
+      ${next ? `<button onclick="goToStep(${STATE.currentStep + 1})" style="padding:10px 20px;border:1px solid var(--p);background:var(--p-bg);color:var(--p);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">${next.name} →</button>` : '<div></div>'}
+    </div>
+  `;
+}
+
+function updateProgress() {
+  const totalChecks = STEPS.reduce((sum, s) => sum + s.checklist.length, 0);
+  const doneChecks = Object.values(STATE.checklistState).filter(v => v).length;
+  const stepProgress = (STATE.currentStep / STEPS.length) * 70;
+  const checkProgress = totalChecks > 0 ? (doneChecks / totalChecks) * 30 : 0;
+  document.getElementById('progressFill').style.width = (stepProgress + checkProgress) + '%';
+}
+
+// =============================================
+// INTERACTIONS
+// =============================================
+function goToStep(i) {
+  if (i < 0 || i >= STEPS.length) return;
+  STATE.currentStep = i;
+  STATE.stepTimes[STEPS[i].id] = Date.now();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleCheck(key) {
+  STATE.checklistState[key] = !STATE.checklistState[key];
+  render();
+}
+
+function copyCommands(stepIdx) {
+  const cmds = STEPS[stepIdx].commands.join('\n');
+  navigator.clipboard.writeText(cmds).then(() => showToast('Đã copy lệnh'));
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Đã copy: ' + text));
+}
+
+function resetGuide() {
+  if (!confirm('Làm mới toàn bộ guide? (Xoá checklist, về bước 1)')) return;
+  STATE = { currentStep: 0, checklistState: {}, phase: '', sessionType: 'dev', startTime: Date.now(), stepTimes: {} };
+  document.getElementById('phaseInput').value = '';
+  document.getElementById('sessionType').value = 'dev';
+  render();
+  showToast('Đã làm mới guide');
+}
+
+function saveHTML() {
+  const stateJSON = JSON.stringify(STATE);
+  const html = document.documentElement.outerHTML;
+  const marker = '<!--GUIDE_STATE-->';
+  const markerEnd = '<!--/GUIDE_STATE-->';
+  let output;
+  if (html.includes(marker)) {
+    output = html.replace(new RegExp(marker+'[\\s\\S]*?'+markerEnd,'g'), marker + '<script id="guideState" type="application/json">' + stateJSON + '<\/script>' + markerEnd);
+  } else {
+    output = html.replace('</body>', marker + '<script id="guideState" type="application/json">' + stateJSON + '<\/script>' + markerEnd + '\n</body>');
+  }
+  const blob = new Blob([output], { type:'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `KFSP_Live_Guide_${new Date().toISOString().slice(0,10)}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Đã lưu guide');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Elapsed timer
+function updateTimer() {
+  const el = document.getElementById('elapsed');
+  if (el && STATE.startTime) {
+    const mins = Math.floor((Date.now() - STATE.startTime) / 60000);
+    el.textContent = mins < 60 ? mins + ' phút' : Math.floor(mins/60) + 'h ' + (mins%60) + 'p';
+  }
+}
+
+// =============================================
+// INIT
+// =============================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Check embedded state
+  const savedEl = document.getElementById('guideState');
+  if (savedEl) {
+    try {
+      STATE = { ...STATE, ...JSON.parse(savedEl.textContent) };
+      document.getElementById('phaseInput').value = STATE.phase || '';
+      document.getElementById('sessionType').value = STATE.sessionType || 'dev';
+      saveGuideState();
+    } catch(e) {}
+  } else {
+    loadState();
+  }
+  if (!STATE.startTime) STATE.startTime = Date.now();
+  render();
+  setInterval(updateTimer, 30000);
+  updateTimer();
+});
+</script>
+
+<!--GUIDE_STATE--><!--/GUIDE_STATE-->
+</body>
+</html>

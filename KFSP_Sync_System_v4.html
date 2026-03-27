@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFSP Sync System v4 — Thiết kế hệ thống đồng bộ</title>
+<style>
+:root{--p:#7B3AEC;--p-bg:#F3EEFA;--pass:#0DBE55;--fail:#FF3B30;--warn:#FFB020;--info:#4A91FD;--bg:#F7F7FA;--card:#fff;--text:#1A1A2E;--text2:#6B7280;--border:#E5E7EB}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.header{background:linear-gradient(135deg,#7B3AEC,#5a1fb8);color:#fff;padding:24px 32px}
+.header h1{font-size:22px;font-weight:700}
+.header p{font-size:13px;opacity:.8;margin-top:4px}
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);padding:0 32px;position:sticky;top:0;z-index:100;overflow-x:auto}
+.tab{padding:14px 20px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2);transition:.2s;white-space:nowrap}
+.tab:hover{color:var(--p)}
+.tab.active{color:var(--p);border-bottom-color:var(--p)}
+.content{max-width:1100px;margin:0 auto;padding:24px 32px}
+.panel{display:none}
+.panel.active{display:block}
+h2{font-size:18px;font-weight:700;color:var(--p);margin:24px 0 12px}
+h3{font-size:15px;font-weight:700;margin:16px 0 8px}
+p,.desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.card{background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px}
+.card-title{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+code{font-family:'SF Mono',Consolas,monospace;font-size:12px;background:var(--p-bg);color:var(--p);padding:2px 6px;border-radius:4px}
+pre{background:#1a1a2e;color:#e0e0e0;padding:16px;border-radius:10px;font-size:12px;line-height:1.6;overflow-x:auto;margin:12px 0}
+pre .hl{color:#0DBE55;font-weight:600}
+pre .cm{color:#6B7280;font-style:italic}
+pre .key{color:#FFB020}
+pre .str{color:#4A91FD}
+.warn-box{background:#FFF7E6;border:1px solid #FFD700;border-radius:8px;padding:12px 16px;font-size:13px;color:#8B6914;margin:12px 0}
+.fail-box{background:#FFECEB;border:1px solid #ffcccc;border-radius:8px;padding:12px 16px;font-size:13px;color:#CC1A1A;margin:12px 0}
+.pass-box{background:#E8F9EF;border:1px solid #b6e8c9;border-radius:8px;padding:12px 16px;font-size:13px;color:#0a7c3a;margin:12px 0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{background:var(--p-bg);color:var(--p);padding:10px 12px;text-align:left;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:#faf7ff}
+
+/* Flow diagram */
+.flow{display:flex;flex-direction:column;gap:0;margin:16px 0}
+.flow-row{display:grid;grid-template-columns:120px 1fr 40px 1fr;gap:0;align-items:stretch;min-height:80px}
+.flow-time{padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.flow-time::after{content:'';position:absolute;bottom:0;left:50%;width:2px;height:100%;background:var(--border);transform:translateX(-1px);z-index:0}
+.flow-row:last-child .flow-time::after{display:none}
+.ft-dot{width:16px;height:16px;border-radius:50%;z-index:1;border:3px solid var(--bg)}
+.ft-label{font-size:10px;font-weight:600;color:var(--text2);text-align:center;margin-top:4px}
+.flow-cell{padding:10px 14px;border:1px solid var(--border);background:var(--card);margin:2px 0;border-radius:8px;font-size:12px}
+.flow-cell.desktop{border-left:3px solid var(--p)}
+.flow-cell.terminal{border-left:3px solid var(--info)}
+.flow-cell.active{background:var(--p-bg);border-color:var(--p)}
+.flow-cell.t-active{background:#E3F2FD;border-color:var(--info)}
+.flow-mid{display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2)}
+.fc-cmd{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:var(--p);font-weight:700}
+.flow-cell.terminal .fc-cmd{color:var(--info)}
+.fc-note{font-size:11px;color:var(--text2);margin-top:4px}
+.fc-file{font-size:10px;background:#f0f0f0;padding:2px 6px;border-radius:3px;display:inline-block;margin:2px 0}
+.fc-file.write{background:#FFF7E6;color:#CC5500}
+.fc-file.read{background:#f0f0f0;color:var(--text2)}
+.fc-check{color:var(--pass);font-weight:700}
+.fc-alert{color:var(--fail);font-weight:700}
+
+/* Answer format */
+.answer-format{background:#1a1a2e;border-radius:12px;padding:20px;color:#e0e0e0;font-size:13px;line-height:1.7;margin:12px 0}
+.af-section{border-left:3px solid var(--p);padding-left:12px;margin:12px 0}
+.af-section.green{border-color:var(--pass)}
+.af-section.orange{border-color:var(--warn)}
+.af-section.blue{border-color:var(--info)}
+.af-title{color:#fff;font-weight:700;font-size:13px}
+.af-content{color:#aaa;font-size:12px;margin-top:4px}
+
+@media(max-width:768px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .flow-row{grid-template-columns:1fr;gap:8px}
+  .flow-time{flex-direction:row;padding:8px 0}
+  .flow-time::after{display:none}
+  .flow-mid{display:none}
+  .content{padding:16px}
+  .tabs{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>KFSP Sync System v4</h1>
+  <p>Thiết kế hệ thống đồng bộ tài liệu — 2 phiên song song, 1 file trung tâm</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('problem')">Vấn đề</div>
+  <div class="tab" onclick="sw('architecture')">Kiến trúc</div>
+  <div class="tab" onclick="sw('files')">File &amp; Rules</div>
+  <div class="tab" onclick="sw('flow')">Flow chi tiết</div>
+  <div class="tab" onclick="sw('example')">Ví dụ thực tế</div>
+  <div class="tab" onclick="sw('qa')">Hỏi — Đáp</div>
+</div>
+
+<div class="content">
+
+<!-- ==================== VẤN ĐỀ ==================== -->
+<div class="panel active" id="p-problem">
+  <h2>Vấn đề cần giải quyết</h2>
+
+  <div class="card">
+    <div class="card-title">Đầu phiên: mọi thứ đồng bộ</div>
+    <div class="grid-3">
+      <div style="background:var(--p-bg);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📋</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Plan/Spec</div>
+        <div style="font-size:11px;color:var(--pass)">✅ Cập nhật</div>
+      </div>
+      <div style="background:var(--p-bg);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">🧪</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Test cases</div>
+        <div style="font-size:11px;color:var(--pass)">✅ Cập nhật</div>
+      </div>
+      <div style="background:var(--p-bg);padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📖</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Docs</div>
+        <div style="font-size:11px;color:var(--pass)">✅ Cập nhật</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:24px;color:var(--text2);margin:8px 0">⬇️ Code/fix 5-10 lần trong phiên ⬇️</div>
+
+  <div class="card" style="border-color:var(--fail)">
+    <div class="card-title" style="color:var(--fail)">Cuối phiên (không có sync system): docs trôi</div>
+    <div class="grid-3">
+      <div style="background:#FFECEB;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📋</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Plan/Spec</div>
+        <div style="font-size:11px;color:var(--fail)">❌ Lỗi thời — approach đã đổi 3 lần</div>
+      </div>
+      <div style="background:#FFECEB;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">🧪</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Test cases</div>
+        <div style="font-size:11px;color:var(--fail)">❌ Thiếu — 3 screens mới chưa có TC</div>
+      </div>
+      <div style="background:#FFECEB;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📖</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Docs</div>
+        <div style="font-size:11px;color:var(--fail)">❌ Sai — API contract đã thay đổi</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fail-box">
+    <strong>Root cause:</strong> Không có cơ chế BẮT BUỘC ghi lại thay đổi + kiểm tra impact → docs trôi dần mà không ai biết.
+  </div>
+
+  <h2>Giải pháp: Sync System</h2>
+
+  <div class="card" style="border-color:var(--pass)">
+    <div class="card-title" style="color:var(--pass)">Cuối phiên (có sync system): mọi thứ đồng bộ</div>
+    <div class="grid-3">
+      <div style="background:#E8F9EF;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📋</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Plan/Spec</div>
+        <div style="font-size:11px;color:var(--pass)">✅ 12/12 thay đổi đã cập nhật</div>
+      </div>
+      <div style="background:#E8F9EF;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">🧪</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Test cases</div>
+        <div style="font-size:11px;color:var(--pass)">✅ +15 TC mới cho screens mới</div>
+      </div>
+      <div style="background:#E8F9EF;padding:12px;border-radius:8px;text-align:center">
+        <div style="font-size:20px">📖</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Docs</div>
+        <div style="font-size:11px;color:var(--pass)">✅ 4 docs đã cập nhật theo code mới</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== KIẾN TRÚC ==================== -->
+<div class="panel" id="p-architecture">
+  <h2>Kiến trúc tổng thể</h2>
+
+  <div class="card">
+    <div class="card-title">3 thành phần chính</div>
+    <div class="grid-3">
+      <div style="background:var(--p-bg);padding:16px;border-radius:10px;border:2px solid var(--p)">
+        <div style="font-size:14px;font-weight:700;color:var(--p);margin-bottom:8px">📄 .changes.json</div>
+        <div style="font-size:12px;color:var(--text)">
+          <strong>Vai trò:</strong> Kênh giao tiếp<br>
+          <strong>Ai ghi:</strong> Desktop (sau mỗi checkpoint)<br>
+          <strong>Ai đọc:</strong> Terminal (khi chạy check)<br>
+          <strong>Vòng đời:</strong> 1 file / 1 phiên → archive cuối phiên
+        </div>
+      </div>
+      <div style="background:#E3F2FD;padding:16px;border-radius:10px;border:2px solid var(--info)">
+        <div style="font-size:14px;font-weight:700;color:var(--info);margin-bottom:8px">📊 session_DATE.html</div>
+        <div style="font-size:12px;color:var(--text)">
+          <strong>Vai trò:</strong> Nhật ký + dashboard<br>
+          <strong>Ai ghi:</strong> Terminal (tick, ghi chú, kết quả)<br>
+          <strong>Ai đọc:</strong> Cả 2 + PM review<br>
+          <strong>Vòng đời:</strong> 1 file / 1 phiên → lưu vĩnh viễn
+        </div>
+      </div>
+      <div style="background:#FFF7E6;padding:16px;border-radius:10px;border:2px solid var(--warn)">
+        <div style="font-size:14px;font-weight:700;color:#CC5500;margin-bottom:8px">⚖️ Rule 21 (CLAUDE.md)</div>
+        <div style="font-size:12px;color:var(--text)">
+          <strong>Vai trò:</strong> Bắt buộc tuân thủ<br>
+          <strong>Ở đâu:</strong> Root CLAUDE.md<br>
+          <strong>Enforce:</strong> Sau MỖI câu trả lời có code change<br>
+          <strong>Vi phạm:</strong> DỪNG → ghi manifest → mới tiếp
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Luồng dữ liệu</h2>
+
+  <div class="card">
+    <pre style="background:#fff;color:var(--text);border:1px solid var(--border)">
+<span class="hl">Desktop (CLAUDE.md Rule 21)</span>
+    │
+    ├─ Code / Fix / Refactor
+    │
+    ├─ <span class="key">SAU MỖI CHECKPOINT:</span>
+    │   ├─ 1. Ghi entry vào <span class="str">.changes.json</span>         ← BẮT BUỘC
+    │   ├─ 2. Ghi mục <span class="str">🔄 Sync</span> trong câu trả lời  ← BẮT BUỘC
+    │   └─ 3. Nhắc Thanh: "Sang Terminal chạy..."    ← BẮT BUỘC
+    │
+    │            <span class="cm">Thanh chuyển sang Terminal</span>
+    │                        │
+    │                        ▼
+    │              <span class="hl">Terminal</span>
+    │                ├─ Đọc <span class="str">.changes.json</span>
+    │                ├─ Biết chính xác: file nào đổi, ảnh hưởng gì
+    │                ├─ Cập nhật: specs, testcases, docs
+    │                ├─ Ghi kết quả vào <span class="str">session_DATE.html</span>
+    │                └─ Đánh dấu entries ĐÃ XỬ LÝ
+    │                        │
+    │            <span class="cm">Thanh quay lại Desktop</span>
+    │                        │
+    ├─ Đọc session HTML → thấy kết quả check
+    ├─ Tiếp tục code...
+    │
+    <span class="key">CUỐI PHIÊN:</span>
+    ├─ Terminal xuất session HTML = BÁO CÁO PHIÊN
+    └─ Archive .changes.json → docs/logs/changes/
+    </pre>
+  </div>
+
+  <h2>Tại sao cần cả 2 file?</h2>
+
+  <table>
+    <tr><th></th><th>.changes.json</th><th>session_DATE.html</th></tr>
+    <tr><td><strong>Mục đích</strong></td><td>Kênh giao tiếp máy-máy</td><td>Nhật ký người-đọc</td></tr>
+    <tr><td><strong>Format</strong></td><td>JSON (agent đọc/ghi nhanh)</td><td>HTML (Thanh xem, tick, ghi chú)</td></tr>
+    <tr><td><strong>Khi nào ghi</strong></td><td>Desktop ghi SAU MỖI checkpoint</td><td>Terminal ghi khi xử lý xong</td></tr>
+    <tr><td><strong>Nội dung</strong></td><td>What changed + impact map</td><td>Timeline + checklist + kết quả check</td></tr>
+    <tr><td><strong>Cuối phiên</strong></td><td>Archive (xoá hoặc chuyển)</td><td>Giữ vĩnh viễn = báo cáo phiên</td></tr>
+  </table>
+</div>
+
+<!-- ==================== FILES & RULES ==================== -->
+<div class="panel" id="p-files">
+  <h2>Cấu trúc file</h2>
+
+  <div class="card">
+    <pre style="background:#fff;color:var(--text);border:1px solid var(--border)">
+docs/
+├── logs/
+│   ├── <span class="hl">.changes.json</span>          ← Desktop ghi, Terminal đọc (1 phiên)
+│   ├── <span class="str">session_2026-03-27.html</span> ← Nhật ký phiên (Terminal quản lý)
+│   ├── session_2026-03-26.html
+│   └── changes/               ← Archive .changes.json cũ
+│       ├── changes_2026-03-26.json
+│       └── changes_2026-03-25.json
+├── plans/
+│   └── P4_NATIVE_CHART.md     ← Plan (source of truth)
+├── test_cases/
+│   └── master_test_registry_v4.html
+└── *.md                       ← Specs (04_FEATURES, 02_ARCH, ...)
+    </pre>
+  </div>
+
+  <h2>Format .changes.json</h2>
+
+  <div class="card">
+    <pre>
+{
+  <span class="key">"session"</span>: <span class="str">"2026-03-27"</span>,
+  <span class="key">"phase"</span>: <span class="str">"P4.11 — Notification Upgrade"</span>,
+  <span class="key">"entries"</span>: [
+    {
+      <span class="key">"id"</span>: 1,
+      <span class="key">"time"</span>: <span class="str">"14:30"</span>,
+      <span class="key">"type"</span>: <span class="str">"code"</span>,           <span class="cm">// code | fix | refactor | decision | revert</span>
+      <span class="key">"what"</span>: <span class="str">"Thêm NotificationSettingsScreen với 5 toggles"</span>,
+      <span class="key">"files"</span>: [<span class="str">"lib/screens/notification_settings_screen.dart"</span>],
+      <span class="key">"impact"</span>: {
+        <span class="key">"spec"</span>: <span class="str">"04_FEATURES.md — cần thêm spec Notification Settings"</span>,
+        <span class="key">"testcase"</span>: <span class="str">"Cần +5 test cases cho settings toggles"</span>,
+        <span class="key">"architecture"</span>: <span class="str">"02_ARCH — thêm route /notification-settings"</span>,
+        <span class="key">"plan"</span>: <span class="str">"P4.11 task 4.11.11 → in_progress"</span>
+      },
+      <span class="key">"decisions"</span>: <span class="str">"Dùng SharedPreferences thay Hive — đơn giản hơn"</span>,
+      <span class="key">"processed"</span>: false      <span class="cm">// Terminal đánh dấu true khi đã xử lý</span>
+    },
+    {
+      <span class="key">"id"</span>: 2,
+      <span class="key">"time"</span>: <span class="str">"15:10"</span>,
+      <span class="key">"type"</span>: <span class="str">"fix"</span>,
+      <span class="key">"what"</span>: <span class="str">"Đổi bottom sheet height từ 0.7 → 0.85"</span>,
+      <span class="key">"files"</span>: [<span class="str">"lib/screens/dashboard/widgets/in_app_news_notification.dart"</span>],
+      <span class="key">"impact"</span>: {
+        <span class="key">"spec"</span>: <span class="str">"04_FEATURES.md — cập nhật bottom sheet spec"</span>,
+        <span class="key">"testcase"</span>: <span class="str">"Sửa TC THONG_BAO-CHUNG_TB-01 expected result"</span>,
+        <span class="key">"architecture"</span>: null,
+        <span class="key">"plan"</span>: null
+      },
+      <span class="key">"decisions"</span>: null,
+      <span class="key">"processed"</span>: false
+    }
+  ]
+}
+    </pre>
+  </div>
+
+  <h2>Rules — Ở đâu, enforce thế nào?</h2>
+
+  <div class="grid-2">
+    <div class="card" style="border-color:var(--fail);border-width:2px">
+      <div class="card-title" style="color:var(--fail)">Rule 21 — Change Manifest (Root CLAUDE.md)</div>
+      <div style="font-size:13px;line-height:1.7">
+        <strong>Nội dung:</strong><br>
+        Sau MỖI câu trả lời có code change, PHẢI:<br>
+        <ol style="padding-left:20px;margin:8px 0">
+          <li>Ghi entry vào <code>.changes.json</code> với impact map</li>
+          <li>Cuối câu trả lời có section <code>🔄 Sync</code></li>
+          <li>Nhắc Thanh sang Terminal chạy check cụ thể</li>
+        </ol>
+        Vi phạm = DỪNG → ghi manifest → mới được tiếp.
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--warn);border-width:2px">
+      <div class="card-title" style="color:#CC5500">Rule 8 mở rộng — Response Format</div>
+      <div style="font-size:13px;line-height:1.7">
+        <strong>Hiện tại (Rule 8):</strong><br>
+        Mỗi response có: 🥋 Skills đã chạy + 📝 Docs đã cập nhật + 🎨 Convention check<br><br>
+        <strong>Mở rộng thêm:</strong><br>
+        <code>🔄 Sync:</code> Thay đổi gì, ảnh hưởng doc nào, Terminal cần chạy gì
+      </div>
+    </div>
+  </div>
+
+  <h3>Vị trí Rules</h3>
+  <table>
+    <tr><th>Rule</th><th>Ở đâu</th><th>Ai tuân thủ</th><th>Enforce thế nào</th></tr>
+    <tr>
+      <td><strong>Rule 21 — Change Manifest</strong></td>
+      <td><code>/CLAUDE.md</code> (root)</td>
+      <td>Desktop agent</td>
+      <td>Mỗi câu trả lời có code change → PHẢI có 🔄 Sync section + ghi .changes.json</td>
+    </tr>
+    <tr>
+      <td><strong>Rule 8 mở rộng — Response Format</strong></td>
+      <td><code>/CLAUDE.md</code> (root)</td>
+      <td>Cả 2 agents</td>
+      <td>Cuối mỗi câu trả lời PHẢI có 4 sections (thêm 🔄 Sync)</td>
+    </tr>
+    <tr>
+      <td><strong>Rule 20 — Dual-Session</strong></td>
+      <td><code>/CLAUDE.md</code> (root)</td>
+      <td>Desktop agent</td>
+      <td>Đầu phiên nhắc bật Terminal</td>
+    </tr>
+  </table>
+
+  <h3>Format câu trả lời Desktop (sau code change)</h3>
+  <div class="answer-format">
+    <div style="color:#fff;font-size:14px;font-weight:700;margin-bottom:12px">Mỗi câu trả lời có code change PHẢI có:</div>
+
+    <div class="af-section">
+      <div class="af-title">🥋 Skills đã chạy</div>
+      <div class="af-content">check --quick, gate --commit</div>
+    </div>
+
+    <div class="af-section green">
+      <div class="af-title">📝 Docs ảnh hưởng</div>
+      <div class="af-content">04_FEATURES.md — cần thêm spec notification settings<br>02_ARCH — thêm route + provider</div>
+    </div>
+
+    <div class="af-section orange">
+      <div class="af-title">🔄 Sync → Terminal</div>
+      <div class="af-content">
+        Đã ghi 2 entries vào .changes.json<br>
+        <strong>Anh sang Terminal chạy:</strong> /kfsp:docs --update<br>
+        <strong>Cần cập nhật:</strong> 04_FEATURES (+1 screen), test_registry (+5 TC)
+      </div>
+    </div>
+
+    <div class="af-section blue">
+      <div class="af-title">🎨 Convention check</div>
+      <div class="af-content">✅ Tiếng Việt có dấu | ✅ Design tokens | ✅ Number format</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FLOW CHI TIẾT ==================== -->
+<div class="panel" id="p-flow">
+  <h2>Flow chi tiết — 1 phiên làm việc</h2>
+
+  <div class="card">
+    <div class="flow">
+      <!-- Start -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--warn)"></div><div class="ft-label">9:00<br>Mở phiên</div></div>
+        <div class="flow-cell desktop active">
+          <div class="fc-cmd">/kfsp:start</div>
+          <div>Tạo <span class="fc-file write">.changes.json</span> mới (rỗng)</div>
+          <div>Tạo <span class="fc-file write">session_2026-03-27.html</span></div>
+          <div class="fc-note">→ "Anh bật Terminal để rà soát docs song song"</div>
+        </div>
+        <div class="flow-mid">⟷</div>
+        <div class="flow-cell terminal">
+          <div class="fc-cmd">Thanh mở Terminal</div>
+          <div>Đọc <span class="fc-file read">.changes.json</span> → rỗng, OK</div>
+          <div>Đọc <span class="fc-file read">plan file</span> → nắm scope</div>
+        </div>
+      </div>
+
+      <!-- Code round 1 -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--p)"></div><div class="ft-label">9:30<br>Code #1</div></div>
+        <div class="flow-cell desktop active">
+          <div class="fc-cmd">Code: notification_settings_screen.dart</div>
+          <div>Ghi <span class="fc-file write">.changes.json</span> entry #1</div>
+          <div class="fc-note">🔄 Sync: "04_FEATURES cần +1 screen, +5 TC"</div>
+          <div class="fc-note">→ "Anh sang Terminal chạy /kfsp:docs --update"</div>
+        </div>
+        <div class="flow-mid">→</div>
+        <div class="flow-cell terminal" style="opacity:.5">
+          <div class="fc-note">Chờ Thanh chuyển sang...</div>
+        </div>
+      </div>
+
+      <!-- Terminal processes -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--info)"></div><div class="ft-label">9:45<br>Sync #1</div></div>
+        <div class="flow-cell desktop" style="opacity:.5">
+          <div class="fc-note">Chờ / code tiếp...</div>
+        </div>
+        <div class="flow-mid">←</div>
+        <div class="flow-cell terminal t-active">
+          <div class="fc-cmd">/kfsp:docs --update</div>
+          <div>Đọc <span class="fc-file read">.changes.json</span> → thấy entry #1</div>
+          <div>Cập nhật <span class="fc-file write">04_FEATURES.md</span> (+notification spec)</div>
+          <div>Thêm <span class="fc-file write">test_registry_v4.html</span> (+5 TC)</div>
+          <div>Đánh dấu entry #1 → <span class="fc-check">processed: true</span></div>
+          <div>Ghi <span class="fc-file write">session HTML</span> "✅ Docs synced"</div>
+        </div>
+      </div>
+
+      <!-- Code round 2 -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--p)"></div><div class="ft-label">10:15<br>Code #2</div></div>
+        <div class="flow-cell desktop active">
+          <div class="fc-cmd">Fix: đổi approach — dùng Hive thay SharedPref</div>
+          <div>Ghi <span class="fc-file write">.changes.json</span> entry #2</div>
+          <div class="fc-note">🔄 Sync: <span class="fc-alert">"⚠️ Decision thay đổi!</span> 04_FEATURES cần sửa storage spec"</div>
+          <div class="fc-note">→ "Anh sang Terminal chạy /kfsp:docs --update"</div>
+        </div>
+        <div class="flow-mid">→</div>
+        <div class="flow-cell terminal" style="opacity:.5">
+          <div class="fc-note">Chờ Thanh...</div>
+        </div>
+      </div>
+
+      <!-- Terminal processes round 2 -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--info)"></div><div class="ft-label">10:30<br>Sync #2</div></div>
+        <div class="flow-cell desktop" style="opacity:.5">
+          <div class="fc-note">Chờ / code tiếp...</div>
+        </div>
+        <div class="flow-mid">←</div>
+        <div class="flow-cell terminal t-active">
+          <div class="fc-cmd">Đọc .changes.json → entry #2 (decision change!)</div>
+          <div>Sửa <span class="fc-file write">04_FEATURES.md</span> (SharedPref → Hive)</div>
+          <div>Sửa <span class="fc-file write">02_ARCH.md</span> (thêm Hive dependency)</div>
+          <div>Sửa <span class="fc-file write">test cases</span> (update expected storage)</div>
+          <div>Ghi <span class="fc-file write">session HTML</span> "⚠️ Decision changed → docs updated"</div>
+        </div>
+      </div>
+
+      <!-- Build -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--pass)"></div><div class="ft-label">11:00<br>Build</div></div>
+        <div class="flow-cell desktop active">
+          <div class="fc-cmd">/kfsp:gate --commit → /kfsp:test --verify</div>
+          <div>Ghi <span class="fc-file write">.changes.json</span> entry #3 (build)</div>
+          <div class="fc-note">→ "Sang Terminal: /kfsp:test --brief"</div>
+        </div>
+        <div class="flow-mid">→</div>
+        <div class="flow-cell terminal t-active">
+          <div class="fc-cmd">/kfsp:test --brief</div>
+          <div>Tạo checklist PM từ .changes.json (3 entries)</div>
+          <div>Ghi <span class="fc-file write">session HTML</span> "📋 Brief sent"</div>
+        </div>
+      </div>
+
+      <!-- Close -->
+      <div class="flow-row">
+        <div class="flow-time"><div class="ft-dot" style="background:var(--pass)"></div><div class="ft-label">12:00<br>Đóng phiên</div></div>
+        <div class="flow-cell desktop">
+          <div class="fc-cmd">/kfsp:check --full</div>
+          <div>Verify: 0 unprocessed entries trong .changes.json</div>
+        </div>
+        <div class="flow-mid">⟷</div>
+        <div class="flow-cell terminal t-active">
+          <div class="fc-cmd">Đóng session HTML</div>
+          <div>Tổng kết: 3 entries, 4 docs updated, 5 TC added</div>
+          <div>Archive <span class="fc-file write">.changes.json</span> → changes/</div>
+          <div class="fc-check">✅ Session HTML = BÁO CÁO PHIÊN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pass-box">
+    <strong>Kết quả:</strong> Sau phiên 3 tiếng, 3 lần code/fix, 1 lần đổi approach → tất cả specs, testcases, docs đều đã được cập nhật. Session HTML ghi lại toàn bộ.
+  </div>
+</div>
+
+<!-- ==================== VÍ DỤ THỰC TẾ ==================== -->
+<div class="panel" id="p-example">
+  <h2>Ví dụ thực tế — Phase 4.11 Notification</h2>
+
+  <h3>Đầu phiên: Tài liệu có sẵn</h3>
+  <table>
+    <tr><th>Tài liệu</th><th>Trạng thái</th><th>Nội dung</th></tr>
+    <tr><td>Plan</td><td style="color:var(--pass)">✅</td><td>P4.11 — 16 tasks, 3 nhóm (A/B/C)</td></tr>
+    <tr><td>Spec</td><td style="color:var(--pass)">✅</td><td>04_FEATURES.md — có spec in-app notification cũ</td></tr>
+    <tr><td>Test cases</td><td style="color:var(--pass)">✅</td><td>master_test_registry_v4.html — có TC notification</td></tr>
+    <tr><td>Architecture</td><td style="color:var(--pass)">✅</td><td>02_ARCH.md — có route, provider hiện tại</td></tr>
+  </table>
+
+  <h3>Sau code: 5 thay đổi trong phiên</h3>
+  <table>
+    <tr><th>#</th><th>Thay đổi</th><th>Impact</th><th>Terminal xử lý</th></tr>
+    <tr>
+      <td>1</td>
+      <td>Thêm NotificationSettingsScreen</td>
+      <td>+1 route, +1 provider, +1 screen spec</td>
+      <td>✅ 04_FEATURES +spec, 02_ARCH +route, +5 TC</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Đổi tap banner → bottom sheet</td>
+      <td>Spec notification cũ sai</td>
+      <td>✅ 04_FEATURES sửa spec, TC sửa expected result</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Đổi SharedPreferences → Hive</td>
+      <td>Architecture thay đổi, dependency mới</td>
+      <td>✅ 02_ARCH +Hive, pubspec note</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Thêm "Không làm phiền" toggle</td>
+      <td>+1 field trong settings</td>
+      <td>✅ 04_FEATURES +spec, +2 TC</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Fix bottom sheet height 0.7→0.85</td>
+      <td>Minor spec change</td>
+      <td>✅ 04_FEATURES sửa height, TC sửa expected</td>
+    </tr>
+  </table>
+
+  <h3>Cuối phiên: Tài liệu đã sync</h3>
+  <table>
+    <tr><th>Tài liệu</th><th>Trạng thái</th><th>Thay đổi</th></tr>
+    <tr><td>Plan</td><td style="color:var(--pass)">✅</td><td>4.11.1→done, 4.11.11→done, 4.11.13→done</td></tr>
+    <tr><td>Spec</td><td style="color:var(--pass)">✅</td><td>+2 screens, sửa notification spec, +bottom sheet</td></tr>
+    <tr><td>Test cases</td><td style="color:var(--pass)">✅</td><td>+7 TC mới, sửa 2 TC cũ</td></tr>
+    <tr><td>Architecture</td><td style="color:var(--pass)">✅</td><td>+2 routes, +1 provider, +Hive dependency</td></tr>
+    <tr><td>Session HTML</td><td style="color:var(--pass)">✅</td><td>5 entries, timeline đầy đủ, checklist ticked</td></tr>
+  </table>
+
+  <div class="pass-box">
+    <strong>0 docs lỗi thời.</strong> Mọi quyết định thay đổi (SharedPref→Hive, height 0.7→0.85) đều được Terminal cập nhật ngay khi xảy ra, không đợi cuối phiên.
+  </div>
+</div>
+
+<!-- ==================== HỎI — ĐÁP ==================== -->
+<div class="panel" id="p-qa">
+  <h2>Hỏi — Đáp</h2>
+
+  <div class="card">
+    <div class="card-title">📄 .changes.json là 1 file / phiên hay 1 file cho tất cả?</div>
+    <div class="desc">
+      <strong>1 file / 1 phiên.</strong> Khi <code>/kfsp:start</code> chạy → tạo mới (hoặc reset). Cuối phiên → archive sang <code>docs/logs/changes/changes_YYYY-MM-DD.json</code>. Tránh file phình to, dễ track per-session.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Session HTML là file log chung của cả 2?</div>
+    <div class="desc">
+      <strong>Đúng.</strong> Desktop ghi entries (code/commit), Terminal ghi results (check/docs update). Cả 2 đọc được. Cuối phiên = báo cáo đầy đủ cho PM review.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚖️ Rule ghi ở đâu để enforce?</div>
+    <div class="desc">
+      <strong>Root <code>/CLAUDE.md</code></strong> — Rule 21. Đây là file BẮT BUỘC mà mọi phiên Claude Code đều đọc trước khi bắt đầu. Không phải memory (có thể quên), không phải plan (có thể bỏ qua). CLAUDE.md = luật.
+      <br><br>
+      Thêm vào Rule 8 (Response Format) yêu cầu section <code>🔄 Sync</code> trong mỗi câu trả lời có code change.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Nếu Thanh quên chuyển sang Terminal thì sao?</div>
+    <div class="desc">
+      Entries tồn đọng trong <code>.changes.json</code> (processed: false). Khi Terminal chạy bất kỳ lúc nào → xử lý tất cả entries chưa processed. Cuối phiên nếu vẫn còn unprocessed → <code>/kfsp:check --full</code> sẽ cảnh báo.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Desktop code liên tục 5 lần không chuyển Terminal?</div>
+    <div class="desc">
+      <strong>Vẫn OK.</strong> .changes.json tích lũy 5 entries. Khi Terminal chạy 1 lần → xử lý cả 5. Không mất data. Chỉ là docs chậm cập nhật hơn so với code — nhưng cuối phiên vẫn đồng bộ 100%.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Có đảm bảo spec/testcase/doc luôn đồng bộ?</div>
+    <div class="desc">
+      <strong>Có, qua 3 lớp bảo vệ:</strong>
+      <ol style="padding-left:20px;margin-top:8px;line-height:2">
+        <li><strong>Lớp 1 — Rule 21:</strong> Desktop BẮT BUỘC ghi impact map → Terminal biết CHÍNH XÁC cần cập nhật gì</li>
+        <li><strong>Lớp 2 — processed flag:</strong> Entry chưa xử lý = gap rõ ràng → không bỏ sót</li>
+        <li><strong>Lớp 3 — /kfsp:check --full cuối phiên:</strong> Verify 0 unprocessed entries + docs khớp code</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Khác gì so với cách cũ (Rule 8 chỉ liệt kê docs)?</div>
+    <div class="desc">
+      <table>
+        <tr><th></th><th>Cũ (Rule 8)</th><th>Mới (Rule 8 + 21)</th></tr>
+        <tr><td>Ghi gì</td><td>"📝 Docs đã cập nhật: X, Y"</td><td>"🔄 Sync: X cần sửa vì Z, Terminal chạy A"</td></tr>
+        <tr><td>Ai xử lý</td><td>Cùng 1 agent (dễ quên)</td><td>Agent riêng (Terminal) chuyên trách</td></tr>
+        <tr><td>Track</td><td>Không (chỉ text trong chat)</td><td>.changes.json + session HTML</td></tr>
+        <tr><td>Verify cuối phiên</td><td>Không</td><td>processed flags + check --full</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function sw(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('p-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

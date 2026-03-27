@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFSP Skill Set v4 — Workflow</title>
+<style>
+:root {
+  --primary: #7B3AEC;
+  --primary-light: #9B6AF0;
+  --primary-bg: #F3EEFA;
+  --pass: #0DBE55;
+  --fail: #FF3B30;
+  --warn: #FFB020;
+  --info: #4A91FD;
+  --bg: #F7F7FA;
+  --card: #FFFFFF;
+  --text: #1A1A2E;
+  --text2: #6B7280;
+  --border: #E5E7EB;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+
+/* Header */
+header { background:linear-gradient(135deg,#7B3AEC,#5a1fb8); color:#fff; padding:24px 32px; }
+header h1 { font-size:24px; font-weight:700; }
+header p { font-size:13px; opacity:.8; margin-top:4px; }
+.version-badge { display:inline-block; background:rgba(255,255,255,.2); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; margin-top:8px; }
+
+/* Tabs */
+.tabs { display:flex; background:#fff; border-bottom:2px solid var(--border); padding:0 32px; position:sticky; top:0; z-index:100; }
+.tab { padding:14px 24px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:3px solid transparent; color:var(--text2); transition:.2s; }
+.tab:hover { color:var(--primary); }
+.tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+/* Content */
+.content { max-width:1200px; margin:0 auto; padding:24px 32px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* Comparison Table */
+.compare-section { margin-bottom:32px; }
+.compare-section h2 { font-size:18px; font-weight:700; margin-bottom:16px; color:var(--primary); }
+.compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.compare-card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); }
+.compare-card.old { border-left:4px solid var(--text2); }
+.compare-card.new { border-left:4px solid var(--pass); }
+.compare-card h3 { font-size:15px; font-weight:700; margin-bottom:12px; }
+.compare-card .num { font-size:36px; font-weight:800; }
+.compare-card .num.old-num { color:var(--text2); }
+.compare-card .num.new-num { color:var(--pass); }
+.compare-card .label { font-size:12px; color:var(--text2); margin-top:4px; }
+
+/* Skill Cards */
+.skill-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:16px; margin-bottom:32px; }
+.skill-card { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); cursor:pointer; transition:.2s; position:relative; overflow:hidden; }
+.skill-card:hover { box-shadow:0 4px 16px rgba(123,58,236,.12); transform:translateY(-2px); }
+.skill-card .skill-num { position:absolute; top:12px; right:16px; width:32px; height:32px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+.skill-card h3 { font-size:16px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+.skill-card .cmd { font-family:'SF Mono',Consolas,monospace; font-size:13px; color:var(--text2); background:var(--primary-bg); padding:2px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; }
+.skill-card .desc { font-size:13px; color:var(--text2); line-height:1.5; margin-bottom:12px; }
+.skill-card .merges { font-size:11px; color:var(--text2); background:#f0f0f0; padding:6px 10px; border-radius:6px; margin-bottom:10px; }
+.skill-card .merges strong { color:var(--fail); }
+.skill-card .modes { display:flex; flex-wrap:wrap; gap:6px; }
+.mode-tag { font-size:11px; padding:4px 10px; border-radius:12px; font-weight:600; }
+.mode-tag.m1 { background:#E8F9EF; color:#059c48; }
+.mode-tag.m2 { background:#E3F2FD; color:#1565C0; }
+.mode-tag.m3 { background:#FFF7E6; color:#CC5500; }
+.mode-tag.m4 { background:#F3EEFA; color:#7B3AEC; }
+
+/* Flow Diagram */
+.flow-section { margin-bottom:32px; }
+.flow-section h2 { font-size:18px; font-weight:700; margin-bottom:16px; color:var(--primary); }
+.flow-container { background:var(--card); border-radius:16px; padding:32px; border:1px solid var(--border); overflow-x:auto; }
+
+/* Timeline Flow */
+.timeline { position:relative; padding:20px 0; }
+.phase-group { margin-bottom:40px; position:relative; }
+.phase-label { font-size:14px; font-weight:700; color:var(--primary); background:var(--primary-bg); padding:8px 16px; border-radius:8px; display:inline-block; margin-bottom:16px; }
+.phase-desc { font-size:12px; color:var(--text2); margin-left:8px; }
+
+.flow-steps { display:flex; align-items:flex-start; gap:0; flex-wrap:wrap; }
+.flow-step { display:flex; align-items:center; }
+.step-box { background:var(--card); border:2px solid var(--border); border-radius:12px; padding:14px 18px; min-width:160px; max-width:200px; position:relative; transition:.2s; }
+.step-box:hover { border-color:var(--primary); box-shadow:0 4px 12px rgba(123,58,236,.1); }
+.step-box .step-cmd { font-family:'SF Mono',Consolas,monospace; font-size:12px; color:var(--primary); font-weight:700; margin-bottom:4px; }
+.step-box .step-name { font-size:13px; font-weight:600; margin-bottom:2px; }
+.step-box .step-detail { font-size:11px; color:var(--text2); line-height:1.4; }
+.step-box.highlight { border-color:var(--primary); background:var(--primary-bg); }
+.step-box.auto { border-color:var(--pass); border-style:dashed; }
+.step-box.manual { border-color:var(--warn); }
+.step-box.gate { border-color:var(--fail); border-width:3px; }
+
+.step-arrow { font-size:20px; color:var(--text2); padding:0 8px; flex-shrink:0; }
+.step-arrow.down { transform:rotate(90deg); margin:8px 0 8px 80px; }
+
+/* Badge */
+.badge { font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; position:absolute; top:8px; right:8px; }
+.badge.auto-badge { background:#E8F9EF; color:#059c48; }
+.badge.manual-badge { background:#FFF7E6; color:#CC5500; }
+.badge.gate-badge { background:#FFECEB; color:#FF3B30; }
+.badge.dual-badge { background:#E3F2FD; color:#1565C0; }
+
+/* Session Split */
+.session-split { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:24px 0; }
+.session-col { background:var(--card); border-radius:12px; padding:20px; border:2px solid var(--border); }
+.session-col.desktop { border-color:var(--primary); }
+.session-col.terminal { border-color:var(--info); }
+.session-col h3 { font-size:14px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.session-col.desktop h3 { color:var(--primary); }
+.session-col.terminal h3 { color:var(--info); }
+.session-col ul { list-style:none; padding:0; }
+.session-col li { font-size:13px; padding:6px 0; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:8px; }
+.session-col li:last-child { border-bottom:none; }
+.file-tag { font-size:10px; font-family:'SF Mono',Consolas,monospace; padding:2px 6px; border-radius:4px; background:#f0f0f0; color:var(--text2); }
+
+/* Merge Map */
+.merge-map { margin-bottom:32px; }
+.merge-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:12px 16px; background:var(--card); border-radius:10px; border:1px solid var(--border); }
+.merge-old { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+.merge-old .old-tag { font-size:11px; padding:4px 10px; background:#f0f0f0; color:var(--text2); border-radius:6px; text-decoration:line-through; font-family:'SF Mono',Consolas,monospace; }
+.merge-arrow-icon { font-size:18px; color:var(--primary); flex-shrink:0; }
+.merge-new { flex:0 0 auto; }
+.merge-new .new-tag { font-size:12px; padding:6px 14px; background:var(--primary-bg); color:var(--primary); border-radius:8px; font-weight:700; font-family:'SF Mono',Consolas,monospace; }
+
+/* Lifecycle */
+.lifecycle { display:flex; flex-direction:column; gap:0; }
+.lc-phase { display:flex; align-items:stretch; }
+.lc-line { width:40px; display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+.lc-dot { width:16px; height:16px; border-radius:50%; background:var(--primary); border:3px solid var(--primary-bg); flex-shrink:0; z-index:1; }
+.lc-connector { width:2px; flex:1; background:var(--border); }
+.lc-content { flex:1; padding:0 0 24px 12px; }
+.lc-title { font-size:14px; font-weight:700; }
+.lc-cmds { font-size:12px; color:var(--text2); margin-top:4px; }
+.lc-cmds code { background:var(--primary-bg); color:var(--primary); padding:2px 6px; border-radius:4px; font-size:11px; }
+
+/* Dual Session Timeline */
+.dual-row { display:grid; grid-template-columns:100px 1fr 20px 1fr; gap:0; margin-bottom:0; }
+.dual-time { padding:16px 8px 16px 0; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+.time-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; border:3px solid var(--bg); z-index:2; }
+.time-label { font-size:11px; font-weight:600; color:var(--text2); text-align:center; line-height:1.3; }
+.dual-cell { padding:14px 16px; border:1px solid var(--border); background:var(--card); margin-bottom:-1px; }
+.desktop-cell { border-left:3px solid var(--primary); }
+.terminal-cell { border-left:3px solid var(--info); }
+.dual-cell.active-cell { background:linear-gradient(135deg, rgba(123,58,236,.04), rgba(123,58,236,.08)); }
+.terminal-cell.active-cell { background:linear-gradient(135deg, rgba(74,145,253,.04), rgba(74,145,253,.08)); }
+.dual-cell.idle-cell { background:#fafafa; opacity:.7; }
+.highlight-row { position:relative; }
+.highlight-row::before { content:''; position:absolute; inset:-2px; border:2px solid var(--pass); border-radius:8px; z-index:-1; pointer-events:none; }
+.dc-cmd { font-family:'SF Mono',Consolas,monospace; font-size:13px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+.terminal-cell .dc-cmd { color:var(--info); }
+.dc-detail { font-size:12px; color:var(--text); line-height:1.5; margin-bottom:6px; }
+.dc-output { font-size:11px; color:var(--text2); background:#f9f9fb; padding:6px 10px; border-radius:6px; margin-bottom:6px; font-style:italic; }
+.dc-files { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px; }
+.df { font-size:10px; font-family:'SF Mono',Consolas,monospace; padding:3px 8px; border-radius:4px; background:#f0f0f0; color:var(--text2); }
+.df.write { background:#FFF7E6; color:#CC5500; font-weight:600; }
+.dc-warn { font-size:11px; font-weight:700; color:var(--fail); background:#FFECEB; border:1px solid #ffcccc; padding:4px 10px; border-radius:6px; margin-top:6px; text-align:center; }
+.dc-badge { font-size:10px; font-weight:700; color:#fff; background:var(--primary); padding:3px 10px; border-radius:12px; display:inline-block; margin-bottom:8px; }
+.dual-connector { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.connector-line { width:2px; flex:1; background:var(--border); }
+.connector-dot { width:10px; height:10px; border-radius:50%; background:var(--border); flex-shrink:0; }
+.connector-dot.active-dot { background:var(--pass); box-shadow:0 0 8px rgba(13,190,85,.4); }
+
+/* Responsive */
+@media(max-width:768px) {
+  .compare-grid, .session-split { grid-template-columns:1fr; }
+  .skill-grid { grid-template-columns:1fr; }
+  .flow-steps { flex-direction:column; align-items:flex-start; }
+  .step-arrow { transform:rotate(90deg); margin:4px 0 4px 60px; }
+  .content { padding:16px; }
+  .tabs { padding:0 16px; overflow-x:auto; }
+  .dual-row { grid-template-columns:1fr; gap:8px; }
+  .dual-time { flex-direction:row; padding:8px 0; }
+  .dual-connector { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KFSP Skill Set v4 — Workflow</h1>
+  <p>Gộp 17 skills → 8 skills. Đủ 5 tầng, ít lệnh hơn, dễ nhớ hơn.</p>
+  <span class="version-badge">v3.2 (17 skills) → v4.0 (8 skills)</span>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">Tổng quan</div>
+  <div class="tab" onclick="switchTab('skills')">8 Skills mới</div>
+  <div class="tab" onclick="switchTab('flow')">Flow làm việc</div>
+  <div class="tab" onclick="switchTab('merge')">Bản đồ gộp</div>
+  <div class="tab" onclick="switchTab('dual')">Dual-Session</div>
+  <div class="tab" onclick="switchTab('lifecycle')">Vòng đời Phase</div>
+</div>
+
+<!-- ============ TAB: OVERVIEW ============ -->
+<div class="content">
+<div class="tab-panel active" id="panel-overview">
+
+  <div class="compare-section">
+    <h2>So sánh v3.2 vs v4.0</h2>
+    <div class="compare-grid">
+      <div class="compare-card old">
+        <h3>v3.2 — Hiện tại</h3>
+        <div class="num old-num">17</div>
+        <div class="label">skills + 1 help = 18 lệnh phải nhớ</div>
+        <ul style="margin-top:12px;font-size:13px;color:var(--text2);list-style:none;line-height:2">
+          <li>guard, sweep, doc-pilot, ux-audit, release-gate, surface-test, sentinel, sync-check, post-phase, product-health, bug-log, pre-commit, session-start, dev-journal, incident-review, test-brief, build-verify, ux-parity, pre-mortem</li>
+        </ul>
+      </div>
+      <div class="compare-card new">
+        <h3>v4.0 — Đề xuất</h3>
+        <div class="num new-num">8</div>
+        <div class="label">skills dễ nhớ, mỗi skill có modes</div>
+        <ul style="margin-top:12px;font-size:13px;list-style:none;line-height:2.2">
+          <li><strong style="color:var(--primary)">start</strong> — Bắt đầu phiên</li>
+          <li><strong style="color:var(--primary)">check</strong> — Rà soát sức khoẻ</li>
+          <li><strong style="color:var(--primary)">test</strong> — Kiểm thử + brief</li>
+          <li><strong style="color:var(--primary)">review</strong> — Review UX/UI</li>
+          <li><strong style="color:var(--primary)">docs</strong> — Tài liệu</li>
+          <li><strong style="color:var(--primary)">gate</strong> — Cổng chặn</li>
+          <li><strong style="color:var(--primary)">log</strong> — Ghi chép</li>
+          <li><strong style="color:var(--primary)">risk</strong> — Phân tích rủi ro</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key improvements -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px">
+    <div style="background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border);text-align:center">
+      <div style="font-size:28px;font-weight:800;color:var(--pass)">-53%</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">Giảm số lệnh</div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border);text-align:center">
+      <div style="font-size:28px;font-weight:800;color:var(--primary)">100%</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">Giữ đủ 5 tầng</div>
+    </div>
+    <div style="background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border);text-align:center">
+      <div style="font-size:28px;font-weight:800;color:var(--info)">0%</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">Trùng lặp</div>
+    </div>
+  </div>
+
+  <!-- Dual Session -->
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--primary)">Rule 20 — Dual-Session Workflow</h2>
+  <div class="session-split">
+    <div class="session-col desktop">
+      <h3>💻 Desktop — Code Flutter</h3>
+      <ul>
+        <li><span class="file-tag">lib/</span> Viết code Dart</li>
+        <li><span class="file-tag">test/</span> Unit tests</li>
+        <li><span class="file-tag">build</span> Build APK/IPA</li>
+        <li>Skills: <code style="color:var(--primary);font-size:12px">start, check, gate --commit, test --verify</code></li>
+      </ul>
+    </div>
+    <div class="session-col terminal">
+      <h3>🖥️ Terminal — Rà soát tài liệu</h3>
+      <ul>
+        <li><span class="file-tag">docs/</span> Cập nhật tài liệu</li>
+        <li><span class="file-tag">test_cases/</span> Test case registry</li>
+        <li><span class="file-tag">plans/</span> Plan files</li>
+        <li>Skills: <code style="color:var(--info);font-size:12px">docs, review, test --brief, risk, log</code></li>
+      </ul>
+    </div>
+  </div>
+  <div style="background:#FFF7E6;border:1px solid #FFD700;border-radius:8px;padding:12px 16px;font-size:13px;color:#8B6914;margin-bottom:24px">
+    ⚠️ <strong>CẤM</strong> 2 phiên cùng sửa 1 file. Desktop đụng <code>lib/</code>, Terminal đụng <code>docs/</code>.
+  </div>
+
+</div>
+
+<!-- ============ TAB: SKILLS ============ -->
+<div class="tab-panel" id="panel-skills">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--primary)">8 Skills mới — Chi tiết</h2>
+
+  <div class="skill-grid">
+    <!-- 1. START -->
+    <div class="skill-card">
+      <span class="skill-num">1</span>
+      <h3>Bắt đầu phiên</h3>
+      <span class="cmd">/kfsp:start</span>
+      <div class="desc">Khởi tạo phiên làm việc: kiểm tra git, phát hiện drift code-docs, nhắc bật dual-session.</div>
+      <div class="merges">Gộp từ: <strong>session-start</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">Tự động đầu phiên</span>
+      </div>
+    </div>
+
+    <!-- 2. CHECK -->
+    <div class="skill-card">
+      <span class="skill-num">2</span>
+      <h3>Rà soát sức khoẻ</h3>
+      <span class="cmd">/kfsp:check</span>
+      <div class="desc">Đánh giá toàn diện: health score, blast radius sau thay đổi, source sync, token audit.</div>
+      <div class="merges">Gộp từ: <strong>guard + sweep + sync-check</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--quick</span>
+        <span class="mode-tag m2">--full</span>
+        <span class="mode-tag m3">--tokens</span>
+        <span class="mode-tag m4">--sync</span>
+      </div>
+    </div>
+
+    <!-- 3. TEST -->
+    <div class="skill-card">
+      <span class="skill-num">3</span>
+      <h3>Kiểm thử</h3>
+      <span class="cmd">/kfsp:test</span>
+      <div class="desc">Pipeline test: verify build → tạo brief cho PM → log bug từ PM feedback.</div>
+      <div class="merges">Gộp từ: <strong>build-verify + test-brief + bug-log</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--verify</span>
+        <span class="mode-tag m2">--brief</span>
+        <span class="mode-tag m3">--bug</span>
+        <span class="mode-tag m4">--bugs</span>
+      </div>
+    </div>
+
+    <!-- 4. REVIEW -->
+    <div class="skill-card">
+      <span class="skill-num">4</span>
+      <h3>Review UX/UI</h3>
+      <span class="cmd">/kfsp:review</span>
+      <div class="desc">So sánh UI vs Figma (parity) + đánh giá UX Nielsen heuristics.</div>
+      <div class="merges">Gộp từ: <strong>ux-parity + ux-audit</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--parity</span>
+        <span class="mode-tag m2">--audit</span>
+      </div>
+    </div>
+
+    <!-- 5. DOCS -->
+    <div class="skill-card">
+      <span class="skill-num">5</span>
+      <h3>Tài liệu</h3>
+      <span class="cmd">/kfsp:docs</span>
+      <div class="desc">Quản lý tài liệu: status, gap analysis, cập nhật, đóng phase, HDSD readiness.</div>
+      <div class="merges">Gộp từ: <strong>doc-pilot + post-phase</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--status</span>
+        <span class="mode-tag m2">--update</span>
+        <span class="mode-tag m3">--close-phase</span>
+        <span class="mode-tag m4">--hdsd</span>
+      </div>
+    </div>
+
+    <!-- 6. GATE -->
+    <div class="skill-card">
+      <span class="skill-num">6</span>
+      <h3>Cổng chặn</h3>
+      <span class="cmd">/kfsp:gate</span>
+      <div class="desc">Chặn trước commit (23 checks) hoặc trước release (12 gates). PHẢI pass mới tiếp.</div>
+      <div class="merges">Gộp từ: <strong>pre-commit + release-gate</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--commit</span>
+        <span class="mode-tag m3">--release</span>
+      </div>
+    </div>
+
+    <!-- 7. LOG -->
+    <div class="skill-card">
+      <span class="skill-num">7</span>
+      <h3>Ghi chép</h3>
+      <span class="cmd">/kfsp:log</span>
+      <div class="desc">Ghi quyết định, sự cố, bài học. Phân tích 5-Whys cho incident. Tìm kiếm precedent.</div>
+      <div class="merges">Gộp từ: <strong>dev-journal + incident-review</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--log</span>
+        <span class="mode-tag m2">--incident</span>
+        <span class="mode-tag m3">--search</span>
+        <span class="mode-tag m4">--digest</span>
+      </div>
+    </div>
+
+    <!-- 8. RISK -->
+    <div class="skill-card">
+      <span class="skill-num">8</span>
+      <h3>Phân tích rủi ro</h3>
+      <span class="cmd">/kfsp:risk</span>
+      <div class="desc">Dự đoán rủi ro trước khi code + kiểm tra contracts 4 bề mặt + phát hiện regression.</div>
+      <div class="merges">Gộp từ: <strong>pre-mortem + surface-test + sentinel</strong></div>
+      <div class="modes">
+        <span class="mode-tag m1">--before</span>
+        <span class="mode-tag m2">--contracts</span>
+        <span class="mode-tag m3">--regression</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--primary-bg);border-radius:12px;padding:20px;font-size:13px;color:var(--text)">
+    <strong>Bỏ hẳn 2 skill:</strong><br>
+    <span style="text-decoration:line-through;color:var(--text2)">product-health</span> — thông tin đã có trong <code>check --full</code><br>
+    <span style="text-decoration:line-through;color:var(--text2)">help</span> — liệt kê 8 lệnh ngay trong CLAUDE.md, không cần skill riêng
+  </div>
+</div>
+
+<!-- ============ TAB: FLOW ============ -->
+<div class="tab-panel" id="panel-flow">
+  <div class="flow-section">
+    <h2>Flow làm việc hàng ngày</h2>
+    <div class="flow-container">
+
+      <!-- Phase 1: Start -->
+      <div class="phase-group">
+        <span class="phase-label">🌅 Bắt đầu phiên</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box highlight">
+              <span class="badge auto-badge">TỰ ĐỘNG</span>
+              <div class="step-cmd">/kfsp:start</div>
+              <div class="step-name">Khởi tạo</div>
+              <div class="step-detail">Git status, drift detect, nhắc dual-session</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box manual">
+              <span class="badge dual-badge">RULE 20</span>
+              <div class="step-cmd">Thanh</div>
+              <div class="step-name">Bật Terminal</div>
+              <div class="step-detail">Mở phiên Terminal để rà soát docs/test case song song</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2: Plan -->
+      <div class="phase-group">
+        <span class="phase-label">📋 Trước khi code</span>
+        <span class="phase-desc">(nếu có feature mới)</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box">
+              <span class="badge manual-badge">TUỲ CHỌN</span>
+              <div class="step-cmd">/kfsp:risk --before</div>
+              <div class="step-name">Pre-mortem</div>
+              <div class="step-detail">Dự đoán rủi ro trên 4 bề mặt trước khi build</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/gsd:plan-phase</div>
+              <div class="step-name">Tạo plan</div>
+              <div class="step-detail">GSD plan chi tiết → file docs/plans/</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3: Code -->
+      <div class="phase-group">
+        <span class="phase-label">⌨️ Code (Desktop)</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">Code Flutter</div>
+              <div class="step-name">Viết code</div>
+              <div class="step-detail">lib/, test/ — TDD workflow</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box auto">
+              <span class="badge auto-badge">SAU THAY ĐỔI</span>
+              <div class="step-cmd">/kfsp:check --quick</div>
+              <div class="step-name">Quick check</div>
+              <div class="step-detail">Health score, token audit, blast radius</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box gate">
+              <span class="badge gate-badge">BẮT BUỘC</span>
+              <div class="step-cmd">/kfsp:gate --commit</div>
+              <div class="step-name">Pre-commit</div>
+              <div class="step-detail">23 checks. PHẢI pass mới commit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3b: Docs (Terminal) -->
+      <div class="phase-group">
+        <span class="phase-label">📝 Song song — Docs (Terminal)</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box" style="border-color:var(--info)">
+              <div class="step-cmd">/kfsp:docs --status</div>
+              <div class="step-name">Docs status</div>
+              <div class="step-detail">Kiểm tra docs nào cần cập nhật</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box" style="border-color:var(--info)">
+              <div class="step-cmd">/kfsp:docs --update</div>
+              <div class="step-name">Cập nhật</div>
+              <div class="step-detail">Sửa specs, features, architecture</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box" style="border-color:var(--info)">
+              <div class="step-cmd">/kfsp:review --parity</div>
+              <div class="step-name">UX Parity</div>
+              <div class="step-detail">So sánh code vs Figma</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4: Build -->
+      <div class="phase-group">
+        <span class="phase-label">🔨 Sau build</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box gate">
+              <span class="badge gate-badge">BẮT BUỘC</span>
+              <div class="step-cmd">/kfsp:test --verify</div>
+              <div class="step-name">Build verify</div>
+              <div class="step-detail">analyze + test + runtime</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box auto">
+              <span class="badge auto-badge">TỰ ĐỘNG</span>
+              <div class="step-cmd">/kfsp:test --brief</div>
+              <div class="step-name">Test brief</div>
+              <div class="step-detail">Tạo checklist cho PM</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box manual">
+              <div class="step-cmd">Thanh test</div>
+              <div class="step-name">PM kiểm thử</div>
+              <div class="step-detail">Test trên Simulator/thiết bị</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:test --bug</div>
+              <div class="step-name">Log bugs</div>
+              <div class="step-detail">Ghi nhận bug từ PM feedback</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5: Close -->
+      <div class="phase-group">
+        <span class="phase-label">✅ Đóng phase</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:check --full</div>
+              <div class="step-name">Full health</div>
+              <div class="step-detail">10 chiều, health score /100</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:docs --close-phase</div>
+              <div class="step-name">Đóng tài liệu</div>
+              <div class="step-detail">Update docs, sync, archive</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:log --log</div>
+              <div class="step-name">Ghi nhận</div>
+              <div class="step-detail">Quyết định, bài học phase</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 6: Release -->
+      <div class="phase-group">
+        <span class="phase-label">🚀 Trước release</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:risk --contracts</div>
+              <div class="step-name">Kiểm tra contracts</div>
+              <div class="step-detail">4 bề mặt tương tác</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:risk --regression</div>
+              <div class="step-name">Regression check</div>
+              <div class="step-detail">So sánh trước/sau</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">/kfsp:review --audit</div>
+              <div class="step-name">UX Audit</div>
+              <div class="step-detail">Nielsen 10 heuristics</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box gate">
+              <span class="badge gate-badge">FINAL GATE</span>
+              <div class="step-cmd">/kfsp:gate --release</div>
+              <div class="step-name">Release gate</div>
+              <div class="step-detail">12 gates, score /100</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: MERGE MAP ============ -->
+<div class="tab-panel" id="panel-merge">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--primary)">Bản đồ gộp: 17 → 8</h2>
+
+  <div class="merge-map">
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">session-start</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:start</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">guard</span>
+        <span class="old-tag">sweep</span>
+        <span class="old-tag">sync-check</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:check</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">build-verify</span>
+        <span class="old-tag">test-brief</span>
+        <span class="old-tag">bug-log</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:test</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">ux-parity</span>
+        <span class="old-tag">ux-audit</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:review</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">doc-pilot</span>
+        <span class="old-tag">post-phase</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:docs</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">pre-commit</span>
+        <span class="old-tag">release-gate</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:gate</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">dev-journal</span>
+        <span class="old-tag">incident-review</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:log</span></div>
+    </div>
+
+    <div class="merge-row">
+      <div class="merge-old">
+        <span class="old-tag">pre-mortem</span>
+        <span class="old-tag">surface-test</span>
+        <span class="old-tag">sentinel</span>
+      </div>
+      <span class="merge-arrow-icon">→</span>
+      <div class="merge-new"><span class="new-tag">/kfsp:risk</span></div>
+    </div>
+
+    <div class="merge-row" style="background:#FFECEB">
+      <div class="merge-old">
+        <span class="old-tag">product-health</span>
+        <span class="old-tag">help</span>
+      </div>
+      <span class="merge-arrow-icon" style="color:var(--fail)">✕</span>
+      <div class="merge-new"><span style="font-size:12px;color:var(--fail);font-weight:600">Bỏ hẳn</span></div>
+    </div>
+  </div>
+
+  <!-- Tiers mapping -->
+  <h2 style="font-size:18px;font-weight:700;margin:32px 0 16px;color:var(--primary)">Phủ 5 tầng</h2>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+    <div style="background:#FFECEB;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:#FF3B30;margin-bottom:8px">T1 An toàn</div>
+      <div style="font-size:11px;color:var(--text2)"><code>start</code> <code>check</code> <code>log</code></div>
+    </div>
+    <div style="background:#FFF7E6;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:#CC5500;margin-bottom:8px">T2 Code</div>
+      <div style="font-size:11px;color:var(--text2)"><code>check</code> <code>gate</code></div>
+    </div>
+    <div style="background:#F3EEFA;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px">T3 QA</div>
+      <div style="font-size:11px;color:var(--text2)"><code>test</code> <code>risk</code> <code>gate</code></div>
+    </div>
+    <div style="background:#E3F2FD;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:#1565C0;margin-bottom:8px">T4 UX</div>
+      <div style="font-size:11px;color:var(--text2)"><code>review</code></div>
+    </div>
+    <div style="background:#E8F9EF;border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;color:#059c48;margin-bottom:8px">T5 Business</div>
+      <div style="font-size:11px;color:var(--text2)"><code>docs</code> <code>risk</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB: LIFECYCLE ============ -->
+<!-- ============ TAB: DUAL SESSION ============ -->
+<div class="tab-panel" id="panel-dual">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--primary)">Dual-Session — Minh hoạ làm việc song song</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:24px">2 phiên Claude Code chạy đồng thời. Desktop code Flutter, Terminal rà soát tài liệu. Không đụng chung file.</p>
+
+  <!-- Timeline parallel view -->
+  <div style="position:relative">
+
+    <!-- Header row -->
+    <div style="display:grid;grid-template-columns:100px 1fr 20px 1fr;gap:0;margin-bottom:0">
+      <div style="padding:12px 0;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Thời điểm</div>
+      <div style="background:var(--primary);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;font-size:14px;font-weight:700;text-align:center">💻 Desktop — Code Flutter</div>
+      <div></div>
+      <div style="background:var(--info);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;font-size:14px;font-weight:700;text-align:center">🖥️ Terminal — Rà soát tài liệu</div>
+    </div>
+
+    <!-- Row 1: Start -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--warn)"></div>
+        <div class="time-label">Mở phiên</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/kfsp:start</div>
+        <div class="dc-detail">Git status, drift detect</div>
+        <div class="dc-output">→ "Anh bật thêm Terminal để rà soát docs song song"</div>
+        <div class="dc-files">
+          <span class="df">Đọc: git log, lib/</span>
+        </div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-dot" title="Đồng bộ thời điểm"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">Thanh mở Terminal</div>
+        <div class="dc-detail">cd vào project, bắt đầu phiên mới</div>
+        <div class="dc-output">→ "Phiên Terminal sẵn sàng rà soát docs"</div>
+        <div class="dc-files">
+          <span class="df">Đọc: CLAUDE.md, docs/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Plan -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--info)"></div>
+        <div class="time-label">Lên kế hoạch</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/gsd:plan-phase 4.11</div>
+        <div class="dc-detail">Tạo plan cho Notification upgrade</div>
+        <div class="dc-output">→ Tạo docs/plans/P4.11_NOTIFICATION.md</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: docs/plans/</span>
+        </div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">/kfsp:docs --status</div>
+        <div class="dc-detail">Kiểm tra docs nào lỗi thời sau preprod merge</div>
+        <div class="dc-output">→ "04_FEATURES.md cần +3 features, 02_ARCH cần +2 providers"</div>
+        <div class="dc-files">
+          <span class="df">Đọc: docs/*.md</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Code + Docs Update (parallel) -->
+    <div class="dual-row highlight-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--primary)"></div>
+        <div class="time-label">Song song<br><small style="color:var(--pass);font-weight:700">⚡ Đồng thời</small></div>
+      </div>
+      <div class="dual-cell desktop-cell active-cell">
+        <div class="dc-badge">ĐANG LÀM</div>
+        <div class="dc-cmd">Code Flutter</div>
+        <div class="dc-detail">
+          Viết in_app_news_notification.dart<br>
+          Tạo notification_settings_screen.dart<br>
+          Viết unit tests
+        </div>
+        <div class="dc-output">→ Sửa 5 files trong lib/</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: lib/screens/</span>
+          <span class="df write">Ghi: test/</span>
+        </div>
+        <div class="dc-warn">⛔ KHÔNG đụng docs/</div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-dot active-dot" title="Song song"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell active-cell">
+        <div class="dc-badge" style="background:#E3F2FD;color:var(--info)">ĐANG LÀM</div>
+        <div class="dc-cmd">/kfsp:docs --update</div>
+        <div class="dc-detail">
+          Cập nhật 04_FEATURES.md (+notification spec)<br>
+          Cập nhật 02_ARCHITECTURE.md (+providers)<br>
+          Cập nhật master_test_registry_v4.html
+        </div>
+        <div class="dc-output">→ Sửa 3 files trong docs/</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: docs/*.md</span>
+          <span class="df write">Ghi: docs/test_cases/</span>
+        </div>
+        <div class="dc-warn" style="background:#E3F2FD;border-color:var(--info);color:#1565C0">⛔ KHÔNG đụng lib/</div>
+      </div>
+    </div>
+
+    <!-- Row 4: Check -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--pass)"></div>
+        <div class="time-label">Sau code</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/kfsp:check --quick</div>
+        <div class="dc-detail">Health score, blast radius, token audit</div>
+        <div class="dc-output">→ Score: 82/100, 2 hardcoded colors mới</div>
+        <div class="dc-files">
+          <span class="df">Đọc: lib/, test/</span>
+        </div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">/kfsp:review --parity</div>
+        <div class="dc-detail">So sánh notification screen vs Figma design</div>
+        <div class="dc-output">→ "Spacing bottom sheet: 16px → nên 20px theo Figma"</div>
+        <div class="dc-files">
+          <span class="df">Đọc: lib/ (chỉ đọc), Design/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 5: Commit -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--fail)"></div>
+        <div class="time-label">Commit</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/kfsp:gate --commit</div>
+        <div class="dc-detail">23 checks pre-commit gate</div>
+        <div class="dc-output">→ ✅ PASS — git commit</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: git history</span>
+        </div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell idle-cell">
+        <div class="dc-cmd">Chờ / tiếp tục docs</div>
+        <div class="dc-detail">Hoặc tiếp tục cập nhật test cases, specs</div>
+        <div class="dc-files">
+          <span class="df">Đọc/Ghi: docs/, QA/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 6: Build & Test -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--primary)"></div>
+        <div class="time-label">Build</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/kfsp:test --verify</div>
+        <div class="dc-detail">flutter analyze + flutter test + runtime</div>
+        <div class="dc-output">→ ✅ PASS — build APK</div>
+        <div class="dc-files">
+          <span class="df">Đọc: toàn bộ project</span>
+        </div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-dot" title="Sync kết quả"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">/kfsp:test --brief</div>
+        <div class="dc-detail">Tạo test checklist cho PM Thanh</div>
+        <div class="dc-output">→ "15 mục cần test, gửi kèm build"</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: docs/logs/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 7: PM Test -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--warn)"></div>
+        <div class="time-label">PM test</div>
+      </div>
+      <div class="dual-cell desktop-cell idle-cell">
+        <div class="dc-cmd">Chờ PM feedback</div>
+        <div class="dc-detail">Thanh test trên Simulator / thiết bị thật</div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">/kfsp:test --bug</div>
+        <div class="dc-detail">Ghi nhận bug từ PM feedback</div>
+        <div class="dc-output">→ "BUG-042: Bottom sheet không hiện thumbnail"</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: docs/logs/bugs/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 8: Close -->
+    <div class="dual-row">
+      <div class="dual-time">
+        <div class="time-dot" style="background:var(--pass)"></div>
+        <div class="time-label">Đóng phase</div>
+      </div>
+      <div class="dual-cell desktop-cell">
+        <div class="dc-cmd">/kfsp:check --full</div>
+        <div class="dc-detail">Health score đầy đủ 10 chiều</div>
+        <div class="dc-output">→ Score: 91/100</div>
+      </div>
+      <div class="dual-connector">
+        <div class="connector-line"></div>
+        <div class="connector-dot" title="Sync cuối phiên"></div>
+        <div class="connector-line"></div>
+      </div>
+      <div class="dual-cell terminal-cell">
+        <div class="dc-cmd">/kfsp:docs --close-phase</div>
+        <div class="dc-detail">Cập nhật plan status, archive artifacts</div>
+        <div class="dc-output">→ "Phase 4.11 DONE — 16/16 tasks"</div>
+        <div class="dc-files">
+          <span class="df write">Ghi: docs/plans/, docs/logs/</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div style="margin-top:32px;background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--border)">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Chú thích</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12px">
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:var(--primary)"></div> Desktop đang làm</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:var(--info)"></div> Terminal đang làm</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="df write" style="font-size:10px">Ghi</span> File được sửa</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="df" style="font-size:10px">Đọc</span> File chỉ đọc</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:50%;background:var(--pass)"></div> Sync point</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:2px;background:var(--fail)"></div> CẤM đụng file bên kia</div>
+    </div>
+  </div>
+
+  <!-- Key rules -->
+  <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="background:#FFECEB;border-radius:12px;padding:16px;border:1px solid #FFcccc">
+      <h4 style="font-size:13px;color:var(--fail);margin-bottom:8px">🚫 Quy tắc CẤM</h4>
+      <ul style="font-size:12px;color:var(--text);list-style:none;line-height:2">
+        <li>❌ Desktop sửa <code>docs/</code>, <code>test_cases/</code>, <code>plans/</code></li>
+        <li>❌ Terminal sửa <code>lib/</code>, <code>test/</code>, build files</li>
+        <li>❌ 2 phiên cùng sửa 1 file (ghi đè nhau)</li>
+        <li>❌ Terminal commit code (chỉ Desktop commit)</li>
+      </ul>
+    </div>
+    <div style="background:#E8F9EF;border-radius:12px;padding:16px;border:1px solid #b6e8c9">
+      <h4 style="font-size:13px;color:var(--pass);margin-bottom:8px">✅ Quy tắc ĐƯỢC</h4>
+      <ul style="font-size:12px;color:var(--text);list-style:none;line-height:2">
+        <li>✅ 2 phiên cùng ĐỌC bất kỳ file nào</li>
+        <li>✅ Terminal đọc <code>lib/</code> để review/audit</li>
+        <li>✅ Desktop ghi note để Terminal cập nhật docs</li>
+        <li>✅ Chạy skill ở phiên nào cũng được (nếu đúng phân vùng)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-lifecycle">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:24px;color:var(--primary)">Vòng đời 1 Phase</h2>
+
+  <div class="lifecycle">
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--warn)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">1. Mở phiên</div>
+        <div class="lc-cmds"><code>/kfsp:start</code> → nhắc bật Terminal → <code>/gsd:discuss-phase</code></div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--info)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">2. Lên kế hoạch</div>
+        <div class="lc-cmds"><code>/kfsp:risk --before</code> → <code>/gsd:plan-phase</code> → lưu <code>docs/plans/P{N}.md</code></div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--primary)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">3. Code (lặp lại)</div>
+        <div class="lc-cmds">Code → <code>/kfsp:check --quick</code> → <code>/kfsp:gate --commit</code> → commit<br>Terminal song song: <code>/kfsp:docs --update</code></div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--pass)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">4. Build & Test</div>
+        <div class="lc-cmds"><code>/kfsp:test --verify</code> → <code>/kfsp:test --brief</code> → PM test → <code>/kfsp:test --bug</code></div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--fail)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">5. Fix bugs (nếu có)</div>
+        <div class="lc-cmds"><code>/kfsp:log --incident</code> (nếu bug nghiêm trọng) → fix → quay lại bước 3</div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--primary)"></div><div class="lc-connector"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">6. Đóng phase</div>
+        <div class="lc-cmds"><code>/kfsp:check --full</code> → <code>/kfsp:docs --close-phase</code> → <code>/kfsp:log --log</code> → <code>/gsd:verify-work</code></div>
+      </div>
+    </div>
+
+    <div class="lc-phase">
+      <div class="lc-line"><div class="lc-dot" style="background:var(--pass)"></div></div>
+      <div class="lc-content">
+        <div class="lc-title">7. Release (khi sẵn sàng)</div>
+        <div class="lc-cmds"><code>/kfsp:risk --contracts</code> → <code>/kfsp:risk --regression</code> → <code>/kfsp:review --audit</code> → <code>/kfsp:gate --release</code></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${name}"]`).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>
