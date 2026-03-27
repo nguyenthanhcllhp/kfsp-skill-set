@@ -1085,7 +1085,7 @@ testWidgets('Heatmap 5 color levels render correctly', ...);
 
 # Code
 - heat_map_model.dart: 9 muc → 5 muc
-  - 0~5%: mau sang goc (#09DA64/#F23468)
+  - 0~5%: mau sang goc (#0DBE55/#FF3B30)
   - >=5%: mau dam (#069946/#D93360)
 - heatmap_chart.dart: tooltip them don vi (trieu/ty)
 - market_tab_thi_truong.dart: dark mode fixes

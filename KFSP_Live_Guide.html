@@ -96,6 +96,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;z-index:600;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* Terminal Setup Guide */
+.terminal-guide{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border:2px solid var(--info);border-radius:12px;padding:20px;margin:16px 0}
+.terminal-guide h3{font-size:15px;font-weight:700;color:var(--info);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.tg-step{display:flex;gap:12px;margin:10px 0;padding:12px;background:rgba(255,255,255,.8);border-radius:8px;align-items:flex-start}
+.tg-num{width:28px;height:28px;border-radius:50%;background:var(--info);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.tg-content{flex:1;font-size:12px;line-height:1.6}
+.tg-content strong{display:block;font-size:13px;margin-bottom:2px;color:var(--text)}
+.tg-content code{background:#1a1a2e;color:#A6E3A1;padding:3px 8px;border-radius:4px;font-size:12px;display:inline-block;margin:2px 0;cursor:pointer;border:1px solid transparent;transition:.2s}
+.tg-content code:hover{border-color:var(--info);background:#2a2a4e}
+.tg-content code::after{content:' 📋';font-size:10px;opacity:.5}
+.tg-verify{background:#E8F9EF;border:1px solid #B8E6C8;border-radius:8px;padding:12px;margin-top:12px}
+.tg-verify h4{font-size:12px;font-weight:700;color:#0A8A3E;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.tg-verify li{font-size:12px;padding:2px 0;padding-left:20px;position:relative;color:#1A5C34;list-style:none}
+.tg-verify li::before{content:'✅';position:absolute;left:0;font-size:10px}
+.tg-warn{background:#FFECEB;border:1px solid #FFCCCC;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;color:#CC0000;display:flex;gap:6px;align-items:flex-start}
+
 /* Responsive */
 @media(max-width:768px){
   .main{flex-direction:column}
@@ -111,10 +127,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <h1>🥋 KFSP Live Guide</h1>
   <div class="header-right">
     <input id="phaseInput" type="text" placeholder="Phase: VD 4.11" style="width:100px" oninput="saveGuideState()">
-    <select id="sessionType" onchange="saveGuideState()">
-      <option value="dev">Code session</option>
-      <option value="review">Review session</option>
-      <option value="release">Release session</option>
+    <select id="sessionType" onchange="switchSession()">
+      <option value="dev">🔨 Code session</option>
+      <option value="release">🚀 Release session</option>
     </select>
     <button class="hdr-btn" onclick="resetGuide()">Làm mới</button>
     <button class="hdr-btn" onclick="saveHTML()">💾 Lưu</button>
@@ -132,28 +147,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <script>
 // =============================================
-// LIFECYCLE STEPS
+// LIFECYCLE STEPS — 2 chế độ
 // =============================================
-const STEPS = [
+
+// ── CODE SESSION: Phát triển tính năng (hàng ngày) ──
+const DEV_STEPS = [
   {
     id: 'start',
     num: 1,
     name: 'Mở phiên',
-    sub: 'Git check, drift detect, nhắc dual-session',
+    sub: 'Git check, drift detect, mở Terminal dual-session',
     workspace: 'both',
     color: '#FFB020',
     commands: ['/kfsp:start'],
     checklist: [
       'Kiểm tra git status — có uncommitted changes?',
       'Phát hiện drift code-docs',
-      'Nhắc bật Terminal cho rà soát docs',
+      '📌 Mở Terminal (xem hướng dẫn bên dưới)',
+      '📌 Gõ "claude" trong Terminal, chờ dấu nhắc >',
+      '📌 Paste vai trò cho Terminal (xem hướng dẫn)',
+      '📌 Terminal xác nhận đã đọc CLAUDE.md',
       'Đọc plan file hiện tại (docs/plans/)',
       'Kiểm tra memory + CLAUDE.md'
     ],
     desktopDo: ['Chạy /kfsp:start', 'Đọc git status', 'Review plan file'],
-    terminalDo: ['Mở Terminal mới', 'cd vào project', 'Sẵn sàng rà soát docs'],
+    terminalDo: ['Mở Terminal mới (xem panel hướng dẫn →)', 'cd vào project', 'Gõ claude → paste vai trò', 'Sẵn sàng rà soát docs'],
     desktopFiles: { write: [], read: ['git log', 'CLAUDE.md', 'docs/plans/'] },
     terminalFiles: { write: [], read: ['CLAUDE.md', 'docs/'] },
+    terminalSetup: true,
     nextHint: 'Bắt đầu lên kế hoạch hoặc code trực tiếp',
     nextCmd: '/kfsp:risk --before'
   },
@@ -172,9 +193,9 @@ const STEPS = [
       'Ước lượng effort + risks'
     ],
     desktopDo: ['/kfsp:risk --before — dự đoán rủi ro', '/gsd:plan-phase — tạo plan chi tiết', 'Lưu plan vào docs/plans/'],
-    terminalDo: ['/kfsp:docs --status — docs nào cần update', 'Bắt đầu rà soát specs lỗi thời', 'Chuẩn bị test cases cho features mới'],
+    terminalDo: ['/kfsp:docs --status — docs nào cần update', 'Chuẩn bị test cases cho features mới'],
     desktopFiles: { write: ['docs/plans/P{N}.md'], read: ['lib/', 'docs/'] },
-    terminalFiles: { write: ['docs/*.md (cập nhật specs)'], read: ['docs/', 'lib/ (chỉ đọc)'] },
+    terminalFiles: { write: ['docs/*.md'], read: ['docs/', 'lib/ (chỉ đọc)'] },
     nextHint: 'Plan xong → bắt đầu code',
     nextCmd: 'Code Flutter (lib/)'
   },
@@ -194,123 +215,225 @@ const STEPS = [
       'Fix hardcoded colors/spacing nếu có'
     ],
     desktopDo: ['Viết test → code → test pass', '/kfsp:check --quick — health + tokens', 'Fix issues từ check'],
-    terminalDo: ['/kfsp:docs --update — cập nhật specs', '/kfsp:review --parity — so sánh vs Figma', 'Cập nhật test_cases/ nếu cần'],
+    terminalDo: ['/kfsp:docs --update — cập nhật specs', 'Cập nhật test_cases/ nếu cần'],
     desktopFiles: { write: ['lib/screens/', 'lib/core/', 'test/'], read: [] },
-    terminalFiles: { write: ['docs/*.md', 'docs/test_cases/'], read: ['lib/ (chỉ đọc)', 'Design/'] },
-    nextHint: 'Code xong → pre-commit gate',
-    nextCmd: '/kfsp:gate --commit'
-  },
-  {
-    id: 'commit',
-    num: 4,
-    name: 'Commit',
-    sub: '23 checks pre-commit gate',
-    workspace: 'desktop',
-    color: '#FF3B30',
-    commands: ['/kfsp:gate --commit', 'git commit'],
-    checklist: [
-      'Chạy /kfsp:gate --commit',
-      '23 checks PHẢI pass',
-      'Fix nếu có BLOCK',
-      'git commit với message rõ ràng',
-      'Không push remote (chờ Thanh cho phép)'
-    ],
-    desktopDo: ['/kfsp:gate --commit — 23 checks', 'git add + git commit', 'KHÔNG push (Rule 14)'],
-    terminalDo: ['Tiếp tục cập nhật docs', 'Hoặc chờ nếu cần sync'],
-    desktopFiles: { write: ['git history'], read: ['lib/', 'test/'] },
-    terminalFiles: { write: ['docs/'], read: [] },
-    nextHint: 'Commit xong → tiếp tục code hoặc build',
-    nextCmd: 'Quay lại Code hoặc Build'
+    terminalFiles: { write: ['docs/*.md', 'docs/test_cases/'], read: ['lib/ (chỉ đọc)'] },
+    nextHint: 'Code xong → build lên Simulator/thiết bị để verify',
+    nextCmd: 'flutter run'
   },
   {
     id: 'build',
-    num: 5,
-    name: 'Build & Verify',
-    sub: 'Build APK/IPA + tự verify',
+    num: 4,
+    name: 'Build & Test',
+    sub: 'Build lên Simulator/thiết bị, test tính năng',
     workspace: 'both',
     color: '#0DBE55',
     commands: ['/kfsp:test --verify', '/kfsp:test --brief'],
     checklist: [
       'rsync source → build copy',
-      'flutter build apk/ios',
+      'flutter run lên Simulator hoặc thiết bị thật',
       '/kfsp:test --verify — analyze + test + runtime',
-      '/kfsp:test --brief — tạo checklist cho PM',
-      'Gửi build + brief cho Thanh'
+      'Thanh test tính năng — chụp screenshot',
+      '/kfsp:test --bug — log bugs nếu có',
+      'Fix bugs → quay lại Code (bước 3) nếu cần',
+      'Tính năng OK → chuyển sang Commit'
     ],
-    desktopDo: ['rsync → build copy', 'flutter build', '/kfsp:test --verify'],
-    terminalDo: ['/kfsp:test --brief — tạo PM checklist', 'Gửi brief kèm build'],
+    desktopDo: ['rsync → build copy', 'flutter run', '/kfsp:test --verify'],
+    terminalDo: ['/kfsp:test --brief — tạo checklist', '/kfsp:test --bug — log bugs', 'Cập nhật test_cases/'],
     desktopFiles: { write: ['~/Desktop/kfsp_flutter_dev/'], read: ['lib/', 'test/'] },
-    terminalFiles: { write: ['docs/logs/'], read: ['lib/ (chỉ đọc)'] },
-    nextHint: 'Build xong → gửi PM test',
-    nextCmd: 'Gửi build cho Thanh'
+    terminalFiles: { write: ['docs/logs/', 'docs/test_cases/'], read: [] },
+    nextHint: 'Tính năng OK → commit code',
+    nextCmd: '/kfsp:gate --commit'
   },
   {
-    id: 'pm-test',
-    num: 6,
-    name: 'PM kiểm thử',
-    sub: 'Thanh test + log bugs',
-    workspace: 'terminal',
-    color: '#FFB020',
-    commands: ['/kfsp:test --bug'],
+    id: 'commit',
+    num: 5,
+    name: 'Commit',
+    sub: 'Pre-commit gate + git commit (sau build OK)',
+    workspace: 'desktop',
+    color: '#FF3B30',
+    commands: ['/kfsp:gate --commit', 'git commit'],
     checklist: [
-      'Thanh test trên Simulator/thiết bị',
-      'Ghi nhận feedback',
-      '/kfsp:test --bug — log bugs',
-      'Phân loại severity',
-      'Nếu có bug → quay lại Code (bước 3)'
+      'Build + test tính năng đã OK (bước trước)',
+      'Chạy /kfsp:gate --commit — 23 checks',
+      'Fix nếu có BLOCK',
+      'git commit với message rõ ràng',
+      'Ghi .changes.json → nhắc Terminal /kfsp:docs --update'
     ],
-    desktopDo: ['Chờ PM feedback', 'Fix bugs nếu có → quay bước 3'],
-    terminalDo: ['/kfsp:test --bug — ghi bugs', '/kfsp:log --incident (nếu bug nghiêm trọng)', 'Cập nhật test registry'],
+    desktopDo: ['/kfsp:gate --commit — 23 checks', 'git add + git commit'],
+    terminalDo: ['/kfsp:docs --update — sync docs', '/kfsp:log --log — ghi decisions'],
+    desktopFiles: { write: ['git history'], read: ['lib/', 'test/'] },
+    terminalFiles: { write: ['docs/'], read: [] },
+    nextHint: 'Commit xong → push hoặc tiếp feature mới',
+    nextCmd: 'git push (khi Thanh cho phép)'
+  },
+  {
+    id: 'push',
+    num: 6,
+    name: 'Push & Đóng feature',
+    sub: 'Push lên remote (khi PM cho phép) + đóng feature',
+    workspace: 'desktop',
+    color: '#FFB020',
+    commands: ['/kfsp:check --full', '/kfsp:docs --close-phase'],
+    checklist: [
+      'Thanh xác nhận cho phép push',
+      'git push origin thanh_sg',
+      '/kfsp:check --full — health score cuối feature',
+      '/kfsp:docs --close-phase (nếu đóng cả phase)',
+      '/kfsp:log --log — ghi decisions + lessons',
+      'Cập nhật plan status → DONE'
+    ],
+    desktopDo: ['git push (sau khi Thanh cho phép)', '/kfsp:check --full'],
+    terminalDo: ['/kfsp:docs --close-phase', '/kfsp:log --log — ghi bài học'],
+    desktopFiles: { write: ['git remote'], read: ['lib/', 'test/'] },
+    terminalFiles: { write: ['docs/plans/', 'docs/logs/'], read: [] },
+    nextHint: 'Feature xong! Quay lại bước 1 cho feature tiếp.',
+    nextCmd: '/kfsp:start (feature mới)'
+  }
+];
+
+// ── RELEASE SESSION: Tổng test + submit store (sau merge nhiều features) ──
+const RELEASE_STEPS = [
+  {
+    id: 'merge',
+    num: 1,
+    name: 'Merge code',
+    sub: 'Merge các feature branches, resolve conflicts',
+    workspace: 'desktop',
+    color: '#4A91FD',
+    commands: ['git merge', 'git pull'],
+    checklist: [
+      'Pull latest từ remote (preprod/main)',
+      'Merge feature branches',
+      'Resolve conflicts nếu có',
+      'flutter analyze — 0 errors sau merge',
+      'flutter test — tất cả tests pass'
+    ],
+    desktopDo: ['git pull + merge', 'Resolve conflicts', 'flutter analyze + test'],
+    terminalDo: ['Chuẩn bị test checklist tổng'],
+    desktopFiles: { write: ['lib/', 'test/', 'pubspec.yaml'], read: [] },
+    terminalFiles: { write: [], read: ['docs/'] },
+    nextHint: 'Merge xong → build tổng test',
+    nextCmd: 'flutter run'
+  },
+  {
+    id: 'integration-build',
+    num: 2,
+    name: 'Build tổng',
+    sub: 'Build bản tổng hợp lên Simulator/thiết bị',
+    workspace: 'both',
+    color: '#0DBE55',
+    commands: ['flutter run', '/kfsp:test --verify'],
+    checklist: [
+      'rsync source → build copy',
+      'flutter run lên Simulator + thiết bị thật',
+      '/kfsp:test --verify — full verify',
+      'Build thành công, app chạy được'
+    ],
+    desktopDo: ['rsync + flutter run', '/kfsp:test --verify'],
+    terminalDo: ['/kfsp:test --brief — tạo checklist tổng test'],
+    desktopFiles: { write: ['~/Desktop/kfsp_flutter_dev/'], read: ['lib/'] },
+    terminalFiles: { write: ['docs/logs/'], read: [] },
+    nextHint: 'Build OK → bắt đầu tổng test',
+    nextCmd: 'Test toàn bộ tính năng'
+  },
+  {
+    id: 'full-test',
+    num: 3,
+    name: 'Tổng test',
+    sub: 'Test tất cả tính năng, regression, cross-feature',
+    workspace: 'both',
+    color: '#FFB020',
+    commands: ['/kfsp:test --brief', '/kfsp:test --bug', '/kfsp:risk --regression'],
+    checklist: [
+      'Test từng tính năng theo brief',
+      'Test regression — tính năng cũ có bị ảnh hưởng?',
+      'Test cross-feature — flow liên tính năng',
+      '/kfsp:risk --regression — so sánh trước/sau',
+      'Log tất cả bugs tìm được',
+      'Phân loại: Critical / High / Medium / Low'
+    ],
+    desktopDo: ['Chờ PM test', 'Fix bugs nếu có → quay bước 1 (merge fix)'],
+    terminalDo: ['/kfsp:test --bug — log bugs', '/kfsp:risk --regression', 'Cập nhật test registry'],
     desktopFiles: { write: ['lib/ (fix bugs)'], read: [] },
     terminalFiles: { write: ['docs/logs/bugs/', 'docs/test_cases/'], read: [] },
-    nextHint: 'Hết bug → đóng phase. Còn bug → quay lại Code.',
-    nextCmd: '/kfsp:check --full'
+    nextHint: 'Hết Critical/High bugs → fix lần cuối',
+    nextCmd: 'Fix bugs → rebuild'
   },
   {
-    id: 'close',
-    num: 7,
-    name: 'Đóng phase',
-    sub: 'Health check + docs + log',
-    workspace: 'both',
-    color: '#7B3AEC',
-    commands: ['/kfsp:check --full', '/kfsp:docs --close-phase', '/kfsp:log --log'],
+    id: 'final-fix',
+    num: 4,
+    name: 'Fix lần cuối',
+    sub: 'Sửa bugs còn lại, rebuild, verify lần cuối',
+    workspace: 'desktop',
+    color: '#FF3B30',
+    commands: ['flutter test', 'flutter run'],
     checklist: [
-      '/kfsp:check --full — health 10 chiều',
-      '/kfsp:docs --close-phase — archive phase',
-      '/kfsp:log --log — ghi decisions/lessons',
-      'Verify 6/6 chiều feature (Rule 9)',
-      '/gsd:verify-work — UAT check'
+      'Fix tất cả Critical + High bugs',
+      'Rebuild + test lại bugs đã fix',
+      'Verify không regression mới',
+      'git commit + push bản fix cuối',
+      '0 Critical/High bugs còn lại'
     ],
-    desktopDo: ['/kfsp:check --full — score /100', '/gsd:verify-work'],
-    terminalDo: ['/kfsp:docs --close-phase', '/kfsp:log --log — ghi bài học', 'Update plan status → DONE'],
-    desktopFiles: { write: [], read: ['lib/', 'test/'] },
-    terminalFiles: { write: ['docs/plans/', 'docs/logs/'], read: ['docs/'] },
-    nextHint: 'Phase xong → release hoặc phase tiếp',
+    desktopDo: ['Fix bugs', 'Rebuild + verify', 'git commit + push'],
+    terminalDo: ['/kfsp:test --bug — verify bugs fixed', 'Cập nhật docs'],
+    desktopFiles: { write: ['lib/', 'test/'], read: [] },
+    terminalFiles: { write: ['docs/'], read: [] },
+    nextHint: '0 bugs critical → chạy final gate',
     nextCmd: '/kfsp:gate --release'
   },
   {
-    id: 'release',
-    num: 8,
-    name: 'Release',
-    sub: 'Final gates + submit store',
+    id: 'release-gate',
+    num: 5,
+    name: 'Final Gate',
+    sub: '12 gates, risk analysis, UX audit',
     workspace: 'both',
-    color: '#0DBE55',
-    commands: ['/kfsp:risk --contracts', '/kfsp:risk --regression', '/kfsp:review --audit', '/kfsp:gate --release'],
+    color: '#7B3AEC',
+    commands: ['/kfsp:risk --contracts', '/kfsp:risk --regression', '/kfsp:gate --release'],
     checklist: [
-      '/kfsp:risk --contracts — 4 bề mặt',
-      '/kfsp:risk --regression — so sánh trước/sau',
-      '/kfsp:review --audit — Nielsen heuristics',
-      '/kfsp:gate --release — 12 gates, score /100',
-      'Score ≥ 80 → PASS → submit store'
+      '/kfsp:risk --contracts — 4 bề mặt (user, backend, services, internal)',
+      '/kfsp:risk --regression — so sánh final trước/sau',
+      '/kfsp:check --full — health score /100',
+      '/kfsp:gate --release — 12 gates',
+      'Score ≥ 80 → PASS'
     ],
-    desktopDo: ['/kfsp:risk --regression', '/kfsp:gate --release — final gate'],
-    terminalDo: ['/kfsp:risk --contracts', '/kfsp:review --audit', 'Final docs review'],
+    desktopDo: ['/kfsp:check --full', '/kfsp:gate --release'],
+    terminalDo: ['/kfsp:risk --contracts', '/kfsp:risk --regression', 'Final docs review'],
     desktopFiles: { write: [], read: ['toàn bộ project'] },
-    terminalFiles: { write: ['docs/ (final update)'], read: ['toàn bộ project'] },
+    terminalFiles: { write: ['docs/ (final)'], read: ['toàn bộ project'] },
+    nextHint: 'Gate pass → submit store',
+    nextCmd: 'Submit App Store / Play Store'
+  },
+  {
+    id: 'submit',
+    num: 6,
+    name: 'Submit Store',
+    sub: 'Build release + submit App Store / Play Store',
+    workspace: 'desktop',
+    color: '#0DBE55',
+    commands: ['flutter build ipa', 'flutter build appbundle'],
+    checklist: [
+      'flutter build ipa (iOS)',
+      'flutter build appbundle (Android)',
+      'Upload lên App Store Connect / Google Play Console',
+      'Điền release notes',
+      'Submit for review',
+      '/kfsp:log --log — ghi bản release',
+      'Tag git: git tag vX.Y.Z'
+    ],
+    desktopDo: ['Build release', 'Upload + submit'],
+    terminalDo: ['/kfsp:log --log — ghi release', '/kfsp:docs --close-phase'],
+    desktopFiles: { write: ['build/'], read: [] },
+    terminalFiles: { write: ['docs/'], read: [] },
     nextHint: 'Release xong! 🎉',
     nextCmd: '/kfsp:start (phiên mới)'
   }
 ];
+
+// Active steps based on session type
+function getSteps() {
+  return STATE.sessionType === 'release' ? RELEASE_STEPS : DEV_STEPS;
+}
 
 // =============================================
 // STATE
@@ -354,7 +477,7 @@ function render() {
 function renderSteps() {
   const col = document.getElementById('stepsCol');
   let html = '';
-  STEPS.forEach((s, i) => {
+  getSteps().forEach((s, i) => {
     const cls = i === STATE.currentStep ? 'active' : (i < STATE.currentStep ? 'done' : '');
     html += `<div class="step-item ${cls}" onclick="goToStep(${i})">
       <div class="step-num" style="background:${s.color}">${s.num}</div>
@@ -370,9 +493,9 @@ function renderSteps() {
 
 function renderDetail() {
   const col = document.getElementById('detailCol');
-  const s = STEPS[STATE.currentStep];
+  const s = getSteps()[STATE.currentStep];
   const prev = STATE.currentStep > 0 ? STEPS[STATE.currentStep - 1] : null;
-  const next = STATE.currentStep < STEPS.length - 1 ? STEPS[STATE.currentStep + 1] : null;
+  const next = STATE.currentStep < getSteps().length - 1 ? STEPS[STATE.currentStep + 1] : null;
 
   let checklistHtml = '';
   s.checklist.forEach((item, i) => {
@@ -386,7 +509,7 @@ function renderDetail() {
   col.innerHTML = `
     <!-- Current step -->
     <div class="detail-card">
-      <div class="phase-label" style="background:${s.color}20;color:${s.color}">Bước ${s.num} / ${STEPS.length} ${STATE.phase ? '— Phase ' + STATE.phase : ''}</div>
+      <div class="phase-label" style="background:${s.color}20;color:${s.color}">Bước ${s.num} / ${getSteps().length} ${STATE.phase ? '— Phase ' + STATE.phase : ''}</div>
       <h2><span style="display:inline-flex;width:32px;height:32px;border-radius:50%;background:${s.color};color:#fff;align-items:center;justify-content:center;font-size:14px">${s.num}</span> ${s.name}</h2>
       <p style="color:var(--text2);margin-top:4px">${s.sub}</p>
 
@@ -402,6 +525,63 @@ function renderDetail() {
         </div>
       </div>
     </div>
+
+    <!-- Terminal Setup Guide (only for step 1) -->
+    ${s.terminalSetup ? `
+    <div class="terminal-guide">
+      <h3>🖥️ Hướng dẫn mở Terminal (làm 1 lần đầu phiên)</h3>
+
+      <div class="tg-step">
+        <div class="tg-num">1</div>
+        <div class="tg-content">
+          <strong>Mở Terminal app</strong>
+          Nhấn <code onclick="copyText('Terminal')">Cmd + Space</code> → gõ "Terminal" → Enter
+        </div>
+      </div>
+
+      <div class="tg-step">
+        <div class="tg-num">2</div>
+        <div class="tg-content">
+          <strong>Vào đúng thư mục Product</strong>
+          Copy lệnh này, paste vào Terminal, nhấn Enter:
+          <br><code onclick="copyText('cd \\'$HOME/Library/CloudStorage/OneDrive-Personal/Work/KFSP/Antigravity/Product\\'')">cd "$HOME/Library/CloudStorage/OneDrive-Personal/Work/KFSP/Antigravity/Product"</code>
+        </div>
+      </div>
+
+      <div class="tg-step">
+        <div class="tg-num">3</div>
+        <div class="tg-content">
+          <strong>Khởi chạy Claude Code</strong>
+          Gõ rồi Enter. Chờ 5-10 giây đến khi thấy dấu nhắc <b>></b>
+          <br><code onclick="copyText('claude')">claude</code>
+        </div>
+      </div>
+
+      <div class="tg-step">
+        <div class="tg-num">4</div>
+        <div class="tg-content">
+          <strong>Nói cho Claude biết vai trò Terminal</strong>
+          Paste câu này vào dấu nhắc > của Claude Code:
+          <br><code onclick="copyText('Tôi là phiên Terminal cho KFSP. Vai trò: rà soát và cập nhật docs, test cases, specs. KHÔNG đụng lib/ hoặc test/. Đọc Product/CLAUDE.md trước.')">Tôi là phiên Terminal cho KFSP. Vai trò: rà soát và cập nhật docs, test cases, specs. KHÔNG đụng lib/ hoặc test/. Đọc Product/CLAUDE.md trước.</code>
+        </div>
+      </div>
+
+      <div class="tg-verify">
+        <h4>Thấy gì là đúng?</h4>
+        <ul>
+          <li>Terminal hiện dấu nhắc <b>></b> (không phải <b>$</b>)</li>
+          <li>Claude phản hồi bằng tiếng Việt, nhắc đến KFSP</li>
+          <li>Claude xác nhận đã đọc CLAUDE.md</li>
+          <li>Thư mục làm việc là .../Antigravity/Product</li>
+        </ul>
+      </div>
+
+      <div class="tg-warn">
+        <span>⚠️</span>
+        <span>Nếu gõ <b>claude</b> mà báo "command not found" → Claude Code chưa cài. Chạy: <code onclick="copyText('npm install -g @anthropic-ai/claude-code')" style="background:#1a1a2e;color:#F38BA8;padding:2px 6px;border-radius:3px;font-size:11px">npm install -g @anthropic-ai/claude-code</code></span>
+      </div>
+    </div>
+    ` : ''}
 
     <!-- Commands -->
     <div class="detail-card">
@@ -472,9 +652,9 @@ function renderDetail() {
 }
 
 function updateProgress() {
-  const totalChecks = STEPS.reduce((sum, s) => sum + s.checklist.length, 0);
+  const totalChecks = getSteps().reduce((sum, s) => sum + s.checklist.length, 0);
   const doneChecks = Object.values(STATE.checklistState).filter(v => v).length;
-  const stepProgress = (STATE.currentStep / STEPS.length) * 70;
+  const stepProgress = (STATE.currentStep / getSteps().length) * 70;
   const checkProgress = totalChecks > 0 ? (doneChecks / totalChecks) * 30 : 0;
   document.getElementById('progressFill').style.width = (stepProgress + checkProgress) + '%';
 }
@@ -483,9 +663,9 @@ function updateProgress() {
 // INTERACTIONS
 // =============================================
 function goToStep(i) {
-  if (i < 0 || i >= STEPS.length) return;
+  if (i < 0 || i >= getSteps().length) return;
   STATE.currentStep = i;
-  STATE.stepTimes[STEPS[i].id] = Date.now();
+  STATE.stepTimes[getSteps()[i].id] = Date.now();
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -496,12 +676,21 @@ function toggleCheck(key) {
 }
 
 function copyCommands(stepIdx) {
-  const cmds = STEPS[stepIdx].commands.join('\n');
+  const cmds = getSteps()[stepIdx].commands.join('\n');
   navigator.clipboard.writeText(cmds).then(() => showToast('Đã copy lệnh'));
 }
 
 function copyText(text) {
   navigator.clipboard.writeText(text).then(() => showToast('Đã copy: ' + text));
+}
+
+function switchSession() {
+  STATE.sessionType = document.getElementById('sessionType').value;
+  STATE.currentStep = 0;
+  STATE.checklistState = {};
+  render();
+  showToast(STATE.sessionType === 'release' ? '🚀 Release session' : '🔨 Code session');
+  saveGuideState();
 }
 
 function resetGuide() {
@@ -572,6 +761,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!--GUIDE_STATE--><!--/GUIDE_STATE-->
+<!--GUIDE_STATE--><script id="guideState" type="application/json">{"currentStep":5,"checklistState":{"start-0":true,"start-1":true,"start-2":true,"start-3":true,"start-4":true,"start-5":true,"start-6":true,"start-7":true,"code-0":true,"code-1":true,"code-2":true,"code-3":true,"code-4":true,"build-0":true,"build-1":true,"build-2":true,"build-3":true,"build-4":true,"build-5":true,"build-6":true,"commit-0":true,"commit-1":true,"commit-2":true,"commit-3":true,"commit-4":true,"push-2":true,"push-4":true,"push-5":true},"phase":"4.11A + Android back fix","sessionType":"dev","startTime":1743066000000,"stepTimes":{"start":1743066000000,"code":1743067800000,"build":1743073200000,"commit":1743075600000,"push":1743076800000}}</script><!--/GUIDE_STATE-->
 </body>
 </html>

@@ -469,15 +469,6 @@ header p { font-size:13px; opacity:.8; margin-top:4px; }
               <div class="step-detail">Health score, token audit, blast radius</div>
             </div>
           </div>
-          <span class="step-arrow">→</span>
-          <div class="flow-step">
-            <div class="step-box gate">
-              <span class="badge gate-badge">BẮT BUỘC</span>
-              <div class="step-cmd">/kfsp:gate --commit</div>
-              <div class="step-name">Pre-commit</div>
-              <div class="step-detail">23 checks. PHẢI pass mới commit</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -511,9 +502,9 @@ header p { font-size:13px; opacity:.8; margin-top:4px; }
         </div>
       </div>
 
-      <!-- Phase 4: Build -->
+      <!-- Phase 4: Build & Verify (TRƯỚC commit) -->
       <div class="phase-group">
-        <span class="phase-label">🔨 Sau build</span>
+        <span class="phase-label">🔨 Build & Verify (TRƯỚC commit)</span>
         <div class="flow-steps">
           <div class="flow-step">
             <div class="step-box gate">
@@ -546,6 +537,29 @@ header p { font-size:13px; opacity:.8; margin-top:4px; }
               <div class="step-cmd">/kfsp:test --bug</div>
               <div class="step-name">Log bugs</div>
               <div class="step-detail">Ghi nhận bug từ PM feedback</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4b: Commit (SAU build OK) -->
+      <div class="phase-group">
+        <span class="phase-label">✅ Commit (sau build OK)</span>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-box gate">
+              <span class="badge gate-badge">BẮT BUỘC</span>
+              <div class="step-cmd">/kfsp:gate --commit</div>
+              <div class="step-name">Pre-commit</div>
+              <div class="step-detail">23 checks. PHẢI pass mới commit</div>
+            </div>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-box">
+              <div class="step-cmd">git commit</div>
+              <div class="step-name">Commit code</div>
+              <div class="step-detail">Build đã OK → commit sạch</div>
             </div>
           </div>
         </div>

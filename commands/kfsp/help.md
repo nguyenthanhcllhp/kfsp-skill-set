@@ -40,8 +40,10 @@ File: `docs/logs/.changes.json` (1 file / 1 phiên)
 ## Lifecycle
 
 ```
-start → risk --before → plan → code → check --quick → gate --commit
-→ test --verify → test --brief → PM test → test --bug
+start → risk --before → plan → code → check --quick
+→ build (flutter run/build) → test --verify → test --brief
+→ gate --commit → git commit
+→ PM test → test --bug
 → check --full → docs --close-phase → log --log
 → risk --contracts → risk --regression → gate --release
 ```
