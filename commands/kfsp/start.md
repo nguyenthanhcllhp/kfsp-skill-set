@@ -34,7 +34,17 @@ Nếu file rỗng hoặc phiên mới:
 ```
 Nếu có entries cũ chưa processed → giữ lại, cảnh báo Thanh.
 
-### 4. Hướng dẫn Dual-Session (Rule 20)
+### 4. Hỏi phiên iOS hay Android (Rule 20)
+
+Branch duy nhất: `thanh_sg`. Cả 2 phiên dùng chung branch, edit trong `current_source/`.
+
+Agent PHẢI hỏi: **"Phiên này làm iOS hay Android?"** rồi:
+- Khai báo files/folders sẽ đụng
+- Kiểm tra không trùng phiên kia (nếu biết phiên kia đang làm gì)
+- Nhắc quy tắc: KHÔNG sửa cùng 1 file ở 2 phiên, commit tuần tự, shared files dồn cuối
+
+### 5. Hướng dẫn Dual-Session Terminal
+
 Agent PHẢI output block hướng dẫn chi tiết (KHÔNG chỉ nhắc chung chung):
 
 ```
@@ -46,8 +56,6 @@ Agent PHẢI output block hướng dẫn chi tiết (KHÔNG chỉ nhắc chung c
 
 ✅ Đúng khi: dấu nhắc >, Claude phản hồi tiếng Việt, nhắc KFSP
 ❌ Sai khi: "command not found" → chạy: npm install -g @anthropic-ai/claude-code
-
-📊 Chi tiết + hình minh hoạ: Live Guide → Bước 1 → panel "Hướng dẫn mở Terminal"
 ```
 
 **KHÔNG ĐƯỢC** chỉ viết "Anh bật Terminal" mà không kèm 4 bước trên.

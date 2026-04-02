@@ -96,6 +96,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;z-index:600;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* Task Board */
+.task-board{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.tb-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(135deg,#FFF7E6,#FFE8CC);border-bottom:1px solid #ffe0b0;cursor:pointer;user-select:none}
+.tb-header h3{font-size:14px;font-weight:700;color:#CC5500;display:flex;align-items:center;gap:8px}
+.tb-header .tb-stats{font-size:12px;color:#996633;font-weight:600}
+.tb-header .tb-toggle{font-size:16px;transition:.3s;color:#CC5500}
+.tb-header:hover{background:linear-gradient(135deg,#FFF0D6,#FFE0B0)}
+.task-board.collapsed .tb-body{display:none}
+.task-board.collapsed .tb-toggle{transform:rotate(-90deg)}
+.tb-body{padding:8px}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin:2px 0;cursor:pointer;transition:.15s;border:2px solid transparent}
+.task-item:hover{background:#f9f9fb}
+.task-item.active-task{background:var(--p-bg);border-color:var(--p)}
+.task-item.task-done{opacity:.5}
+.task-item.task-done .task-name{text-decoration:line-through}
+.task-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;cursor:pointer;transition:.2s}
+.task-chk:hover{border-color:var(--pass);background:#E8F9EF}
+.task-item.task-done .task-chk{background:var(--pass);border-color:var(--pass);color:#fff}
+.task-body{flex:1;min-width:0}
+.task-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.task-desc{font-size:11px;color:var(--text2);line-height:1.5;display:none}
+.task-item.active-task .task-desc{display:block}
+.task-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.task-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+.tag-high{background:#FFECEB;color:var(--fail)}
+.tag-medium{background:#FFF7E6;color:#CC5500}
+.tag-files{background:#f0f0f0;color:var(--text2);font-weight:400;font-size:10px}
+.task-detail-card{background:#FAFBFF;border:1px solid #E8EAFF;border-radius:10px;padding:14px;margin:12px 12px 8px;font-size:12px;line-height:1.7}
+.task-detail-card h4{font-size:13px;font-weight:700;color:var(--p);margin-bottom:8px}
+.task-detail-card code{background:#1a1a2e;color:#A6E3A1;padding:2px 6px;border-radius:4px;font-size:11px}
+.task-detail-card ul{margin:4px 0 4px 16px;font-size:12px}
+.task-detail-card .td-decision{background:#E8F9EF;padding:8px 10px;border-radius:6px;margin-top:8px;font-size:11px;color:#1A5C34;border:1px solid #B8E6C8}
+
 /* Terminal Setup Guide */
 .terminal-guide{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border:2px solid var(--info);border-radius:12px;padding:20px;margin:16px 0}
 .terminal-guide h3{font-size:15px;font-weight:700;color:var(--info);margin-bottom:12px;display:flex;align-items:center;gap:6px}
@@ -430,6 +463,119 @@ const RELEASE_STEPS = [
   }
 ];
 
+// ── SESSION TASKS: Việc cần làm phiên 2026-03-28 ──
+const SESSION_TASKS = [
+  {
+    id: 'sparkline-extend-15h',
+    name: 'Sparkline data liền mạch 9h→15h',
+    priority: 'high',
+    status: 'todo',
+    files: ['stock_sparkline.dart'],
+    desc: `<b>Vấn đề:</b> Data chỉ extend đến nowMin (thời gian hiện tại), không đến 15:00. Ngoài giờ GD data kết thúc ở point cuối.<br>
+<b>Cần làm:</b>
+<ul>
+<li>Luôn extend data đến 15:00 (giống BieuDo đã làm)</li>
+<li>Nếu data cuối ở 13h16 → vẽ đường thẳng 13h16→15:00 tại lastPrice</li>
+<li><b>HSX/HNX:</b> ATC ~14:44-14:45, sau đó không có data → kéo thẳng 14:45→15:00 tại lastPrice</li>
+<li>UPCOM tương tự</li>
+</ul>
+<div class="td-decision">📍 File: <code>stock_sparkline.dart</code> line 97-109 — forward-fill logic</div>`
+  },
+  {
+    id: 'verify-dot-clip',
+    name: 'Verify dot không bị cắt (buffer maxX +5)',
+    priority: 'high',
+    status: 'todo',
+    files: ['stock_sparkline.dart', 'index_card.dart'],
+    desc: `<b>Đã làm:</b> Thêm maxX +5 buffer<br>
+<b>Chưa verify:</b>
+<ul>
+<li>Dot radius 3.0 cần ít nhất ~4px buffer — +5 đủ chưa?</li>
+<li>Cần buffer bên trên/dưới cho dot Y (chartMin/chartMax padding)</li>
+<li>Verify trên Simulator: dot cuối cùng hiển thị đầy đủ, không bị crop</li>
+</ul>
+<div class="td-decision">📍 Cần Thanh chụp screenshot Simulator để confirm</div>`
+  },
+  {
+    id: 'verify-lunch-gap',
+    name: 'Verify gap buổi trưa (11:30→13:00)',
+    priority: 'medium',
+    status: 'todo',
+    files: ['stock_sparkline.dart'],
+    desc: `<b>Logic hiện tại:</b> Step interpolation chỉ xử lý gap >2 phút. Gap trưa = 90 phút → line ngang tại lastPrice (đúng).<br>
+<b>Edge case:</b> Nếu data đầu tiên ở 13:15 (không có data sáng) → line chéo từ ref@09:00 → 13:15 = <b>SAI</b><br>
+<b>Cần verify:</b>
+<ul>
+<li>Đã có logic line 80-84: nếu firstDataMin > 09:15 → ref ngang từ 09:00 đến firstDataMin-0.5 rồi step transition</li>
+<li>Test case: data bắt đầu 13:15 — phải thấy ref ngang 09:00→13:14, rồi step xuống/lên tại 13:15</li>
+</ul>`
+  },
+  {
+    id: 'sparkline-lastprice-label',
+    name: 'LastPrice label trên sparkline mini?',
+    priority: 'medium',
+    status: 'todo',
+    files: [],
+    desc: `<b>BieuDo (ta_chart.dart):</b> Đã có lastPrice badge overlay ✅<br>
+<b>Sparkline (PriceBoard + Dashboard):</b> Chưa có — nhưng sparkline mini nên có thể không cần.<br>
+<b>⚠️ CẦN THANH QUYẾT ĐỊNH:</b> Sparkline mini có cần lastPrice label không?<br>
+<ul>
+<li>Nếu CÓ → dùng Positioned overlay giống BieuDo, font 8px</li>
+<li>Nếu KHÔNG → bỏ qua task này</li>
+</ul>
+<div class="td-decision">🎯 Chờ PM quyết định — hỏi Thanh trước khi code</div>`
+  },
+  {
+    id: 'tap-axis-dismiss-5charts',
+    name: 'Tap-axis-dismiss → 5 charts',
+    priority: 'medium',
+    status: 'todo',
+    files: ['liquid_chart.dart', 'advance_decline_chart.dart', 'ma_breadth_chart.dart', 'foreign_series_chart.dart', 'cash_flow_chart.dart'],
+    desc: `<b>Convention:</b> Tap vùng trục phải hoặc trục dưới → dismiss tooltip<br>
+<b>Logic:</b> <code>localPos.dx > plotWidth || localPos.dy > plotHeight → dismiss</code><br>
+<b>5 charts cần áp dụng:</b>
+<ul>
+<li>liquid_chart.dart — Thanh Khoản</li>
+<li>advance_decline_chart.dart — Advance/Decline</li>
+<li>ma_breadth_chart.dart — MA Breadth</li>
+<li>foreign_series_chart.dart — Foreign Series</li>
+<li>cash_flow_chart.dart — Cash Flow (Dòng Tiền)</li>
+</ul>
+<div class="td-decision">💡 Batch cùng #6 và #7 cho hiệu quả</div>`
+  },
+  {
+    id: 'ref-yellow-5charts',
+    name: 'Ref xám + yellow line → 5 charts',
+    priority: 'medium',
+    status: 'todo',
+    files: ['liquid_chart.dart', 'advance_decline_chart.dart', 'ma_breadth_chart.dart', 'foreign_series_chart.dart', 'cash_flow_chart.dart'],
+    desc: `<b>Convention đã chốt (03_DESIGN_SYSTEM.md 20.13):</b>
+<ul>
+<li>Ref line: xám dashed <code>#666666</code> full width → thay ref vàng dashed cũ</li>
+<li>Yellow line: <code>#FFD600</code> solid, trên cùng (z-top), từ minX→dotX</li>
+<li>Bỏ mask line (bg-color line)</li>
+<li>Dot tại last data point, radius 3.0</li>
+</ul>
+<div class="td-decision">💡 Batch cùng #5 và #7 — cùng 5 files</div>`
+  },
+  {
+    id: 'lastprice-badge-5charts',
+    name: 'LastPrice badge → 5 charts',
+    priority: 'medium',
+    status: 'todo',
+    files: ['liquid_chart.dart', 'advance_decline_chart.dart', 'ma_breadth_chart.dart', 'foreign_series_chart.dart', 'cash_flow_chart.dart'],
+    desc: `<b>Convention (đã làm cho ta_chart.dart):</b>
+<ul>
+<li>Positioned overlay badge: bg=stockColor, text=white, bold 9px</li>
+<li>Number format: <code>#,##0.00</code> (2 decimal)</li>
+<li><code>rightAxisW >= 50px</code></li>
+<li>HorizontalLine dashed từ lastPrice</li>
+<li>Chỉ áp dụng cho charts có trục Y phải</li>
+</ul>
+<div class="td-decision">💡 Batch cùng #5 và #6 — cùng 5 files</div>`
+  }
+];
+
 // Active steps based on session type
 function getSteps() {
   return STATE.sessionType === 'release' ? RELEASE_STEPS : DEV_STEPS;
@@ -445,7 +591,10 @@ let STATE = {
   phase: '',
   sessionType: 'dev',
   startTime: null,
-  stepTimes: {}
+  stepTimes: {},
+  tasksDone: {},
+  tasksExpanded: {},
+  taskBoardCollapsed: false
 };
 
 function loadState() {
@@ -494,8 +643,9 @@ function renderSteps() {
 function renderDetail() {
   const col = document.getElementById('detailCol');
   const s = getSteps()[STATE.currentStep];
-  const prev = STATE.currentStep > 0 ? STEPS[STATE.currentStep - 1] : null;
-  const next = STATE.currentStep < getSteps().length - 1 ? STEPS[STATE.currentStep + 1] : null;
+  const steps = getSteps();
+  const prev = STATE.currentStep > 0 ? steps[STATE.currentStep - 1] : null;
+  const next = STATE.currentStep < steps.length - 1 ? steps[STATE.currentStep + 1] : null;
 
   let checklistHtml = '';
   s.checklist.forEach((item, i) => {
@@ -507,6 +657,9 @@ function renderDetail() {
   const allChecked = s.checklist.every((_, i) => STATE.checklistState[s.id + '-' + i]);
 
   col.innerHTML = `
+    <!-- Task Board -->
+    ${renderTaskBoard()}
+
     <!-- Current step -->
     <div class="detail-card">
       <div class="phase-label" style="background:${s.color}20;color:${s.color}">Bước ${s.num} / ${getSteps().length} ${STATE.phase ? '— Phase ' + STATE.phase : ''}</div>
@@ -651,12 +804,76 @@ function renderDetail() {
   `;
 }
 
+function renderTaskBoard() {
+  const doneCount = SESSION_TASKS.filter(t => STATE.tasksDone[t.id]).length;
+  const total = SESSION_TASKS.length;
+  const collapsed = STATE.taskBoardCollapsed ? 'collapsed' : '';
+
+  let tasksHtml = '';
+  SESSION_TASKS.forEach((t, i) => {
+    const done = STATE.tasksDone[t.id] ? 'task-done' : '';
+    const expanded = STATE.tasksExpanded[t.id] ? 'active-task' : '';
+    const prioTag = t.priority === 'high' ? '<span class="task-tag tag-high">Cao</span>' : '<span class="task-tag tag-medium">TB</span>';
+    const filesTags = t.files.length > 0 ? t.files.map(f => `<span class="task-tag tag-files">${f}</span>`).join('') : '<span class="task-tag tag-files">Chờ quyết định</span>';
+
+    tasksHtml += `
+      <div class="task-item ${done} ${expanded}" data-task="${t.id}">
+        <div class="task-chk" onclick="event.stopPropagation();toggleTask('${t.id}')">${STATE.tasksDone[t.id] ? '✓' : (i+1)}</div>
+        <div class="task-body" onclick="expandTask('${t.id}')">
+          <div class="task-name">${t.name}</div>
+          <div class="task-meta">${prioTag}${filesTags}</div>
+          <div class="task-desc">${t.desc}</div>
+        </div>
+      </div>`;
+
+    if (STATE.tasksExpanded[t.id] && t.desc) {
+      tasksHtml += `<div class="task-detail-card"><h4>#${i+1} — Chi tiết</h4>${t.desc}</div>`;
+    }
+  });
+
+  return `
+    <div class="task-board ${collapsed}">
+      <div class="tb-header" onclick="toggleTaskBoard()">
+        <h3>📋 Việc cần làm phiên này</h3>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="tb-stats">${doneCount}/${total} xong</div>
+          <div style="width:80px;height:6px;border-radius:3px;background:#e0e0e0;overflow:hidden"><div style="height:100%;width:${total>0?(doneCount/total*100):0}%;background:var(--pass);border-radius:3px;transition:width .4s"></div></div>
+          <div class="tb-toggle">▼</div>
+        </div>
+      </div>
+      <div class="tb-body">${tasksHtml}</div>
+    </div>`;
+}
+
+function toggleTask(id) {
+  STATE.tasksDone[id] = !STATE.tasksDone[id];
+  render();
+  const doneCount = SESSION_TASKS.filter(t => STATE.tasksDone[t.id]).length;
+  showToast(STATE.tasksDone[id] ? `✅ Xong #${SESSION_TASKS.findIndex(t=>t.id===id)+1} (${doneCount}/${SESSION_TASKS.length})` : 'Đã bỏ đánh dấu');
+}
+
+function expandTask(id) {
+  const wasExpanded = STATE.tasksExpanded[id];
+  STATE.tasksExpanded = {};
+  if (!wasExpanded) STATE.tasksExpanded[id] = true;
+  render();
+}
+
+function toggleTaskBoard() {
+  STATE.taskBoardCollapsed = !STATE.taskBoardCollapsed;
+  render();
+}
+
 function updateProgress() {
   const totalChecks = getSteps().reduce((sum, s) => sum + s.checklist.length, 0);
   const doneChecks = Object.values(STATE.checklistState).filter(v => v).length;
-  const stepProgress = (STATE.currentStep / getSteps().length) * 70;
-  const checkProgress = totalChecks > 0 ? (doneChecks / totalChecks) * 30 : 0;
-  document.getElementById('progressFill').style.width = (stepProgress + checkProgress) + '%';
+  const tasksDone = SESSION_TASKS.filter(t => STATE.tasksDone[t.id]).length;
+  const tasksTotal = SESSION_TASKS.length;
+  // Progress = 40% lifecycle steps + 20% checklist + 40% session tasks
+  const stepProgress = (STATE.currentStep / getSteps().length) * 40;
+  const checkProgress = totalChecks > 0 ? (doneChecks / totalChecks) * 20 : 0;
+  const taskProgress = tasksTotal > 0 ? (tasksDone / tasksTotal) * 40 : 0;
+  document.getElementById('progressFill').style.width = (stepProgress + checkProgress + taskProgress) + '%';
 }
 
 // =============================================
@@ -761,6 +978,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!--GUIDE_STATE--><script id="guideState" type="application/json">{"currentStep":5,"checklistState":{"start-0":true,"start-1":true,"start-2":true,"start-3":true,"start-4":true,"start-5":true,"start-6":true,"start-7":true,"code-0":true,"code-1":true,"code-2":true,"code-3":true,"code-4":true,"build-0":true,"build-1":true,"build-2":true,"build-3":true,"build-4":true,"build-5":true,"build-6":true,"commit-0":true,"commit-1":true,"commit-2":true,"commit-3":true,"commit-4":true,"push-2":true,"push-4":true,"push-5":true},"phase":"4.11A + Android back fix","sessionType":"dev","startTime":1743066000000,"stepTimes":{"start":1743066000000,"code":1743067800000,"build":1743073200000,"commit":1743075600000,"push":1743076800000}}</script><!--/GUIDE_STATE-->
+<!--GUIDE_STATE--><script id="guideState" type="application/json">{"currentStep":2,"checklistState":{},"phase":"P4.10 — Sparkline + Chart Convention","sessionType":"dev","startTime":null,"stepTimes":{},"tasksDone":{"verify-lunch-gap":true,"sparkline-lastprice-label":true},"tasksExpanded":{},"taskBoardCollapsed":false}</script><!--/GUIDE_STATE-->
 </body>
 </html>

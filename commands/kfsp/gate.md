@@ -22,6 +22,7 @@ Chặn trước commit hoặc trước release. PHẢI pass mới được tiế
 2. Health score ≥ 70 (từ /kfsp:check)
 3. Git remote — KHÔNG tự ý push (Rule 14)
 4. .changes.json — entry đã ghi cho thay đổi này?
+5. **Changelog** — `changelog_thanh_sg.md` ĐÃ CÓ entry cho thay đổi này? Nếu chưa → BLOCK, phải thêm entry trước khi commit. Format: Added/Changed/Fixed, mô tả cụ thể từng file, stats +/- dòng.
 
 #### T2 Code (BLOCK nếu fail)
 5. Design tokens — 0 NEW hardcoded violations
@@ -45,7 +46,7 @@ Chặn trước commit hoặc trước release. PHẢI pass mới được tiế
 17. Feature 6 chiều (Rule 9) — nếu hoàn thành feature
 18. Build deliverable (Rule 18) — nếu sau build
 19. Plan file cập nhật (Rule 19)
-20. Changelog entry
+20. ~~Changelog entry~~ (moved to T1 #5 — now BLOCK)
 21. Docs impact noted
 22. Test cases covered
 23. Legacy trend — hardcoded count trending down?
