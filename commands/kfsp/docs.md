@@ -29,7 +29,7 @@ Kiểm tra trạng thái tất cả docs. Chạy ở Terminal.
 **Output:** Bảng status + danh sách actions cần làm
 
 ### --update
-Cập nhật docs theo .changes.json. **Đây là mode chính cho Terminal.**
+Cập nhật docs + changelog theo .changes.json. **Đây là mode chính cho Terminal.**
 
 **Quy trình:**
 1. Đọc `.changes.json` → lấy entries có `processed: false`
@@ -38,8 +38,14 @@ Cập nhật docs theo .changes.json. **Đây là mode chính cho Terminal.**
    - `testcase` → thêm/sửa test cases trong registry
    - `architecture` → cập nhật 02_ARCH.md
    - `plan` → cập nhật plan file status
-3. Sau khi xử lý → đánh dấu `processed: true`
-4. Ghi kết quả vào session HTML
+3. **Cập nhật changelog** (`changelog_thanh_sg.md`):
+   - Tìm entry `[Unreleased]` có trạng thái 🔨
+   - Thêm thay đổi vào đúng section (Added/Changed/Fixed) theo format trong file
+   - Mô tả CỤ THỂ từng file: tên file, MỚI hay SỬA, số dòng, thay đổi gì
+   - Nhóm theo feature, KHÔNG liệt kê lộn xộn
+   - Nếu chưa có entry Unreleased → tạo mới với base = commit hiện tại
+4. Sau khi xử lý → đánh dấu `processed: true`
+5. Ghi kết quả vào session HTML
 
 **Output:**
 ```
@@ -47,9 +53,9 @@ Cập nhật docs theo .changes.json. **Đây là mode chính cho Terminal.**
 ├── 04_FEATURES.md — +1 screen spec (NotificationSettings)
 ├── 02_ARCH.md — +1 route, +1 provider
 ├── test_registry_v4.html — +5 TC
-└── P4.11 plan — task 4.11.11 → done
-
-.changes.json: 3/3 entries processed ✅
+├── P4.11 plan — task 4.11.11 → done
+├── changelog_thanh_sg.md — +2 entries (Added: NotificationSettings, Changed: app_router)
+└── .changes.json: 3/3 entries processed ✅
 ```
 
 ### --close-phase
@@ -75,3 +81,4 @@ Cập nhật docs theo .changes.json. **Đây là mode chính cho Terminal.**
 | 06_DECISIONS_LOG.md | Decision/incident |
 | plans/P{N}.md | Task status change |
 | test_cases/master_test_registry_v4.html | Thêm/sửa test cases |
+| changelog_thanh_sg.md | Mỗi code change — Added/Changed/Fixed, mô tả cụ thể từng file |

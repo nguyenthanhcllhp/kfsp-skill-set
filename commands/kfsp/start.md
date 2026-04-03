@@ -64,13 +64,6 @@ Agent PHẢI output block hướng dẫn chi tiết (KHÔNG chỉ nhắc chung c
 - Đọc file plan mới nhất trong `docs/plans/`
 - Tóm tắt: phase nào, tasks nào đang in_progress
 
-### 6. Mở Live Guide (TỰ ĐỘNG)
-TỰ ĐỘNG mở Live Guide trong browser:
-```bash
-open "Product/kfsp-skill-set/KFSP_Live_Guide.html"
-```
-Nếu `open` không khả dụng, nhắc Thanh mở thủ công.
-
 ## Output
 ```
 🥋 KFSP Session Start — [DATE]
@@ -78,7 +71,6 @@ Nếu `open` không khả dụng, nhắc Thanh mở thủ công.
 ├── Drift: [N] docs có thể lỗi thời
 ├── Sync: [N] entries chưa xử lý từ phiên trước
 ├── Phase: [current phase + status]
-├── 📊 Live Guide: đã mở trong browser
 │
 ├── 🖥️ MỞ TERMINAL — 4 bước:
 │   1. Cmd+Space → "Terminal" → Enter
@@ -91,24 +83,7 @@ Nếu `open` không khả dụng, nhắc Thanh mở thủ công.
 └── Khi Desktop nhắc "🔄 Sync → Terminal" → sang Terminal gõ: /kfsp:docs --update
 ```
 
-### 7. Lưu Live Guide khi đóng phiên (TỰ ĐỘNG)
-
-Mỗi Live Guide chỉ hoạt động cho 1 plan/task/phase cụ thể. Khi Thanh phát tín hiệu:
-- "Đóng phiên", "chuyển chat mới", "xong feature X", "chuyển sang phase Y"
-
-Agent PHẢI TỰ ĐỘNG:
-1. Copy Live Guide hiện tại vào archive:
-```bash
-cp "Product/kfsp-skill-set/KFSP_Live_Guide.html" \
-   "Product/kfsp_flutter_migration/docs/logs/KFSP_Live_Guide_YYYY-MM-DD.html"
-```
-2. Xác nhận với Thanh: "Live Guide đã archive vào docs/logs/"
-3. **KHÔNG chờ push git** — lưu ngay khi đóng
-
-**Lưu ý:** Nếu trong 1 ngày có nhiều phiên, đặt tên `KFSP_Live_Guide_YYYY-MM-DD_v2.html`
-
 ## Enforcement
 - Agent PHẢI output đầy đủ block 🖥️ MỞ TERMINAL, KHÔNG được tóm tắt
 - Agent PHẢI nói rõ "thấy gì là đúng" và "thấy gì là sai"
 - Agent PHẢI nói Terminal sau đó chạy lệnh gì, khi nào chạy
-- Agent PHẢI lưu Live Guide khi Thanh báo đóng phiên — KHÔNG cần Thanh nhắc
