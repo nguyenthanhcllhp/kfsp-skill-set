@@ -23,7 +23,7 @@ Kiểm tra trạng thái tất cả docs. Chạy ở Terminal.
 | Doc | Last updated | Code changed since | Status |
 |-----|-------------|-------------------|--------|
 | 01_PROJECT.md | 03-26 | 03-27 | ⚠️ Cần cập nhật |
-| 04_FEATURES.md | 03-27 | 03-27 | ✅ OK |
+| 04_FEATURES_v2.md | 03-27 | 03-27 | ✅ OK |
 | test_registry_v4.html | 03-26 | 03-27 | ⚠️ Thiếu TC |
 
 **Output:** Bảng status + danh sách actions cần làm
@@ -50,7 +50,7 @@ Cập nhật docs + changelog theo .changes.json. **Đây là mode chính cho Te
 **Output:**
 ```
 📝 Docs Updated:
-├── 04_FEATURES.md — +1 screen spec (NotificationSettings)
+├── 04_FEATURES_v2.md — +1 screen spec (NotificationSettings)
 ├── 02_ARCH.md — +1 route, +1 provider
 ├── test_registry_v4.html — +5 TC
 ├── P4.11 plan — task 4.11.11 → done
@@ -69,6 +69,30 @@ Cập nhật docs + changelog theo .changes.json. **Đây là mode chính cho Te
 5. Tạo session summary trong session HTML
 6. Kiểm tra 6/6 chiều feature (Rule 9)
 
+## Chuẩn viết doc khi --update
+
+### Spec (04_FEATURES_v2.md)
+Khi code thay đổi feature → cập nhật spec theo cấu trúc 11 sections unified:
+1. Mô tả + User Stories, 2. UI Spec, 3. Data & API, **4. Business Rules**, **5. Acceptance Criteria**, **6. Error & Edge Cases**, **7. Input & Boundary**, **8. Performance**, **9. Pro/Free Gating**, 10. Files, 11. Test Case IDs.
+
+**Quy tắc:**
+- Mỗi rule/criteria có ID: `BR-{FT}-{NN}`, `AC-{FT}-{NN}`, `ERR-{FT}-{NN}`...
+- Business Rules PHẢI có giá trị cụ thể (ZERO TOLERANCE cho finance)
+- Acceptance Criteria PHẢI rõ pass/fail (tester đọc hiểu)
+- Sections 4-9 là phần QA/Tester cần — KHÔNG ĐƯỢC bỏ qua
+
+### Test Case (master_test_registry)
+Khi thêm/sửa test case → tuân thủ AI-RBT (xem `05_TESTING.md` section "Chuẩn viết Test Case"):
+- **4 loại BẮT BUỘC** per feature: Positive, Negative, Boundary, Edge
+- Mỗi test case có: `riskLevel` (High/Medium/Low), `testType`, `specRef` (link spec ID)
+- Test data convention: `KFSP_{testName}_{timestamp}`
+- Expected result CỤ THỂ — KHÔNG viết "hoạt động đúng"
+
+### Changelog (changelog_thanh_sg.md)
+- Mô tả CỤ THỂ từng file: tên, MỚI/SỬA, số dòng, thay đổi gì
+- Nhóm theo feature
+- Dùng merge-base khi so sánh branch
+
 ## Doc Registry
 
 | File | Khi nào cập nhật |
@@ -76,9 +100,9 @@ Cập nhật docs + changelog theo .changes.json. **Đây là mode chính cho Te
 | 01_PROJECT.md | Phase status change |
 | 02_ARCHITECTURE.md | Thêm/đổi route, provider, API, dependency |
 | 03_DESIGN_SYSTEM.md | Thêm/đổi token, color, spacing |
-| 04_FEATURES.md | Thêm/đổi screen, feature spec |
-| 05_TESTING.md | Test count change, coverage |
+| 04_FEATURES_v2.md | Thêm/đổi feature spec (unified 11 sections) |
+| 05_TESTING.md | Test count change, coverage, standards |
 | 06_DECISIONS_LOG.md | Decision/incident |
 | plans/P{N}.md | Task status change |
-| test_cases/master_test_registry_v4.html | Thêm/sửa test cases |
+| test_cases/master_test_registry_v4.html | Thêm/sửa test cases (4 loại, risk level, specRef) |
 | changelog_thanh_sg.md | Mỗi code change — Added/Changed/Fixed, mô tả cụ thể từng file |
